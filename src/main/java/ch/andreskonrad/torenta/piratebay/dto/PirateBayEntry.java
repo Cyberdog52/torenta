@@ -1,4 +1,4 @@
-package piratebay.dto;
+package ch.andreskonrad.torenta.piratebay.dto;
 
 import java.util.Objects;
 

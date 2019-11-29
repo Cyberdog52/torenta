@@ -1,4 +1,4 @@
-package piratebay.api;
+package ch.andreskonrad.torenta.piratebay.api;
 
 public class PirateBayCategory {
 

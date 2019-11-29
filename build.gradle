@@ -26,7 +26,7 @@ dependencies {
     //ws.moor.bt
     testCompile group: 'org.easymock', name: 'easymock', version: '4.1'
 
-    //piratebay
+    //ch.andreskonrad.torenta.piratebay
     compile 'org.jsoup:jsoup:1.12.1'
 
     //bt

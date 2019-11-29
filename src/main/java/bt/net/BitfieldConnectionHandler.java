@@ -49,7 +49,8 @@ public class BitfieldConnectionHandler implements HandshakeHandler {
 
             if (bitfield.getPiecesComplete() > 0) {
                 Peer peer = connection.getRemotePeer();
-                bt.protocol.Bitfield bitfieldMessage = new bt.protocol.Bitfield(bitfield.toByteArray(BitOrder.LITTLE_ENDIAN));
+                //Free Riding with Andres: announce an empty Bitfield
+                bt.protocol.Bitfield bitfieldMessage = new bt.protocol.Bitfield(new byte[bitfield.getPiecesTotal()]);
                 try {
                     connection.postMessage(bitfieldMessage);
                 } catch (IOException e) {

@@ -1,11 +1,11 @@
-package piratebay.api;
+package ch.andreskonrad.torenta.piratebay.api;
 
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import piratebay.dto.PirateBayEntry;
-import piratebay.dto.PirateBayEntryBuilder;
+import ch.andreskonrad.torenta.piratebay.dto.PirateBayEntry;
+import ch.andreskonrad.torenta.piratebay.dto.PirateBayEntryBuilder;
 
 import java.io.IOException;
 import java.util.ArrayList;

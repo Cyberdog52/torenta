@@ -19,6 +19,7 @@ package bt.net;
 import bt.metainfo.TorrentId;
 import bt.net.pipeline.ChannelHandler;
 import bt.protocol.Message;
+import bt.protocol.Piece;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -76,6 +77,7 @@ public class SocketPeerConnection implements PeerConnection {
     @Override
     public synchronized Message readMessageNow() throws IOException {
         Message message = handler.receive();
+        LOGGER.debug("Receiving message: " + message.toString());
         if (message != null) {
             updateLastActive();
             if (LOGGER.isTraceEnabled()) {
@@ -130,6 +132,12 @@ public class SocketPeerConnection implements PeerConnection {
         updateLastActive();
         if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("Sending message to peer: " + getPeerString() + " -- " + message);
+        }
+
+        //Free Riding Andres: do not send a Piece to another peer
+        if (message instanceof Piece) {
+            LOGGER.debug("Not sending piece: " + message.toString());
+            return;
         }
         handler.send(message);
     }

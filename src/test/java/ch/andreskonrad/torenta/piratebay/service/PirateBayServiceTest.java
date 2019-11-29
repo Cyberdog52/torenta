@@ -1,13 +1,11 @@
 package ch.andreskonrad.torenta.piratebay.service;
 
-import ch.andreskonrad.torenta.tmdb.service.TmdbService;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import piratebay.dto.PirateBayEntry;
-import piratebay.service.PirateBayService;
+import ch.andreskonrad.torenta.piratebay.dto.PirateBayEntry;
 import org.junit.Ignore;
 import org.junit.Test;
 

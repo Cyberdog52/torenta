@@ -32,7 +32,6 @@ public class TorrentDownloadConfiguration {
   private boolean downloadFromSeeders = true;
   private boolean initiateConnections = true;
   private boolean sendRealBitField = false;
-  private boolean showGui = false;
   private int initialAnnounceInterval = DEFAULT_ANNOUNCE_INTERVAL;
   private double shareRatio = DEFAULT_SHARE_RATIO;
   private boolean quitOnFinish = false;
@@ -94,24 +93,8 @@ public class TorrentDownloadConfiguration {
     return sendRealBitField;
   }
 
-  public void setSendRealBitField(boolean sendRealBitField) {
-    this.sendRealBitField = sendRealBitField;
-  }
-
-  public void setShowGui(boolean showGui) {
-    this.showGui = showGui;
-  }
-
-  public boolean showGui() {
-    return showGui;
-  }
-
   public long getInitialAnnounceInterval() {
     return initialAnnounceInterval * 1000;
-  }
-
-  public void setInitialAnnounceInterval(int initialAnnounceInterval) {
-    this.initialAnnounceInterval = initialAnnounceInterval;
   }
 
   public double getShareRatio() {

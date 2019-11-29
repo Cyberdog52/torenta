@@ -1,10 +1,10 @@
-package piratebay.service;
+package ch.andreskonrad.torenta.piratebay.service;
 
-import piratebay.api.PirateBayAPI;
-import piratebay.api.PirateBayCategory;
-import piratebay.api.PirateBayQuery;
-import piratebay.api.PirateBayQueryOrder;
-import piratebay.dto.PirateBayEntry;
+import ch.andreskonrad.torenta.piratebay.api.PirateBayAPI;
+import ch.andreskonrad.torenta.piratebay.api.PirateBayCategory;
+import ch.andreskonrad.torenta.piratebay.api.PirateBayQuery;
+import ch.andreskonrad.torenta.piratebay.api.PirateBayQueryOrder;
+import ch.andreskonrad.torenta.piratebay.dto.PirateBayEntry;
 
 import java.util.ArrayList;
 

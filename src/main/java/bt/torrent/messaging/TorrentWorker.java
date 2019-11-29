@@ -359,12 +359,8 @@ public class TorrentWorker {
 
             message = delegate.get();
             if (message != null && Have.class.equals(message.getClass())) {
-                Have have = (Have) message;
-                peerMap.values().forEach(worker -> {
-                    if (this != worker) {
-                        worker.getPieceAnnouncements().add(have);
-                    }
-                });
+                //Free Riding with Andres: do not update
+                LOGGER.debug("Not updating have list");
             }
             return message;
         }

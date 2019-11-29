@@ -1,4 +1,4 @@
-package piratebay.dto;
+package ch.andreskonrad.torenta.piratebay.dto;
 
 public class PirateBayEntryBuilder {
     private String name;
