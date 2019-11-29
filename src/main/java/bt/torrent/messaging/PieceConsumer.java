@@ -100,9 +100,9 @@ public class PieceConsumer {
         } else {
             future.whenComplete((block, error) -> {
                 if (error != null) {
-                    LOGGER.error("Failed to perform request to write block", error);
+                    LOGGER.warn("Failed to perform request to write block", error);
                 } else if (block.getError().isPresent()) {
-                    LOGGER.error("Failed to perform request to write block", block.getError().get());
+                    LOGGER.warn("Failed to perform request to write block", block.getError().get());
                 }
                 if (block.isRejected()) {
                     if (LOGGER.isTraceEnabled()) {
@@ -113,12 +113,12 @@ public class PieceConsumer {
                     if (verificationFuture.isPresent()) {
                         verificationFuture.get().whenComplete((verified, error1) -> {
                             if (error1 != null) {
-                                LOGGER.error("Failed to verify piece index {" + piece.getPieceIndex() + "}", error1);
+                                LOGGER.warn("Failed to verify piece index {" + piece.getPieceIndex() + "}", error1);
                             } else if (verified) {
                                 completedPieces.add(piece.getPieceIndex());
                                 eventSink.firePieceVerified(context.getTorrentId(), piece.getPieceIndex());
                             } else {
-                                LOGGER.error("Failed to verify piece index {" + piece.getPieceIndex() + "}." +
+                                LOGGER.warn("Failed to verify piece index {" + piece.getPieceIndex() + "}." +
                                         " No error has been provided by I/O worker," +
                                         " which means that the data itself might have been corrupted. Will re-download.");
                             }

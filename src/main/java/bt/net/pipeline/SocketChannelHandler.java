@@ -166,7 +166,7 @@ public class SocketChannelHandler implements ChannelHandler {
             try {
                 unregister();
             } catch (Exception e) {
-                LOGGER.error("Failed to unregister channel", e);
+                LOGGER.warn("Failed to unregister channel", e);
             }
             closeChannel();
             releaseBuffers();
@@ -177,7 +177,7 @@ public class SocketChannelHandler implements ChannelHandler {
         try {
             channel.close();
         } catch (IOException e) {
-            LOGGER.error("Failed to close channel", e);
+            LOGGER.warn("Failed to close channel", e);
         }
     }
 
@@ -190,7 +190,7 @@ public class SocketChannelHandler implements ChannelHandler {
         try {
             buffer.release();
         } catch (Exception e) {
-            LOGGER.error("Failed to release buffer", e);
+            LOGGER.warn("Failed to release buffer", e);
         }
     }
 

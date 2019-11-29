@@ -160,7 +160,7 @@ public class BtRuntime {
     public void startup() {
         if (started.compareAndSet(false, true)) {
             synchronized (lock) {
-                runHooks(LifecycleEvent.STARTUP, e -> LOGGER.error("Error on runtime startup", e));
+                runHooks(LifecycleEvent.STARTUP, e -> LOGGER.warn("Error on runtime startup", e));
             }
         }
     }
@@ -220,7 +220,7 @@ public class BtRuntime {
                     try {
                         client.stop();
                     } catch (Throwable e) {
-                        LOGGER.error("Error when stopping client", e);
+                        LOGGER.warn("Error when stopping client", e);
                     }
                 });
 

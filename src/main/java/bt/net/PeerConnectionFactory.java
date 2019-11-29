@@ -261,7 +261,7 @@ public class PeerConnectionFactory implements IPeerConnectionFactory {
         try {
             buffer.release();
         } catch (Exception e) {
-            LOGGER.error("Failed to release buffer", e);
+            LOGGER.warn("Failed to release buffer", e);
         }
     }
 }

@@ -146,14 +146,14 @@ public class PeerRegistry implements IPeerRegistry {
             try {
                 queryTracker(torrentId, announceKey);
             } catch (Exception e) {
-                LOGGER.error("Error when querying tracker (torrent's announce key): " + announceKey, e);
+                LOGGER.warn("Error when querying tracker (torrent's announce key): " + announceKey, e);
             }
         });
         extraAnnounceKeys.forEach(announceKey -> {
             try {
                 queryTracker(torrentId, announceKey);
             } catch (Exception e) {
-                LOGGER.error("Error when querying tracker (extra announce key): " + announceKey, e);
+                LOGGER.warn("Error when querying tracker (extra announce key): " + announceKey, e);
             }
         });
     }
@@ -199,7 +199,7 @@ public class PeerRegistry implements IPeerRegistry {
                 }
             }
         } catch (Exception e) {
-            LOGGER.error("Error when querying peer source: " + peerSource, e);
+            LOGGER.warn("Error when querying peer source: " + peerSource, e);
         }
     }
 

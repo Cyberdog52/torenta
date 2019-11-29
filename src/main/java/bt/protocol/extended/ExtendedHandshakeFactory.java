@@ -105,14 +105,14 @@ public class ExtendedHandshakeFactory implements IExtendedHandshakeFactory {
                 builder.property(UT_METADATA_SIZE_PROPERTY, new BEInteger(null, BigInteger.valueOf(metadataSize)));
             });
         } catch (Exception e) {
-            LOGGER.error("Failed to get metadata size for torrent ID: " + torrentId, e);
+            LOGGER.warn("Failed to get metadata size for torrent ID: " + torrentId, e);
         }
 
         String version;
         try {
             version = getVersion();
         } catch (Exception e) {
-            LOGGER.error("Failed to get version", e);
+            LOGGER.warn("Failed to get version", e);
             version = getDefaultVersion();
         }
         builder.property(VERSION_PROPERTY, new BEString(version.getBytes(Charset.forName("UTF-8"))));

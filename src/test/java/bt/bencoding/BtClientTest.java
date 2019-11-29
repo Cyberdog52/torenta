@@ -5,6 +5,7 @@ import bt.data.Storage;
 import bt.data.file.FileSystemStorage;
 import bt.runtime.BtClient;
 import bt.runtime.Config;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.nio.file.Path;
@@ -12,6 +13,7 @@ import java.nio.file.Paths;
 
 public class BtClientTest {
 
+    @Ignore
     @Test
     public void manual_btClient_downloadToUserDir() {
         Config config = new Config() {

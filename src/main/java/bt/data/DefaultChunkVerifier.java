@@ -103,7 +103,7 @@ public class DefaultChunkVerifier implements ChunkVerifier {
             try {
                 f.get();
             } catch (Exception e) {
-                LOGGER.error("Unexpected error during verification of torrent data", e);
+                LOGGER.warn("Unexpected error during verification of torrent data", e);
                 errors.add(e);
             }
         });

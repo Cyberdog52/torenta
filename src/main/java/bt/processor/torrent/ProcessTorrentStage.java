@@ -83,7 +83,7 @@ public class ProcessTorrentStage<C extends TorrentContext> extends TerminateOnEr
         try {
             onStarted(context);
         } catch (Exception e) {
-            LOGGER.error("Unexpected error", e);
+            LOGGER.warn("Unexpected error", e);
         }
     }
 
@@ -96,7 +96,7 @@ public class ProcessTorrentStage<C extends TorrentContext> extends TerminateOnEr
             context.getTorrentId().ifPresent(torrentId -> getDescriptor(torrentId).complete());
             onCompleted(context);
         } catch (Exception e) {
-            LOGGER.error("Unexpected error", e);
+            LOGGER.warn("Unexpected error", e);
         }
     }
 

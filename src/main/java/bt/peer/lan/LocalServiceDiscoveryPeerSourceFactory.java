@@ -86,7 +86,7 @@ public class LocalServiceDiscoveryPeerSourceFactory implements PeerSourceFactory
             try {
                  remoteAddress = channel.receive(receiveBuffer);
             } catch (Exception e) {
-                LOGGER.error("Failed to receive LSD announce", e);
+                LOGGER.warn("Failed to receive LSD announce", e);
             }
 
             if (remoteAddress == null) {
@@ -99,7 +99,7 @@ public class LocalServiceDiscoveryPeerSourceFactory implements PeerSourceFactory
             try {
                 message = AnnounceMessage.readFrom(receiveBuffer);
             } catch (Exception e) {
-                LOGGER.error("Failed to parse message", e);
+                LOGGER.warn("Failed to parse message", e);
             }
 
             if (message != null) {

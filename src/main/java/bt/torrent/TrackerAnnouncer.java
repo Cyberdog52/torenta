@@ -59,7 +59,7 @@ public class TrackerAnnouncer {
                 LOGGER.warn("Tracker URL protocol is not supported: " + trackerUrl);
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to create tracker for announce key: " + announceKey);
+            LOGGER.warn("Failed to create tracker for announce key: " + announceKey);
         }
         return null;
     }
@@ -123,7 +123,7 @@ public class TrackerAnnouncer {
         }
 
         if (e.isPresent()) {
-            LOGGER.error(log, e.get());
+            LOGGER.warn(log, e.get());
         } else {
             LOGGER.warn(log);
         }

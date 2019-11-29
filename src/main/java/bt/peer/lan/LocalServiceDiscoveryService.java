@@ -113,7 +113,7 @@ public class LocalServiceDiscoveryService implements ILocalServiceDiscoveryServi
                 announce(idsToAnnounce);
             }
         } catch (Exception e) {
-            LOGGER.error("Failed to announce", e);
+            LOGGER.warn("Failed to announce", e);
         }
     }
 
@@ -182,7 +182,7 @@ public class LocalServiceDiscoveryService implements ILocalServiceDiscoveryServi
             try {
                 a.announce(ids);
             } catch (IOException e) {
-                LOGGER.error("Failed to announce to group: " + a.getGroup().getAddress(), e);
+                LOGGER.warn("Failed to announce to group: " + a.getGroup().getAddress(), e);
             }
         });
     }

@@ -61,7 +61,7 @@ class TrackerPeerSource extends ScheduledPeerSource {
                 if (response.getError().isPresent()) {
                     throw new BtException("Failed to get peers for torrent", response.getError().get());
                 } else {
-                    LOGGER.error("Failed to get peers for torrent -- " +
+                    LOGGER.warn("Failed to get peers for torrent -- " +
                             "unexpected error during interaction with the tracker; message: " + response.getErrorMessage());
                 }
             }

@@ -115,7 +115,7 @@ public class ChainProcessor<C extends ProcessingContext> implements Processor<C>
                         context.getTorrentId().orElse(null), stage.getClass().getName()));
             }
         } catch (Exception e) {
-            LOGGER.error(String.format("Processing failed with error: torrent ID (%s), stage (%s)",
+            LOGGER.warn(String.format("Processing failed with error: torrent ID (%s), stage (%s)",
                     context.getTorrentId().orElse(null), stage.getClass().getName()), e);
             finalizer.ifPresent(f -> f.finalizeContext(context));
             throw e;
@@ -126,7 +126,7 @@ public class ChainProcessor<C extends ProcessingContext> implements Processor<C>
                 // TODO: different listeners may return different next stages (including nulls)
                 next = listener.apply(context, next);
             } catch (Exception e) {
-                LOGGER.error("Listener invocation failed", e);
+                LOGGER.warn("Listener invocation failed", e);
             }
         }
 

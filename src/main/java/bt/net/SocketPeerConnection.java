@@ -20,6 +20,7 @@ import bt.metainfo.TorrentId;
 import bt.net.pipeline.ChannelHandler;
 import bt.protocol.Message;
 import bt.protocol.Piece;
+import bt.protocol.Unchoke;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -133,9 +134,9 @@ public class SocketPeerConnection implements PeerConnection {
             LOGGER.trace("Sending message to peer: " + getPeerString() + " -- " + message);
         }
 
-        //Free Riding Andres: do not send a Piece to another peer
-        if (message instanceof Piece) {
-            LOGGER.debug("Not sending piece: " + message.toString());
+        //Free Riding Andres: do not send a Unchoke or Piece to another peer
+        if (message instanceof Piece || message instanceof Unchoke) {
+            LOGGER.debug("Not sending message: " + message.toString());
             return;
         }
         handler.send(message);

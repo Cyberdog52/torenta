@@ -160,7 +160,7 @@ public class MessageDispatcher implements IMessageDispatcher {
                             try {
                                 message = connection.readMessageNow();
                             } catch (Exception ex) {
-                                LOGGER.error("Error when reading message from peer connection: " + connectionKey.getPeer(), ex);
+                                LOGGER.warn("Error when reading message from peer connection: " + connectionKey.getPeer(), ex);
                                 break;
                             }
 
@@ -219,7 +219,7 @@ public class MessageDispatcher implements IMessageDispatcher {
                             try {
                                 connection.postMessage(message);
                             } catch (Exception ex) {
-                                LOGGER.error("Error when writing message", ex);
+                                LOGGER.warn("Error when writing message", ex);
                             }
                         }
                     }

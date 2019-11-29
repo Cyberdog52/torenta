@@ -37,7 +37,7 @@ public abstract class TerminateOnErrorProcessingStage<C extends ProcessingContex
         try {
             doExecute(context);
         } catch (Exception e) {
-            LOGGER.error("Unexpected error during processing, will finalize context and terminate...", e);
+            LOGGER.warn("Unexpected error during processing, will finalize context and terminate...", e);
             next = null; // terminate processing chain
         }
         return next;

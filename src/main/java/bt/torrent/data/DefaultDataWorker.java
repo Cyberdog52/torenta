@@ -93,7 +93,7 @@ public class DefaultDataWorker implements DataWorker {
                 BlockReader blockReader = blockCache.get(torrentId, pieceIndex, offset, length);
                 return BlockRead.ready(peer, pieceIndex, offset, length, blockReader);
             } catch (Throwable e) {
-                LOGGER.error("Failed to perform request to read block:" +
+                LOGGER.warn("Failed to perform request to read block:" +
                         " piece index {" + pieceIndex + "}, offset {" + offset + "}, length {" + length + "}, peer {" + peer + "}", e);
                 return BlockRead.exceptional(peer, e, pieceIndex, offset, length);
             } finally {

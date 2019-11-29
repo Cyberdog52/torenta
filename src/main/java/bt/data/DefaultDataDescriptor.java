@@ -186,7 +186,7 @@ class DefaultDataDescriptor implements DataDescriptor {
             try {
                 unit.close();
             } catch (Exception e) {
-                LOGGER.error("Failed to close storage unit: " + unit);
+                LOGGER.warn("Failed to close storage unit: " + unit);
             }
         });
     }
