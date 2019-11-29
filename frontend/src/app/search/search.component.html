@@ -1,0 +1,9 @@
+<mat-card>
+  <mat-card-title>
+    Search
+  </mat-card-title>
+  <mat-card-content>
+    <input matInput placeholder="TV Show" [(ngModel)]="searchString" (keyup)="sendSearchRequest()">
+  </mat-card-content>
+</mat-card>
+
