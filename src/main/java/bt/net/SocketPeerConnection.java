@@ -77,7 +77,6 @@ public class SocketPeerConnection implements PeerConnection {
     @Override
     public synchronized Message readMessageNow() throws IOException {
         Message message = handler.receive();
-        LOGGER.debug("Receiving message: " + message.toString());
         if (message != null) {
             updateLastActive();
             if (LOGGER.isTraceEnabled()) {
