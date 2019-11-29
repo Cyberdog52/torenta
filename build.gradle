@@ -1,0 +1,50 @@
+plugins {
+    id 'org.springframework.boot' version '2.2.1.RELEASE'
+    id 'io.spring.dependency-management' version '1.0.8.RELEASE'
+    id 'java'
+}
+
+group = 'ch.andreskonrad'
+version = '0.0.1-SNAPSHOT'
+sourceCompatibility = '11'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    implementation 'org.springframework.boot:spring-boot-starter-web'
+    implementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation('org.springframework.boot:spring-boot-starter-test') {
+        exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
+    }
+    testImplementation 'org.springframework.security:spring-security-test'
+    // https://mvnrepository.com/artifact/org.easymock/easymock
+
+    //ws.moor.bt
+    testCompile group: 'org.easymock', name: 'easymock', version: '4.1'
+
+    //piratebay
+    compile 'org.jsoup:jsoup:1.12.1'
+
+    //bt
+    // https://mvnrepository.com/artifact/com.google.inject/guice
+    compile group: 'com.google.inject', name: 'guice', version: '3.0'
+    // https://mvnrepository.com/artifact/com.google.inject.extensions/guice-multibindings
+    compile group: 'com.google.inject.extensions', name: 'guice-multibindings', version: '3.0'
+    // https://mvnrepository.com/artifact/org.slf4j/slf4j-api
+    compile group: 'org.slf4j', name: 'slf4j-api', version: '1.7.29'
+    // https://mvnrepository.com/artifact/org.yaml/snakeyaml
+    compile group: 'org.yaml', name: 'snakeyaml', version: '1.8'
+
+
+
+}
+
+test {
+    useJUnitPlatform()
+}
+
+
