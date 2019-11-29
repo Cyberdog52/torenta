@@ -20,7 +20,7 @@ public class TmdbServiceTest {
     @Autowired
     private TmdbService tmdbService;
 
-
+    @Ignore
     @Test
     public void manualSearch() {
         SearchResult result = tmdbService.search("Walking Dead");
@@ -28,6 +28,7 @@ public class TmdbServiceTest {
         assertEquals(1, result.getPage());
     }
 
+    @Ignore
     @Test
     public void manualGetSeries() {
         SeriesDetail result = tmdbService.get(1402);

@@ -24,7 +24,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import ws.moor.bt.Environment;
 import ws.moor.bt.downloader.peermanager.PeerManager;
-import ws.moor.bt.et.ET;
 import ws.moor.bt.network.BitTorrentConnection;
 import ws.moor.bt.network.BitTorrentListener;
 import ws.moor.bt.network.ConnectionInitiator;
@@ -58,7 +57,6 @@ public class TorrentDownload {
   private final CostThrottler costThrottler;
   private final ConnectionInitiator connectionInitiator;
   private final Choker choker;
-  private final ET et;
 
   private CounterRepository counterRepository;
 
@@ -80,7 +78,6 @@ public class TorrentDownload {
     trackerClient = new TrackerClient(getMetaInfo().getAnnounceUrl(), peerManager, this);
     costThrottler = new CostThrottler(configuration.getMaxUploadRate() * 1000, 1000, getCounterRepository());
     choker = createChoker();
-    et = new ET(environment.getConfiguration());
 
     trackerRegisteredPeerId = PeerId.createRandomMainlineId();
     environment.getDownloadRepository().addDownload(this);
@@ -107,7 +104,6 @@ public class TorrentDownload {
     environment.getScheduledExecutor().scheduleWithFixedDelay(
         new Maintenance(), 0, 15, TimeUnit.SECONDS);
     costThrottler.start();
-    et.callHomeForStart(this);
   }
 
   private void assertNotRunning() {
@@ -122,7 +118,6 @@ public class TorrentDownload {
     costThrottler.stop();
     environment.getDownloadRepository().removeDownload(this);
     environment.getConnectionRepository().closeAllConnections(this);
-    et.callHomeForStop(this);
   }
 
   private void assertRunning() {

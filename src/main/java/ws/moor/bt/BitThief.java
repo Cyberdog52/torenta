@@ -47,6 +47,7 @@ public class BitThief {
     logger.info("reading meta info file " + torrentFile);
     MetaInfo metaInfo = MetaInfoBuilder.fromFile(torrentFile);
 
+
     TorrentDownloadConfiguration configuration =
         new TorrentDownloadConfiguration(metaInfo, targetDirectory);
 
