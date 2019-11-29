@@ -73,7 +73,7 @@ public class TmdbService {
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(uri)
-                .setHeader("User-Agent", "Java 11 HttpClient Bot") // add request header
+                .setHeader("User-Agent", "Java 11 HttpClient Bot")
                 .build();
 
         try {
