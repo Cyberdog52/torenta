@@ -4,6 +4,7 @@ import ch.andreskonrad.torenta.tmdb.dto.SeriesDetail;
 import ch.andreskonrad.torenta.tmdb.dto.SearchResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -15,8 +16,8 @@ import java.net.http.HttpResponse;
 @Service
 public class TmdbService {
 
-    //TODO
-    private static String apiKey = "554b9c38cb52072b92d7b06179f2752e";
+    @Value("${ch.andreskonrad.torenta.tmdb.service.key}")
+    private String apiKey;
     private final String host = "api.themoviedb.org";
     private final String scheme = "https";
 
@@ -26,7 +27,7 @@ public class TmdbService {
         String jsonStringResponse = searchRequest(searchString);
         try {
             return new ObjectMapper().readValue(jsonStringResponse, SearchResult.class);
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }
@@ -36,7 +37,7 @@ public class TmdbService {
         String jsonStringResponse = detailRequest(id);
         try {
             return new ObjectMapper().readValue(jsonStringResponse, SeriesDetail.class);
-        } catch (JsonProcessingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return null;
         }

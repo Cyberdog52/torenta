@@ -20,6 +20,7 @@ build/
 *.iml
 *.ipr
 out/
+src/main/resources/application.properties
 
 ### NetBeans ###
 /nbproject/private/
@@ -30,3 +31,4 @@ out/
 
 ### VS Code ###
 .vscode/
+
