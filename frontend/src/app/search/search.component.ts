@@ -4,7 +4,7 @@ import {SearchService} from "./search.service";
 @Component({
   selector: 'search',
   templateUrl: './search.component.html',
-  styleUrls: ['./search.component.css']
+  styleUrls: ['./search.component.scss']
 })
 export class SearchComponent implements OnInit {
 
@@ -27,4 +27,17 @@ export class SearchComponent implements OnInit {
     })
   }
 
+  public getSeriesOverviews(): SeriesOverview[] {
+    if (this.searchResult == null) {
+      return [];
+    }
+    return this.searchResult.results.sort((a, b) => b.popularity - a.popularity);
+  }
+
+  getImageFor(seriesOverview: SeriesOverview): string {
+    if (seriesOverview.poster_path == null) {
+      return "../../assets/tvnotfound.png";
+    }
+    return "https://image.tmdb.org/t/p/w500/" + seriesOverview.poster_path;
+  }
 }

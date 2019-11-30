@@ -19,7 +19,7 @@ public class TmdbServiceTest {
 
     @Autowired
     private TmdbService tmdbService;
-    
+
     @Ignore
     @Test
     public void manualSearch() {
