@@ -8,11 +8,13 @@ import {MatCardModule, MatDialogModule, MatFormFieldModule, MatIconModule, MatLi
 import {HttpClientModule} from "@angular/common/http";
 import {FormsModule} from "@angular/forms";
 import {MaterialModule} from "./shared/material/material.module";
+import { SeriesDetailComponent } from './series-detail/series-detail.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    SearchComponent
+    SearchComponent,
+    SeriesDetailComponent
   ],
   imports: [
     BrowserModule,

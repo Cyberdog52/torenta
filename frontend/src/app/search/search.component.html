@@ -6,13 +6,20 @@
     <input matInput placeholder="TV Show" [(ngModel)]="searchString" (keyup)="sendSearchRequest()">
   </mat-card-content>
   <mat-card-footer>
-    <mat-list>
-      <mat-list-item *ngFor="let seriesOverview of getSeriesOverviews()">
-        <img mat-list-avatar src="{{getImageFor(seriesOverview)}}"/>
-        <h4 mat-line>{{seriesOverview.name}}</h4>
-        <p mat-line> {{seriesOverview.first_air_date | date}} </p>
-      </mat-list-item>
-    </mat-list>
+    <mat-accordion *ngIf="searchResult">
+      <mat-expansion-panel *ngFor="let seriesOverview of getSeriesOverviews()" (opened)="setPanelOpen(seriesOverview.id)"
+                           (closed)="setPanelClosed(seriesOverview.id)">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <img class="icon_image" src="{{getImageFor(seriesOverview)}}"/>
+            <h4 class="series_title">{{seriesOverview.name}}</h4>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div *ngIf="isPanelOpen(seriesOverview.id)">
+          <series-detail [id]="seriesOverview.id"></series-detail>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
   </mat-card-footer>
 </mat-card>
 

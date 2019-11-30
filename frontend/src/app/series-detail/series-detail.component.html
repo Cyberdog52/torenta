@@ -1,0 +1,7 @@
+<div *ngIf="isLoading()">
+  <mat-progress-spinner mode="indeterminate">
+  </mat-progress-spinner>
+</div>
+<div *ngIf="!isLoading()">
+  {{seriesDetail.overview}}
+</div>

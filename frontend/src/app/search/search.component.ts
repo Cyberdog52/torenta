@@ -1,5 +1,6 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit, ɵEMPTY_MAP} from '@angular/core';
 import {SearchService} from "./search.service";
+import {buildOptimizerLoader} from "@angular-devkit/build-angular/src/angular-cli-files/models/webpack-configs";
 
 @Component({
   selector: 'search',
@@ -13,6 +14,7 @@ export class SearchComponent implements OnInit {
   public searchString : string;
 
   public searchResult: SearchResult;
+  public listOfOpenendPanels: number[] = [];
 
   ngOnInit() {
   }
@@ -23,6 +25,7 @@ export class SearchComponent implements OnInit {
     }
     this.searchService.searchTmdb(this.searchString).subscribe(searchResult => {
       this.searchResult = searchResult;
+      this.listOfOpenendPanels = [];
       console.log(searchResult);
     })
   }
@@ -40,4 +43,26 @@ export class SearchComponent implements OnInit {
     }
     return "https://image.tmdb.org/t/p/w500/" + seriesOverview.poster_path;
   }
+
+  setPanelClosed(id: number) {
+    const index = this.listOfOpenendPanels.indexOf(id, 0);
+    if (index > -1) {
+      this.listOfOpenendPanels.splice(index, 1);
+    }
+    console.log("closed", this.listOfOpenendPanels)
+  }
+  setPanelOpen(id: number) {
+    if (this.listOfOpenendPanels.includes(id, 0)) {
+      return;
+    }
+    this.listOfOpenendPanels.push(id);
+    console.log("openend", this.listOfOpenendPanels)
+  }
+
+  //check if panel is open to make sure you do not load all the seriesDetail before they are opened
+  //would exceed maximum of requests per 10 seconds (40)
+  isPanelOpen(id: number): boolean {
+    return this.listOfOpenendPanels.includes(id, 0);
+  }
+
 }
