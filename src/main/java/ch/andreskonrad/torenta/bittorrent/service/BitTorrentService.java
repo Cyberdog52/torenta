@@ -5,17 +5,22 @@ import bt.data.file.FileSystemStorage;
 import bt.runtime.BtClient;
 import bt.runtime.Config;
 import bt.torrent.TorrentSessionState;
+import ch.andreskonrad.torenta.bittorrent.dto.Download;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 @Service
 public class BitTorrentService {
 
     private final int SESSION_STATE_UPDATE_INTERVAL = 1000; //in ms
-    private static HashMap<Integer, TorrentSessionState> btClientList = new HashMap<>();
+    private static List<Download> downloads = new ArrayList<>();
 
     public int startDownload(String magnetLink, Path targetDirectory) throws IllegalStateException {
         int id = generateId(magnetLink);
@@ -28,27 +33,40 @@ public class BitTorrentService {
                 .stopWhenDownloaded()
                 .build();
 
-        client.startAsync(
+        CompletableFuture torrentFuture = client.startAsync(
                 torrentSessionState -> processSessionState(torrentSessionState, id),
                 SESSION_STATE_UPDATE_INTERVAL);
+        downloads.add(new Download(id, client, torrentFuture));
         return id;
     }
 
+    public Set<Integer> getTorrentIds() {
+        return downloads.stream()
+                .map(Download::getId)
+                .collect(Collectors.toSet());
+    }
+
     public TorrentSessionState getState(int id) {
-       return btClientList.get(id);
+        return getDownload(id).getState();
     }
 
     private synchronized int generateId(String magnetLink) {
         int id = magnetLink.hashCode();
-        if (btClientList.containsKey(id)) {
+        if (getDownload(id) != null) {
             throw new IllegalStateException("Already downloading a torrent with magnet link: " + magnetLink);
         }
-        btClientList.put(id, null);
         return id;
     }
 
     private static void processSessionState(TorrentSessionState state, int id) {
-        btClientList.put(id, state);
+        getDownload(id).setState(state);
+    }
+
+    private static Download getDownload(int id) {
+        return downloads.stream()
+                .filter(download -> download.getId() == id)
+                .findFirst()
+                .orElse(null);
     }
 
     public void startDownloadToDownloadsFolder(String magnetLink) {
