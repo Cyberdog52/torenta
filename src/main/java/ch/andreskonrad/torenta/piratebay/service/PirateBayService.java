@@ -5,9 +5,11 @@ import ch.andreskonrad.torenta.piratebay.api.PirateBayCategory;
 import ch.andreskonrad.torenta.piratebay.api.PirateBayQuery;
 import ch.andreskonrad.torenta.piratebay.api.PirateBayQueryOrder;
 import ch.andreskonrad.torenta.piratebay.dto.PirateBayEntry;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 
+@Service
 public class PirateBayService {
 
     public ArrayList<PirateBayEntry> search(String searchString) {
