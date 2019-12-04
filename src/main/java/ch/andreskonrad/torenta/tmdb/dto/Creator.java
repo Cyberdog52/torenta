@@ -9,6 +9,10 @@ public class Creator {
     private String name;
     private int gender;
     private String profile_path;
+    private String department;
+    private String job;
+    private String character;
+    private int order;
 
     public Creator() {
     }
@@ -33,20 +37,32 @@ public class Creator {
         return profile_path;
     }
 
+    public String getDepartment() {
+        return department;
+    }
+
+    public String getJob() {
+        return job;
+    }
+
+    public String getCharacter() {
+        return character;
+    }
+
+    public int getOrder() {
+        return order;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Creator creator = (Creator) o;
-        return id == creator.id &&
-                gender == creator.gender &&
-                Objects.equals(credit_id, creator.credit_id) &&
-                Objects.equals(name, creator.name) &&
-                Objects.equals(profile_path, creator.profile_path);
+        return id == creator.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, credit_id, name, gender, profile_path);
+        return Objects.hash(id);
     }
 }

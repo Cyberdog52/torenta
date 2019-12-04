@@ -1,5 +1,6 @@
 package ch.andreskonrad.torenta.tmdb.dto;
 
+import java.util.Arrays;
 import java.util.Objects;
 
 public class Episode {
@@ -15,6 +16,8 @@ public class Episode {
     private String still_path;
     private double vote_average;
     private int vote_count;
+    private Creator[] crew;
+    private Creator[] guest_stars;
 
     public Episode() {
     }
@@ -63,26 +66,25 @@ public class Episode {
         return vote_count;
     }
 
+    public Creator[] getCrew() {
+        return crew;
+    }
+
+    public Creator[] getGuest_stars() {
+        return guest_stars;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Episode episode = (Episode) o;
-        return episode_number == episode.episode_number &&
-                id == episode.id &&
-                season_number == episode.season_number &&
-                show_id == episode.show_id &&
-                Double.compare(episode.vote_average, vote_average) == 0 &&
-                vote_count == episode.vote_count &&
-                Objects.equals(air_date, episode.air_date) &&
-                Objects.equals(name, episode.name) &&
-                Objects.equals(overview, episode.overview) &&
-                Objects.equals(production_code, episode.production_code) &&
-                Objects.equals(still_path, episode.still_path);
+        return id == episode.id &&
+                show_id == episode.show_id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(air_date, episode_number, id, name, overview, production_code, season_number, show_id, still_path, vote_average, vote_count);
+        return Objects.hash(id, show_id);
     }
 }

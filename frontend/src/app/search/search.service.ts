@@ -2,6 +2,7 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {SeriesDetail} from "../shared/dto/SeriesDetail";
+import {Episode} from "../shared/dto/Episode";
 
 @Injectable({
   providedIn: 'root'
@@ -19,9 +20,13 @@ export class SearchService {
   }
 
   public getTVShow(id: number): Observable<SeriesDetail> {
-    let url = `${this.backendUrl}/detail?id=${id}`;
+    let url = `${this.backendUrl}/${id}`;
     return this.httpClient.get<SeriesDetail>(url);
   }
 
 
+  getEpisodes(seriesId: number, season_number: number): Observable<Episode[]> {
+    let url = `${this.backendUrl}/${seriesId}/season/${season_number}`;
+    return this.httpClient.get<Episode[]>(url);
+  }
 }

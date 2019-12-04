@@ -15,6 +15,9 @@ Swagger Docs: http://localhost:8080/v2/api-docs
 
 TMDB:
 https://developers.themoviedb.org/3/getting-started/introduction
+
+Designs:
+https://hubmovies-a26fc.firebaseapp.com/movie/496243
  
 
 Useful links that helped the implementation:

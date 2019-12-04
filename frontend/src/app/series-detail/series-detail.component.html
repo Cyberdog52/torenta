@@ -17,8 +17,9 @@
   </p>
   <p class="overview">{{seriesDetail.overview}}</p>
   <p>
-    <button mat-raised-button class="seasonButton" *ngFor="let season of seriesDetail.seasons">
+    <button mat-raised-button class="seasonButton" *ngFor="let season of seriesDetail.seasons" (click)="showSeason = season">
       {{getSeasonTitle(season)}}
     </button>
   </p>
+  <season [season]="showSeason" [seriesId]="seriesDetail.id" *ngIf="showSeason"></season>
 </div>

@@ -12,7 +12,7 @@ export class SeriesDetailComponent implements OnInit {
 
   @Input() id : number;
   public seriesDetail: SeriesDetail;
-
+  public showSeason: Season;
 
   constructor(private searchService: SearchService) { }
 

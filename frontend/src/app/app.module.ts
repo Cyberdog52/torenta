@@ -9,12 +9,16 @@ import {HttpClientModule} from "@angular/common/http";
 import {FormsModule} from "@angular/forms";
 import {MaterialModule} from "./shared/material/material.module";
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
+import { SeasonComponent } from './season/season.component';
+import { EpisodeComponent } from './episode/episode.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     SearchComponent,
-    SeriesDetailComponent
+    SeriesDetailComponent,
+    SeasonComponent,
+    EpisodeComponent
   ],
   imports: [
     BrowserModule,

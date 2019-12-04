@@ -5,7 +5,7 @@ mat-progress-spinner {
 
 .seriesDetail {
   min-height: 100px;
-  background: black no-repeat right;
+  background: black no-repeat top right;
   background-size: 70%;
   color: whitesmoke;
   padding-left: 12pt;
@@ -20,7 +20,8 @@ mat-progress-spinner {
 
 .seasonButton {
   margin-right: 4pt;
-  background-color: rgba(0,0,0,0.75);
+  margin-bottom: 4pt;
+  background-color: rgba(65,65,65,0.4);
   color: whitesmoke;
 }
 

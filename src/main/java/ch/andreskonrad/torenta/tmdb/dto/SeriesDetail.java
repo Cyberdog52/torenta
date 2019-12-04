@@ -154,39 +154,12 @@ public class SeriesDetail {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SeriesDetail that = (SeriesDetail) o;
-        return id == that.id &&
-                in_production == that.in_production &&
-                number_of_episodes == that.number_of_episodes &&
-                number_of_seasons == that.number_of_seasons &&
-                Double.compare(that.popularity, popularity) == 0 &&
-                Double.compare(that.vote_average, vote_average) == 0 &&
-                vote_count == that.vote_count &&
-                Objects.equals(backdrop_path, that.backdrop_path) &&
-                Objects.equals(created_by, that.created_by) &&
-                Objects.equals(episode_run_time, that.episode_run_time) &&
-                Objects.equals(first_air_date, that.first_air_date) &&
-                Objects.equals(genres, that.genres) &&
-                Objects.equals(homepage, that.homepage) &&
-                Objects.equals(languages, that.languages) &&
-                Objects.equals(last_air_date, that.last_air_date) &&
-                Objects.equals(last_episode_to_air, that.last_episode_to_air) &&
-                Objects.equals(name, that.name) &&
-                Objects.equals(next_episode_to_air, that.next_episode_to_air) &&
-                Objects.equals(networks, that.networks) &&
-                Objects.equals(origin_country, that.origin_country) &&
-                Objects.equals(original_language, that.original_language) &&
-                Objects.equals(original_name, that.original_name) &&
-                Objects.equals(overview, that.overview) &&
-                Objects.equals(poster_path, that.poster_path) &&
-                Objects.equals(production_companies, that.production_companies) &&
-                Objects.equals(seasons, that.seasons) &&
-                Objects.equals(status, that.status) &&
-                Objects.equals(type, that.type);
+        SeriesDetail detail = (SeriesDetail) o;
+        return id == detail.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(backdrop_path, created_by, episode_run_time, first_air_date, genres, homepage, id, in_production, languages, last_air_date, last_episode_to_air, name, next_episode_to_air, networks, number_of_episodes, number_of_seasons, origin_country, original_language, original_name, overview, popularity, poster_path, production_companies, seasons, status, type, vote_average, vote_count);
+        return Objects.hash(id);
     }
 }

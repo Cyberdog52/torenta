@@ -1,0 +1,18 @@
+<div class="season">
+  <p>
+    <mat-icon>queue_play_next</mat-icon> {{season.name }} •
+    <mat-icon>date_range</mat-icon>{{season.air_date}}
+  </p>
+  <p class="overview">
+    {{season.overview}}
+  </p>
+  <p>
+    <button mat-raised-button class="episodeButton" *ngFor="let episode of episodes" (click)="showEpisode = episode">
+      {{getEpisodeButtonTitle(episode)}}
+    </button>
+  </p>
+  <episode [episode]="showEpisode" *ngIf="showEpisode"></episode>
+</div>
+
+
+

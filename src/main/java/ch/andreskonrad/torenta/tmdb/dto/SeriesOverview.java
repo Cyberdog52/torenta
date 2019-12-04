@@ -80,23 +80,11 @@ public class SeriesOverview {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         SeriesOverview that = (SeriesOverview) o;
-        return Double.compare(that.popularity, popularity) == 0 &&
-                vote_count == that.vote_count &&
-                id == that.id &&
-                Double.compare(that.vote_average, vote_average) == 0 &&
-                Objects.equals(original_name, that.original_name) &&
-                Objects.equals(genre_ids, that.genre_ids) &&
-                Objects.equals(name, that.name) &&
-                Objects.equals(origin_country, that.origin_country) &&
-                Objects.equals(first_air_date, that.first_air_date) &&
-                Objects.equals(backdrop_path, that.backdrop_path) &&
-                Objects.equals(original_language, that.original_language) &&
-                Objects.equals(overview, that.overview) &&
-                Objects.equals(poster_path, that.poster_path);
+        return id == that.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(original_name, genre_ids, name, popularity, origin_country, vote_count, first_air_date, backdrop_path, original_language, id, vote_average, overview, poster_path);
+        return Objects.hash(id);
     }
 }

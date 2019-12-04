@@ -1,3 +1,5 @@
+import {Creator} from "./Creator";
+
 export interface Episode {
   air_date: string;
   episode_number: number;
@@ -10,4 +12,6 @@ export interface Episode {
   still_path?: any;
   vote_average: number;
   vote_count: number;
+  crew: Creator[];
+  guest_stars: Creator[];
 }

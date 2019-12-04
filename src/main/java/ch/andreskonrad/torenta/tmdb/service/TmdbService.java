@@ -1,5 +1,7 @@
 package ch.andreskonrad.torenta.tmdb.service;
 
+import ch.andreskonrad.torenta.tmdb.dto.Episode;
+import ch.andreskonrad.torenta.tmdb.dto.Season;
 import ch.andreskonrad.torenta.tmdb.dto.SeriesDetail;
 import ch.andreskonrad.torenta.tmdb.dto.SearchResult;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -37,6 +39,18 @@ public class TmdbService {
         String jsonStringResponse = detailRequest(id);
         try {
             return new ObjectMapper().readValue(jsonStringResponse, SeriesDetail.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public Episode[] getEpisodes(int seriesId, int season_number) {
+        String jsonStringResponse = seasonRequest(seriesId, season_number);
+        try {
+            return new ObjectMapper()
+                    .readValue(jsonStringResponse, Season.class)
+                    .getEpisodes();
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -81,5 +95,13 @@ public class TmdbService {
         } catch (Exception e) {
             return null;
         }
+    }
+
+    private String seasonRequest(int seriesId, int season_number) {
+        return httpGet(getDefaultComponentsBuilder()
+                .path("/3/tv/" + String.valueOf(seriesId) + "/season/" + String.valueOf(season_number))
+                .build()
+                .encode()
+                .toUri());
     }
 }

@@ -7,10 +7,12 @@ public class Season {
     private String air_date;
     private int episode_count;
     private int id;
+    private String _id;
     private String name;
     private String overview;
     private String poster_path;
     private int season_number;
+    private Episode[] episodes;
 
     public Season() {
     }
@@ -25,6 +27,10 @@ public class Season {
 
     public int getId() {
         return id;
+    }
+
+    public String get_id() {
+        return _id;
     }
 
     public String getName() {
@@ -43,22 +49,20 @@ public class Season {
         return season_number;
     }
 
+    public Episode[] getEpisodes() {
+        return episodes;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         Season season = (Season) o;
-        return episode_count == season.episode_count &&
-                id == season.id &&
-                season_number == season.season_number &&
-                Objects.equals(air_date, season.air_date) &&
-                Objects.equals(name, season.name) &&
-                Objects.equals(overview, season.overview) &&
-                Objects.equals(poster_path, season.poster_path);
+        return id == season.id;
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(air_date, episode_count, id, name, overview, poster_path, season_number);
+        return Objects.hash(id);
     }
 }
