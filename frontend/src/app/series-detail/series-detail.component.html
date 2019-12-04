@@ -2,6 +2,23 @@
   <mat-progress-spinner mode="indeterminate">
   </mat-progress-spinner>
 </div>
-<div *ngIf="!isLoading()">
-  {{seriesDetail.overview}}
+<div *ngIf="!isLoading()" class="seriesDetail" [ngStyle]="{'background-image':'url('+getBackgroundImageFor(seriesDetail)+')'}">
+  <p>
+      <mat-icon>date_range</mat-icon>{{seriesDetail.first_air_date}} •
+      <mat-icon>timer</mat-icon>{{getRuntime(seriesDetail) }} •
+      <mat-icon>star</mat-icon>{{seriesDetail.vote_average}}
+  </p>
+  <p>
+    <mat-chip-list>
+      <mat-chip *ngFor="let genre of seriesDetail.genres">
+        {{genre.name}}
+      </mat-chip>
+    </mat-chip-list>
+  </p>
+  <p class="overview">{{seriesDetail.overview}}</p>
+  <p>
+    <button mat-raised-button class="seasonButton" *ngFor="let season of seriesDetail.seasons">
+      {{getSeasonTitle(season)}}
+    </button>
+  </p>
 </div>

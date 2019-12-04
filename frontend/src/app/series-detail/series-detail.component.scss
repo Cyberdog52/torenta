@@ -2,3 +2,26 @@ mat-progress-spinner {
   size: 10px;
   align-self: center;
 }
+
+.seriesDetail {
+  min-height: 100px;
+  background: black no-repeat right;
+  background-size: 70%;
+  color: whitesmoke;
+  padding-left: 12pt;
+  padding-top: 8pt;
+  padding-bottom: 12pt;
+
+}
+
+.overview {
+  text-shadow: 0.5pt 0.5pt black;
+}
+
+.seasonButton {
+  margin-right: 4pt;
+  background-color: rgba(0,0,0,0.75);
+  color: whitesmoke;
+}
+
+
