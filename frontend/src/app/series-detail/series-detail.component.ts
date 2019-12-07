@@ -1,7 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {SearchService} from "../search/search.service";
-import {SeriesDetail} from "../shared/dto/SeriesDetail";
-import {Season} from "../shared/dto/Season";
+import {SeriesDetail} from "../shared/dto/tmdb/SeriesDetail";
+import {Season} from "../shared/dto/tmdb/Season";
 
 @Component({
   selector: 'series-detail',

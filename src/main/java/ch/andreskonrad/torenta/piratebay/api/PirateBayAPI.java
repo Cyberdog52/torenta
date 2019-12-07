@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 //found in https://github.com/anthony-salutari/Java-Pirate-Bay-Api
 public class PirateBayAPI {
 
-	public static ArrayList<PirateBayEntry> Search (PirateBayQuery query) throws IOException {
+	public static ArrayList<PirateBayEntry> search(PirateBayQuery query) throws IOException {
 		
 		Jsoup.connect(PirateBayConstants.Url);
 

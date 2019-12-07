@@ -4,7 +4,6 @@ import java.util.Objects;
 
 public class PirateBayEntry {
     private final String name;
-
     private final  String magnetLink;
     private final  String link;
     private final  String uploadedTime;

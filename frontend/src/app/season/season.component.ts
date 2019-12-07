@@ -1,7 +1,8 @@
 import {Component, Input, OnChanges, OnInit} from '@angular/core';
-import {Season} from "../shared/dto/Season";
+import {Season} from "../shared/dto/tmdb/Season";
 import {SearchService} from "../search/search.service";
-import {Episode} from "../shared/dto/Episode";
+import {Episode} from "../shared/dto/tmdb/Episode";
+import {SeriesDetail} from "../shared/dto/tmdb/SeriesDetail";
 
 @Component({
   selector: 'season',
@@ -11,7 +12,7 @@ import {Episode} from "../shared/dto/Episode";
 export class SeasonComponent implements OnInit, OnChanges {
 
   @Input() season : Season;
-  @Input() seriesId: number;
+  @Input() seriesDetail: SeriesDetail;
   public showEpisode: Episode;
 
   public episodes: Episode[];
@@ -30,7 +31,7 @@ export class SeasonComponent implements OnInit, OnChanges {
 
   //get episodes because season does not automatically come with all episodes
   private getEpisodes() {
-    this.searchService.getEpisodes(this.seriesId, this.season.season_number).subscribe(episodes => {
+    this.searchService.getEpisodes(this.seriesDetail.id, this.season.season_number).subscribe(episodes => {
       this.episodes = episodes;
     });
   }

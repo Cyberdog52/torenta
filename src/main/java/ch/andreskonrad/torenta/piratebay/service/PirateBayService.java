@@ -14,8 +14,8 @@ public class PirateBayService {
 
     public ArrayList<PirateBayEntry> search(String searchString) {
         try {
-            PirateBayQuery query = new PirateBayQuery(searchString, 1, PirateBayCategory.TVshows, PirateBayQueryOrder.ByDefault);
-            return PirateBayAPI.Search(query);
+            PirateBayQuery query = new PirateBayQuery(searchString, 0, PirateBayCategory.All, PirateBayQueryOrder.ByDefault);
+            return PirateBayAPI.search(query);
         } catch (Exception e) {
             e.printStackTrace();
         }

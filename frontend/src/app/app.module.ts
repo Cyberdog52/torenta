@@ -11,6 +11,7 @@ import {MaterialModule} from "./shared/material/material.module";
 import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { SeasonComponent } from './season/season.component';
 import { EpisodeComponent } from './episode/episode.component';
+import { TorrentSuggestionsComponent } from './torrent-suggestions/torrent-suggestions.component';
 
 @NgModule({
   declarations: [
@@ -18,7 +19,8 @@ import { EpisodeComponent } from './episode/episode.component';
     SearchComponent,
     SeriesDetailComponent,
     SeasonComponent,
-    EpisodeComponent
+    EpisodeComponent,
+    TorrentSuggestionsComponent
   ],
   imports: [
     BrowserModule,
