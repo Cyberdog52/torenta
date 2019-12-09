@@ -1,13 +1,13 @@
 # torenta
 
 ## Run
-Run Backend:
+#### Run Backend:
 
 Execute TorentaApplication through RunConfigurations
 
 Will start at http://localhost:8080/
 
-Run Frontend:
+#### Run Frontend:
 
 ```
 cd frontend
