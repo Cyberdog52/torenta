@@ -1,6 +1,7 @@
 import {Component, Input, OnChanges, OnInit} from '@angular/core';
-import {PirateBayService} from "./piratebay.service";
-import {PirateBayEntry} from "../shared/dto/pirateBay/PirateBayEntry";
+import {PirateBayService} from "../piratebay.service";
+import {PirateBayEntry} from "../../shared/dto/pirateBay/PirateBayEntry";
+import {TorrentService} from "../torrent.service";
 
 @Component({
   selector: 'torrent-suggestions',
@@ -11,9 +12,10 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
 
   @Input() searchString: string;
   suggestions: PirateBayEntry[];
-  displayedColumns: string[] = ['name', 'seeders', 'time', 'size', 'trusted'];
+  displayedColumns: string[] = ['name', 'seeders', 'time', 'size', 'trusted', 'startDownload'];
 
-  constructor(private pirateBayService: PirateBayService) { }
+  constructor(private pirateBayService: PirateBayService,
+              private torrentService: TorrentService) { }
 
   ngOnInit() {
   }
@@ -32,5 +34,11 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
 
   public isLoading(): boolean {
     return this.suggestions == null;
+  }
+
+  startDownload(magnetLink: string) {
+    this.torrentService.startTorrent(magnetLink).subscribe(response => {
+      console.log("Torrent started for magnetLink ", magnetLink);
+    });
   }
 }
