@@ -5,6 +5,8 @@ import bt.data.file.FileSystemStorage;
 import bt.runtime.BtClient;
 import bt.runtime.Config;
 import bt.torrent.TorrentSessionState;
+import ch.andreskonrad.torenta.preference.service.PreferenceService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
@@ -20,6 +22,13 @@ public class BitTorrentService {
 
     private final int SESSION_STATE_UPDATE_INTERVAL = 1000; //in ms
     private static List<Download> downloads = new ArrayList<>();
+
+    private final PreferenceService preferenceService;
+
+    @Autowired
+    public BitTorrentService(PreferenceService preferenceService) {
+        this.preferenceService = preferenceService;
+    }
 
     public void startDownload(String magnetLink, Path targetDirectory) throws IllegalStateException {
         int id = generateId(magnetLink);
@@ -38,9 +47,9 @@ public class BitTorrentService {
         downloads.add(new Download(id, magnetLink, targetDirectory, client, torrentFuture));
     }
 
-    public void startDownloadToDownloadsFolder(String magnetLink) {
-        Path pathTodownloadsFolder = Paths.get(System.getProperty("user.home"), "Downloads");
-        startDownload(magnetLink, pathTodownloadsFolder);
+    public void startDownloadToPreferredFolder(String magnetLink) {
+        Path preferredDownloadFolder = Paths.get(this.preferenceService.loadPreferences().getDownloadDirectoryPath());
+        startDownload(magnetLink, preferredDownloadFolder);
     }
 
     public Set<Integer> getTorrentIds() {

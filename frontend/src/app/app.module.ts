@@ -12,6 +12,7 @@ import { SeriesDetailComponent } from './series-detail/series-detail.component';
 import { SeasonComponent } from './season/season.component';
 import { EpisodeComponent } from './episode/episode.component';
 import { TorrentSuggestionsComponent } from './torrent/torrent-suggestions/torrent-suggestions.component';
+import { PreferencesComponent } from './preferences/preferences.component';
 
 @NgModule({
   declarations: [
@@ -20,7 +21,8 @@ import { TorrentSuggestionsComponent } from './torrent/torrent-suggestions/torre
     SeriesDetailComponent,
     SeasonComponent,
     EpisodeComponent,
-    TorrentSuggestionsComponent
+    TorrentSuggestionsComponent,
+    PreferencesComponent
   ],
   imports: [
     BrowserModule,

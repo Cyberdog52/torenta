@@ -23,7 +23,7 @@ public class BittorrentController {
     @PostMapping()
     public ResponseEntity<HttpStatus> startDownload(@RequestBody String magnetLink) {
         try {
-            this.bitTorrentService.startDownloadToDownloadsFolder(magnetLink);
+            this.bitTorrentService.startDownloadToPreferredFolder(magnetLink);
         } catch (Exception exception) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
