@@ -9,6 +9,7 @@
           <p>{{getProgessString(downloadDto)}}</p>
         </mat-list-item>
       </mat-list>
+      <p *ngIf="downloadDtos.length == 0"> Downloads will be shown here</p>
     </mat-card-content>
   </div>
   <div *ngIf="!downloadsLoaded()">
