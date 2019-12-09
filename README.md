@@ -1,6 +1,9 @@
 # torenta
 
 ## Run
+
+First, you need to get an API key from [TMDB](https://developers.themoviedb.org/3/getting-started/introduction). Create an `application.properties` from the template and add the key. Do not check in the `application.properties` file.
+
 #### Run Backend:
 
 Execute TorentaApplication through RunConfigurations
