@@ -1,6 +1,7 @@
 package ch.andreskonrad.torenta.bittorrent.controller;
 
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadDto;
+import ch.andreskonrad.torenta.bittorrent.dto.DownloadRequest;
 import ch.andreskonrad.torenta.bittorrent.service.BitTorrentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -21,9 +22,9 @@ public class BittorrentController {
     }
 
     @PostMapping()
-    public ResponseEntity<HttpStatus> startDownload(@RequestBody String magnetLink) {
+    public ResponseEntity<HttpStatus> startDownload(@RequestBody DownloadRequest downloadRequest) {
         try {
-            this.bitTorrentService.startDownloadToPreferredFolder(magnetLink);
+            this.bitTorrentService.startDownloadToPreferredFolder(downloadRequest);
         } catch (Exception exception) {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
@@ -31,23 +32,12 @@ public class BittorrentController {
     }
 
     @GetMapping()
-    public ResponseEntity<Set<Integer>> getTorrentIds() {
-        Set<Integer> result;
+    public ResponseEntity<Set<DownloadDto>> getTorrents() {
+        Set<DownloadDto> result;
         try {
-            result = this.bitTorrentService.getTorrentIds();
+            result = this.bitTorrentService.getAllDownloadDtos();
         } catch (Exception exception) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        return new ResponseEntity<>(result, HttpStatus.OK);
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<DownloadDto> getDownloadDto(@PathVariable("id") int id) {
-        DownloadDto result;
-        try {
-            result = BitTorrentService.getDownload(id).mapToDownloadDto();
-        } catch (Exception exception) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(result, HttpStatus.OK);
     }

@@ -5,6 +5,8 @@ import bt.data.file.FileSystemStorage;
 import bt.runtime.BtClient;
 import bt.runtime.Config;
 import bt.torrent.TorrentSessionState;
+import ch.andreskonrad.torenta.bittorrent.dto.DownloadDto;
+import ch.andreskonrad.torenta.bittorrent.dto.DownloadRequest;
 import ch.andreskonrad.torenta.preference.service.PreferenceService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,7 +22,7 @@ import java.util.stream.Collectors;
 @Service
 public class BitTorrentService {
 
-    private final int SESSION_STATE_UPDATE_INTERVAL = 1000; //in ms
+    private final int SESSION_STATE_UPDATE_INTERVAL = 100; //in ms
     private static List<Download> downloads = new ArrayList<>();
 
     private final PreferenceService preferenceService;
@@ -30,7 +32,8 @@ public class BitTorrentService {
         this.preferenceService = preferenceService;
     }
 
-    public void startDownload(String magnetLink, Path targetDirectory) throws IllegalStateException {
+    public void startDownload(DownloadRequest downloadRequest, Path targetDirectory) throws IllegalStateException {
+        String magnetLink = downloadRequest.getPirateBayEntry().getMagnetLink();
         int id = generateId(magnetLink);
 
         BtClient client = Bt.client()
@@ -44,18 +47,12 @@ public class BitTorrentService {
         CompletableFuture torrentFuture = client.startAsync(
                 torrentSessionState -> processSessionState(torrentSessionState, id),
                 SESSION_STATE_UPDATE_INTERVAL);
-        downloads.add(new Download(id, magnetLink, targetDirectory, client, torrentFuture));
+        downloads.add(new Download(id, downloadRequest, targetDirectory, client, torrentFuture));
     }
 
-    public void startDownloadToPreferredFolder(String magnetLink) {
+    public void startDownloadToPreferredFolder(DownloadRequest downloadRequest) {
         Path preferredDownloadFolder = Paths.get(this.preferenceService.loadPreferences().getDownloadDirectoryPath());
-        startDownload(magnetLink, preferredDownloadFolder);
-    }
-
-    public Set<Integer> getTorrentIds() {
-        return downloads.stream()
-                .map(Download::getId)
-                .collect(Collectors.toSet());
+        startDownload(downloadRequest, preferredDownloadFolder);
     }
 
     private static void processSessionState(TorrentSessionState state, int id) {
@@ -86,4 +83,9 @@ public class BitTorrentService {
         return id;
     }
 
+    public Set<DownloadDto> getAllDownloadDtos() {
+        return downloads.stream()
+                .map(Download::mapToDownloadDto)
+                .collect(Collectors.toSet());
+    }
 }

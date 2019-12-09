@@ -26,7 +26,6 @@ export class SearchComponent implements OnInit {
     this.searchService.searchTmdb(this.searchString).subscribe(searchResult => {
       this.searchResult = searchResult;
       this.listOfOpenendPanels = [];
-      console.log(searchResult);
     })
   }
 
@@ -49,14 +48,13 @@ export class SearchComponent implements OnInit {
     if (index > -1) {
       this.listOfOpenendPanels.splice(index, 1);
     }
-    console.log("closed", this.listOfOpenendPanels)
   }
+
   setPanelOpen(id: number) {
     if (this.listOfOpenendPanels.includes(id, 0)) {
       return;
     }
     this.listOfOpenendPanels.push(id);
-    console.log("openend", this.listOfOpenendPanels)
   }
 
   //check if panel is open to make sure you do not load all the seriesDetail before they are opened

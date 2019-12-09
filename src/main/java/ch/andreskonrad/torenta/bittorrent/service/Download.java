@@ -3,6 +3,7 @@ package ch.andreskonrad.torenta.bittorrent.service;
 import bt.runtime.BtClient;
 import bt.torrent.TorrentSessionState;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadDto;
+import ch.andreskonrad.torenta.bittorrent.dto.DownloadRequest;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadState;
 
 import java.nio.file.Path;
@@ -12,19 +13,21 @@ import java.util.concurrent.CompletableFuture;
 public class Download {
 
     private final int id;
-    private final String magnetLink;
+    private final DownloadRequest downloadRequest;
     private final Path targetDirectory;
     private final BtClient client;
     private final CompletableFuture torrentFuture;
     private TorrentSessionState state;
     private boolean isCancelled = false;
+    private final long startTimeInMs;
 
-    public Download(int id, String magnetLink, Path targetDirectory, BtClient client, CompletableFuture torrentFuture) {
+    public Download(int id, DownloadRequest downloadRequest, Path targetDirectory, BtClient client, CompletableFuture torrentFuture) {
         this.id = id;
-        this.magnetLink = magnetLink;
+        this.downloadRequest = downloadRequest;
         this.targetDirectory = targetDirectory;
         this.client = client;
         this.torrentFuture = torrentFuture;
+        this.startTimeInMs = System.currentTimeMillis();
     }
 
     public int getId() {
@@ -54,8 +57,8 @@ public class Download {
         this.state = state;
     }
 
-    public String getMagnetLink() {
-        return magnetLink;
+    public DownloadRequest getDownloadRequest() {
+        return downloadRequest;
     }
 
     public Path getTargetDirectory() {
@@ -65,7 +68,7 @@ public class Download {
     public DownloadDto mapToDownloadDto() {
         double progress = getProgress();
         DownloadState downloadState = getDownloadState();
-        return new DownloadDto(id, downloadState, progress, magnetLink);
+        return new DownloadDto(id, downloadState, progress, downloadRequest, this.startTimeInMs);
     }
 
     private DownloadState getDownloadState() {
@@ -89,5 +92,9 @@ public class Download {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    public long getStartTimeInMs() {
+        return startTimeInMs;
     }
 }

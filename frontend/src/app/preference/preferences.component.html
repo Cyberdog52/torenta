@@ -3,14 +3,14 @@
   <div *ngIf="preferencesLoaded()">
     <mat-card-content>
       <mat-form-field>
-        <input matInput name="downloadFolder" #username="ngModel" type="text" placeholder="Root folder for downloads"  [(ngModel)]="userPreferences.downloadDirectoryPath">
+        <input matInput name="downloadFolder" type="text" placeholder="Root folder for downloads"  [(ngModel)]="userPreferences.downloadDirectoryPath">
       </mat-form-field>
     </mat-card-content>
     <mat-card-actions>
       <button mat-raised-button (click)="savePreferences()">Save</button>
     </mat-card-actions>
   </div>
-  <div *ngIf="!preferencesLoaded">
+  <div *ngIf="!preferencesLoaded()">
     <p>Preferences could not be loaded</p>
   </div>
 

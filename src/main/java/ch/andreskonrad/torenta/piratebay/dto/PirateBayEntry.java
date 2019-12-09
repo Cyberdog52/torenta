@@ -3,18 +3,22 @@ package ch.andreskonrad.torenta.piratebay.dto;
 import java.util.Objects;
 
 public class PirateBayEntry {
-    private final String name;
-    private final  String magnetLink;
-    private final  String link;
-    private final  String uploadedTime;
-    private final  String size;
-    private final  String uploader;
-    private final  int numberOfSeeders;
-    private final  int numberOfLeechers;
-    private final  String category;
-    private final  String subCategory;
-    private final  boolean uploaderIsVIP;
-    private final  boolean uploaderIsTrusted;
+    private String name;
+    private String magnetLink;
+    private String link;
+    private String uploadedTime;
+    private String size;
+    private String uploader;
+    private int numberOfSeeders;
+    private int numberOfLeechers;
+    private String category;
+    private String subCategory;
+    private boolean uploaderIsVIP;
+    private boolean uploaderIsTrusted;
+
+    //used for jackson
+    public PirateBayEntry() {
+    }
 
     PirateBayEntry(String name, String magnetLink, String link, String uploadedTime, String size, String uploader, int numberOfSeeders, int numberOfLeechers, String categoryParent, String subCategory, boolean uploaderIsVIP, boolean uploaderIsTrusted) {
         this.name = name;

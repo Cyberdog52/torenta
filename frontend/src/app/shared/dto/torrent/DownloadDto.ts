@@ -1,8 +1,10 @@
 import {DownloadState} from "./DownloadState";
+import {DownloadRequest} from "./DownloadRequest";
 
 export interface DownloadDto {
   id: number;
   state: DownloadState;
   progress: number;
-  magnetLink: string;
+  downloadRequest: DownloadRequest;
+  startTimeInMs: number;
 }

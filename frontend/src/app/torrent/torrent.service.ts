@@ -2,6 +2,7 @@ import {Injectable} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
 import {DownloadDto} from "../shared/dto/torrent/DownloadDto";
+import {DownloadRequest} from "../shared/dto/torrent/DownloadRequest";
 
 @Injectable({
   providedIn: 'root'
@@ -13,18 +14,13 @@ export class TorrentService {
   constructor(private httpClient: HttpClient) {
   }
 
-  public startTorrent(magnetLink: string): Observable<any> {
+  public startTorrent(downloadRequest: DownloadRequest): Observable<any> {
     let url = `${this.backendUrl}`;
-    return this.httpClient.post<any>(url, magnetLink);
+    return this.httpClient.post<any>(url, downloadRequest);
   }
 
-  public getIds(): Observable<number[]> {
+  public getDownloadDtos(): Observable<DownloadDto[]> {
     let url = `${this.backendUrl}`;
-    return this.httpClient.get<number[]>(url);
-  }
-
-  public getDownloadDto(id: number): Observable<DownloadDto> {
-    let url = `${this.backendUrl}/${id}`;
-    return this.httpClient.get<DownloadDto>(url);
+    return this.httpClient.get<DownloadDto[]>(url);
   }
 }

@@ -19,6 +19,7 @@ public class Episode {
     private Creator[] crew;
     private Creator[] guest_stars;
 
+    //used for jackson
     public Episode() {
     }
 

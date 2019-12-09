@@ -1,0 +1,18 @@
+<mat-card>
+  <mat-card-title>Downloads</mat-card-title>
+  <div *ngIf="downloadsLoaded()">
+    <mat-card-content>
+      <mat-list>
+        <mat-list-item *ngFor="let downloadDto of downloadDtos">
+          <p class="download_title"> {{downloadDto.downloadRequest.seriesDetail.name}} {{getEpisodeString(downloadDto)}}</p>
+          <mat-progress-bar [mode]="determinate" [value]="downloadDto.progress * 100"></mat-progress-bar>
+          <p>{{getProgessString(downloadDto)}}</p>
+        </mat-list-item>
+      </mat-list>
+    </mat-card-content>
+  </div>
+  <div *ngIf="!downloadsLoaded()">
+    <p>Preferences could not be loaded</p>
+  </div>
+
+</mat-card>
