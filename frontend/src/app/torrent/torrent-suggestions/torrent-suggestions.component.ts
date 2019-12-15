@@ -5,6 +5,7 @@ import {TorrentService} from "../torrent.service";
 import {DownloadRequest} from "../../shared/dto/torrent/DownloadRequest";
 import {Episode} from "../../shared/dto/tmdb/Episode";
 import {SeriesDetail} from "../../shared/dto/tmdb/SeriesDetail";
+import {DownloadDto} from "../../shared/dto/torrent/DownloadDto";
 
 @Component({
   selector: 'torrent-suggestions',
@@ -17,11 +18,19 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
   @Input() episode: Episode;
   suggestions: PirateBayEntry[];
   displayedColumns: string[] = ['name', 'seeders', 'time', 'size', 'trusted', 'startDownload'];
+  downloadDtos : DownloadDto[] = [];
 
   constructor(private pirateBayService: PirateBayService,
               private torrentService: TorrentService) { }
 
   ngOnInit() {
+    this.updateDownloadDtos()
+  }
+
+  private updateDownloadDtos(): void {
+    this.torrentService.getDownloadDtosObservable().subscribe(downloadDtos => {
+      this.downloadDtos = downloadDtos;
+    });
   }
 
   ngOnChanges() {
@@ -66,5 +75,18 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
     }
     episodeStr += this.episode.episode_number.toString();
     return episodeStr;
+  }
+
+  hasNotStartedDownload(pirateBayEntry: PirateBayEntry): boolean {
+    return !this.hasStartedDownload(pirateBayEntry) && !this.hasFullyDownloaded(pirateBayEntry);
+  }
+
+  hasStartedDownload(pirateBayEntry: PirateBayEntry): boolean {
+    return this.downloadDtos.some(downloadDto => {return downloadDto.downloadRequest.pirateBayEntry.magnetLink == pirateBayEntry.magnetLink})
+  }
+
+  hasFullyDownloaded(pirateBayEntry: PirateBayEntry): boolean {
+    //TODO: once we get the information from the file system
+    return false;
   }
 }

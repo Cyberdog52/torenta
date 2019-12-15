@@ -8,27 +8,20 @@ import {DownloadState} from "../../shared/dto/torrent/DownloadState";
   templateUrl: './downloads.component.html',
   styleUrls: ['./downloads.component.scss']
 })
-export class DownloadsComponent implements OnInit, OnDestroy {
+export class DownloadsComponent implements OnInit{
 
   downloadDtos: DownloadDto[];
-  private intervalId: any;
-  private updateIntervalInMs = 200;
 
   constructor(private torrentService: TorrentService) { }
 
   ngOnInit() {
     this.updateDownloadDtos();
-
-    this.intervalId = setInterval(() => this.updateDownloadDtos(), this.updateIntervalInMs);
   }
 
-  ngOnDestroy() {
-    clearInterval(this.intervalId);
-  }
 
   private updateDownloadDtos(): void {
-    this.torrentService.getDownloadDtos().subscribe(downloadDtos => {
-      this.downloadDtos = downloadDtos.sort((a, b) => b.startTimeInMs - a.startTimeInMs);
+    this.torrentService.getDownloadDtosObservable().subscribe(downloadDtos => {
+      this.downloadDtos = downloadDtos;
     });
   }
 
