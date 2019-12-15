@@ -32,7 +32,7 @@ public class BitTorrentService {
         this.preferenceService = preferenceService;
     }
 
-    public void startDownload(DownloadRequest downloadRequest, Path targetDirectory) throws IllegalStateException {
+    public synchronized void startDownload(DownloadRequest downloadRequest, Path targetDirectory) throws IllegalStateException {
         String magnetLink = downloadRequest.getPirateBayEntry().getMagnetLink();
         int id = generateId(magnetLink);
 
