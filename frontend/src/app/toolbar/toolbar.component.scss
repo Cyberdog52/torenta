@@ -1,0 +1,26 @@
+mat-toolbar {
+  background-color: rgb(50,50,50);
+  color: whitesmoke;
+  position: sticky;
+  position: -webkit-sticky; /* For macOS/iOS Safari */
+  top: 0; /* Sets the sticky toolbar to be on top */
+  z-index: 1000; /* Ensure that your app's content doesn't overlap the toolbar */
+}
+
+.navigationButtonContainer {
+  /* This fills the remaining space, by using flexbox.
+     Every toolbar row uses a flexbox row layout. */
+  flex: 1 1 auto;
+  justify-content: flex-end;
+}
+
+button {
+  background-color: rgba(0, 0, 0, 0.01);
+  color: whitesmoke;
+  margin-right: 12pt;
+  float: right;
+}
+
+mat-icon {
+  margin-right: 8pt;
+}

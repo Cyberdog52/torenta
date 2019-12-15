@@ -14,6 +14,9 @@ import { EpisodeComponent } from './tmdb/episode/episode.component';
 import { TorrentSuggestionsComponent } from './torrent/torrent-suggestions/torrent-suggestions.component';
 import { PreferencesComponent } from './preference/preferences.component';
 import { DownloadsComponent } from './torrent/downloads/downloads.component';
+import {AppRoutingModule} from "./app-routing/app-routing.module";
+import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
+import { ToolbarComponent } from './toolbar/toolbar.component';
 
 @NgModule({
   declarations: [
@@ -24,7 +27,9 @@ import { DownloadsComponent } from './torrent/downloads/downloads.component';
     EpisodeComponent,
     TorrentSuggestionsComponent,
     PreferencesComponent,
-    DownloadsComponent
+    DownloadsComponent,
+    PageNotFoundComponent,
+    ToolbarComponent
   ],
   imports: [
     BrowserModule,
@@ -34,7 +39,8 @@ import { DownloadsComponent } from './torrent/downloads/downloads.component';
     MatCardModule,
     FormsModule,
     MatIconModule,
-    MatDialogModule
+    MatDialogModule,
+    AppRoutingModule
   ],
   providers: [],
   bootstrap: [AppComponent]
