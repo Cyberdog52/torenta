@@ -7,12 +7,11 @@ import bt.runtime.Config;
 import bt.torrent.TorrentSessionState;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadDto;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRequest;
-import ch.andreskonrad.torenta.preference.service.PreferenceService;
+import ch.andreskonrad.torenta.directory.service.DirectoryService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -25,11 +24,11 @@ public class BitTorrentService {
     private final int SESSION_STATE_UPDATE_INTERVAL = 100; //in ms
     private static List<Download> downloads = new ArrayList<>();
 
-    private final PreferenceService preferenceService;
+    private final DirectoryService directoryService;
 
     @Autowired
-    public BitTorrentService(PreferenceService preferenceService) {
-        this.preferenceService = preferenceService;
+    public BitTorrentService(DirectoryService directoryService) {
+        this.directoryService = directoryService;
     }
 
     public synchronized void startDownload(DownloadRequest downloadRequest, Path targetDirectory) throws IllegalStateException {
@@ -51,7 +50,7 @@ public class BitTorrentService {
     }
 
     public void startDownloadToPreferredFolder(DownloadRequest downloadRequest) {
-        Path preferredDownloadFolder = Paths.get(this.preferenceService.loadPreferences().getDownloadDirectoryPath());
+        Path preferredDownloadFolder = this.directoryService.getPathForSeason(downloadRequest.getSeriesDetail().getName(), downloadRequest.getEpisode().getSeason_number());
         startDownload(downloadRequest, preferredDownloadFolder);
     }
 
