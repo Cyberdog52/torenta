@@ -2,6 +2,10 @@
   <p>
     <mat-icon>queue_play_next</mat-icon> {{episode.name }} •
     <mat-icon>date_range</mat-icon>{{episode.air_date}}
+
+  </p>
+  <p *ngIf="alreadyDownloaded">
+    <mat-icon>archive</mat-icon> Downloaded
   </p>
   <p class="overview">
     {{episode.overview}}

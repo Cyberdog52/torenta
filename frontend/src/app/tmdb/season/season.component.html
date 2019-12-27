@@ -7,11 +7,14 @@
     {{season.overview}}
   </p>
   <p>
-    <button mat-raised-button class="episodeButton" *ngFor="let episode of episodes" (click)="showEpisode = episode">
-      {{getEpisodeButtonTitle(episode)}}
-    </button>
+    <span *ngFor="let episode of episodes">
+      <button mat-raised-button  [matBadgeHidden]="!isAlreadyDownloaded(episode)" matBadge="Ok" matBadgePosition="after" matBadgeColor="primary" class="episodeButton" (click)="showEpisode = episode">
+        {{getEpisodeButtonTitle(episode)}}
+      </button>
+    </span>
+
   </p>
-  <episode [episode]="showEpisode" [seriesDetail]="seriesDetail" *ngIf="showEpisode"></episode>
+  <episode [episode]="showEpisode" [seriesDetail]="seriesDetail" [alreadyDownloaded]="isAlreadyDownloaded(showEpisode)" *ngIf="showEpisode"></episode>
 </div>
 
 
