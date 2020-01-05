@@ -3,7 +3,7 @@
 ## Setup
 
 #### Java
-Install Java OpenJDK 11 from [here](https://openjdk.java.net/projects/jdk/11/). 
+Install Java OpenJDK 13 from [here](https://jdk.java.net/13/). 
 Make sure it is also in the system's path, because gradlew will use the java version that is on the path.
 To see which java version is used, type the following in the terminal:
 
