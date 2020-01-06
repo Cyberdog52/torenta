@@ -4,7 +4,7 @@
     <mat-card-content>
       <mat-list>
         <mat-list-item *ngFor="let downloadDto of downloadDtos">
-          <p class="download_title"> {{downloadDto.downloadRequest.seriesDetail.name}} {{getEpisodeString(downloadDto)}}</p>
+          <p class="download_title"> {{getDownloadTitle(downloadDto)}} {{getEpisodeString(downloadDto)}}</p>
           <mat-progress-bar [mode]="determinate" [value]="downloadDto.progress * 100"></mat-progress-bar>
           <p>{{getProgessString(downloadDto)}}</p>
         </mat-list-item>

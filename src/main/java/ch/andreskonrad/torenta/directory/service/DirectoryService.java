@@ -38,6 +38,11 @@ public class DirectoryService {
         return seriesPath;
     }
 
+    public Path getRootDirectoryPath() {
+        createDirectoryIfNeeded(rootDirectoryPath);
+        return rootDirectoryPath;
+    }
+
     public Path getPathForMovie(String movieName) {
         Path moviesPath = moviesDirectoryPath.resolve(movieName);
         createDirectoryIfNeeded(moviesPath);

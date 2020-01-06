@@ -1,9 +1,9 @@
 <mat-card>
   <mat-card-title>
-    Search
+    Search TV Show
   </mat-card-title>
   <mat-card-content>
-    <input matInput placeholder="TV Show" [(ngModel)]="searchString" (keyup)="sendSearchRequest()">
+    <input matInput placeholder="TV Show" [(ngModel)]="searchTVString" (keyup)="searchTmdb()">
   </mat-card-content>
   <mat-card-footer>
     <mat-accordion *ngIf="searchResult">
@@ -20,6 +20,18 @@
         </div>
       </mat-expansion-panel>
     </mat-accordion>
+  </mat-card-footer>
+</mat-card>
+
+<mat-card>
+  <mat-card-title>
+    Search Piratebay
+  </mat-card-title>
+  <mat-card-content>
+    <input matInput placeholder="Piratebay Search" [(ngModel)]="searchPiratebayString">
+  </mat-card-content>
+  <mat-card-footer>
+    <torrent-suggestions [searchString]="searchPiratebayString" *ngIf="searchPiratebayString != null && searchPiratebayString.length > 0"></torrent-suggestions>
   </mat-card-footer>
 </mat-card>
 

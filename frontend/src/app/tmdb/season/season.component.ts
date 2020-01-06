@@ -1,6 +1,6 @@
 import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {Season} from "../../shared/dto/tmdb/Season";
-import {SearchService} from "../search/search.service";
+import {SearchService} from "../../search/search.service";
 import {Episode} from "../../shared/dto/tmdb/Episode";
 import {SeriesDetail} from "../../shared/dto/tmdb/SeriesDetail";
 import {DirectoryDto} from "../../shared/dto/directory/DirectoryDto";
