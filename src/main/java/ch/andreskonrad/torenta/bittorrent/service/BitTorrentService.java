@@ -50,7 +50,10 @@ public class BitTorrentService {
     }
 
     public void startDownloadToPreferredFolder(DownloadRequest downloadRequest) {
-        Path preferredDownloadFolder = this.directoryService.getPathForSeason(downloadRequest.getSeriesDetail().getName(), downloadRequest.getEpisode().getSeason_number());
+        Path preferredDownloadFolder = this.directoryService.getRootDirectoryPath();
+        if (downloadRequest.getSeriesDetail() != null && downloadRequest.getEpisode() != null) {
+            preferredDownloadFolder = this.directoryService.getPathForSeason(downloadRequest.getSeriesDetail().getName(), downloadRequest.getEpisode().getSeason_number());
+        }
         startDownload(downloadRequest, preferredDownloadFolder);
     }
 

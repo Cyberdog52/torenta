@@ -43,6 +43,9 @@ export class DownloadsComponent implements OnInit{
   }
 
   getEpisodeString(downloadDto: DownloadDto) : string{
+    if (downloadDto.downloadRequest.episode == null) {
+      return "";
+    }
     let episodeStr = "S";
     if (downloadDto.downloadRequest.episode.season_number < 10) {
       episodeStr += "0";
@@ -54,5 +57,13 @@ export class DownloadsComponent implements OnInit{
     }
     episodeStr += downloadDto.downloadRequest.episode.episode_number.toString();
     return episodeStr;
+  }
+
+  getDownloadTitle(downloadDto: DownloadDto) {
+    if (downloadDto.downloadRequest.seriesDetail != null) {
+      return downloadDto.downloadRequest.seriesDetail.name;
+    } else {
+      return downloadDto.downloadRequest.pirateBayEntry.name;
+    }
   }
 }

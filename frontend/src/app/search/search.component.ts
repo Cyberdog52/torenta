@@ -1,6 +1,7 @@
 import {Component, OnInit, ɵEMPTY_MAP} from '@angular/core';
 import {SearchService} from "./search.service";
 import {buildOptimizerLoader} from "@angular-devkit/build-angular/src/angular-cli-files/models/webpack-configs";
+import {PirateBayService} from "../torrent/piratebay.service";
 
 @Component({
   selector: 'search',
@@ -9,21 +10,21 @@ import {buildOptimizerLoader} from "@angular-devkit/build-angular/src/angular-cl
 })
 export class SearchComponent implements OnInit {
 
-  constructor(private searchService: SearchService) { }
+  constructor(private searchService: SearchService, private pirateBayService: PirateBayService) { }
 
-  public searchString : string;
-
+  public searchTVString : string;
+  public searchPiratebayString: string;
   public searchResult: SearchResult;
   public listOfOpenendPanels: number[] = [];
 
   ngOnInit() {
   }
 
-  public sendSearchRequest() : void {
-    if (this.searchString == null || this.searchString.length == 0) {
+  public searchTmdb() : void {
+    if (this.searchTVString == null || this.searchTVString.length == 0) {
       return;
     }
-    this.searchService.searchTmdb(this.searchString).subscribe(searchResult => {
+    this.searchService.searchTmdb(this.searchTVString).subscribe(searchResult => {
       this.searchResult = searchResult;
       this.listOfOpenendPanels = [];
     })
@@ -59,6 +60,7 @@ export class SearchComponent implements OnInit {
 
   //check if panel is open to make sure you do not load all the seriesDetail before they are opened
   //would exceed maximum of requests per 10 seconds (40)
+
   isPanelOpen(id: number): boolean {
     return this.listOfOpenendPanels.includes(id, 0);
   }

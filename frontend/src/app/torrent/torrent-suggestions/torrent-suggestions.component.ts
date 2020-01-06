@@ -16,15 +16,16 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
 
   @Input() seriesDetail: SeriesDetail;
   @Input() episode: Episode;
+  @Input() searchString: string;
   suggestions: PirateBayEntry[];
   displayedColumns: string[] = ['name', 'seeders', 'time', 'size', 'trusted', 'startDownload'];
-  downloadDtos : DownloadDto[] = [];
+  downloadDtos: DownloadDto[] = [];
 
   constructor(private pirateBayService: PirateBayService,
               private torrentService: TorrentService) { }
 
   ngOnInit() {
-    this.updateDownloadDtos()
+    this.updateDownloadDtos();
   }
 
   private updateDownloadDtos(): void {
@@ -34,11 +35,13 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
   }
 
   ngOnChanges() {
+    this.suggestions = null;
     this.getSuggestions();
   }
 
   private getSuggestions() {
-    this.pirateBayService.searchPirateBay(this.getSearchString()).subscribe(suggestions => {
+    const selectedSearchString = this.searchString ? this.searchString: this.createSearchString();
+    this.pirateBayService.searchPirateBay(selectedSearchString).subscribe(suggestions => {
       this.suggestions = suggestions;
     });
   }
@@ -59,7 +62,7 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
     });
   }
 
-  getSearchString(): string {
+  createSearchString(): string {
     return this.seriesDetail.name + " " + this.getEpisodeString();
   }
 
