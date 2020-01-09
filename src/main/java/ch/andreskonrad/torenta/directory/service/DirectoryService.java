@@ -24,10 +24,17 @@ public class DirectoryService {
     private Path rootDirectoryPath;
     private Path moviesDirectoryPath;
     private Path tvDirectoryPath;
+    private PreferenceService preferenceService;
 
     @Autowired
     public DirectoryService(PreferenceService preferenceService) {
-        String downloadDirectoryPath = preferenceService.loadPreferences().getDownloadDirectoryPath();
+        this.preferenceService = preferenceService;
+        this.preferenceService.setDirectoryService(this);
+        setup();
+    }
+
+    public void setup() {
+        String downloadDirectoryPath = this.preferenceService.loadPreferences().getDownloadDirectoryPath();
         rootDirectoryPath = Path.of(downloadDirectoryPath);
         createHierarchyIfNeeded();
     }
