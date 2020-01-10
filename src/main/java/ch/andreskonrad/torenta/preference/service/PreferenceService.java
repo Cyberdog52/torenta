@@ -1,5 +1,6 @@
 package ch.andreskonrad.torenta.preference.service;
 
+import ch.andreskonrad.torenta.directory.service.DirectoryService;
 import ch.andreskonrad.torenta.preference.dto.UserPreference;
 import org.springframework.stereotype.Service;
 
@@ -14,6 +15,8 @@ public class PreferenceService {
     private static final String PREFERENCE_NODE_NAME = "ch/andreskonrad/torenta/preference";
     private static final String PREFERENCE_DOWNLOAD_DIRECTORY = "downloadDirectory";
 
+    private DirectoryService directoryService;
+
     public UserPreference loadPreferences() {
         Preferences userPreferenceRoot = getUserPreferenceRoot();
 
@@ -23,11 +26,19 @@ public class PreferenceService {
         return new UserPreference(downloadDirectoryPath);
     }
 
+    public void setDirectoryService(DirectoryService directoryService) {
+        this.directoryService = directoryService;
+    }
+
     public void save(UserPreference preferences) {
         Preferences userPreferenceRoot = getUserPreferenceRoot();
 
         if (preferences.getDownloadDirectoryPath() != null) {
             userPreferenceRoot.put(PREFERENCE_DOWNLOAD_DIRECTORY, preferences.getDownloadDirectoryPath());
+        }
+
+        if (this.directoryService != null) {
+            this.directoryService.setup();
         }
     }
 

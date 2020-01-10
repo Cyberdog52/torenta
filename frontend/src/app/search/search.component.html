@@ -3,7 +3,7 @@
     Search TV Show
   </mat-card-title>
   <mat-card-content>
-    <input matInput placeholder="TV Show" [(ngModel)]="searchTVString" (keyup)="searchTmdb()">
+    <input matInput placeholder="TV Show" [(ngModel)]="searchTVString" (delayedKeyup)="searchTmdb()">
   </mat-card-content>
   <mat-card-footer>
     <mat-accordion *ngIf="searchResult">
@@ -28,10 +28,11 @@
     Search Piratebay
   </mat-card-title>
   <mat-card-content>
-    <input matInput placeholder="Piratebay Search" [(ngModel)]="searchPiratebayString">
+    <input matInput placeholder="Piratebay Search" [(ngModel)]="searchPiratebayString"
+           (delayedKeyup)="searchPiratebay()">
   </mat-card-content>
-  <mat-card-footer>
-    <torrent-suggestions [searchString]="searchPiratebayString" *ngIf="searchPiratebayString != null && searchPiratebayString.length > 0"></torrent-suggestions>
+  <mat-card-footer *ngIf="delayedPirateBaySearchString != null && delayedPirateBaySearchString.length > 0">
+    <torrent-suggestions [searchString]="delayedPirateBaySearchString" ></torrent-suggestions>
   </mat-card-footer>
 </mat-card>
 

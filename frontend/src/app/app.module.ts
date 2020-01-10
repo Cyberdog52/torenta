@@ -17,6 +17,7 @@ import { DownloadsComponent } from './torrent/downloads/downloads.component';
 import {AppRoutingModule} from "./app-routing/app-routing.module";
 import { PageNotFoundComponent } from './page-not-found/page-not-found.component';
 import { ToolbarComponent } from './toolbar/toolbar.component';
+import {DelayedKeyupDirective} from "./shared/delayed-keyup.directive";
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { ToolbarComponent } from './toolbar/toolbar.component';
     PreferencesComponent,
     DownloadsComponent,
     PageNotFoundComponent,
-    ToolbarComponent
+    ToolbarComponent,
+    DelayedKeyupDirective
   ],
   imports: [
     BrowserModule,
