@@ -14,6 +14,7 @@ export class SearchComponent implements OnInit {
 
   public searchTVString : string;
   public searchPiratebayString: string;
+  public delayedPirateBaySearchString: string;
   public searchResult: SearchResult;
   public listOfOpenendPanels: number[] = [];
 
@@ -65,4 +66,7 @@ export class SearchComponent implements OnInit {
     return this.listOfOpenendPanels.includes(id, 0);
   }
 
+  public searchPiratebay() {
+    this.delayedPirateBaySearchString = this.searchPiratebayString;
+  }
 }
