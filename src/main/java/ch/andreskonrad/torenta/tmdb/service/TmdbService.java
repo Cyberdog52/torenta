@@ -1,12 +1,14 @@
 package ch.andreskonrad.torenta.tmdb.service;
 
+import ch.andreskonrad.torenta.CustomCacheConfig;
 import ch.andreskonrad.torenta.tmdb.dto.Episode;
+import ch.andreskonrad.torenta.tmdb.dto.SearchResult;
 import ch.andreskonrad.torenta.tmdb.dto.Season;
 import ch.andreskonrad.torenta.tmdb.dto.SeriesDetail;
-import ch.andreskonrad.torenta.tmdb.dto.SearchResult;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheConfig;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
@@ -16,6 +18,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 
 @Service
+@CacheConfig(cacheNames={CustomCacheConfig.TMDB_CACHE_NAME})
 public class TmdbService {
 
     @Value("${ch.andreskonrad.torenta.tmdb.service.key}")
@@ -25,6 +28,7 @@ public class TmdbService {
 
     private static HttpClient httpClient = HttpClient.newHttpClient();
 
+    @Cacheable
     public SearchResult search(String searchString) {
         String jsonStringResponse = searchRequest(searchString);
         try {
@@ -35,6 +39,7 @@ public class TmdbService {
         }
     }
 
+    @Cacheable
     public SeriesDetail get(int id) {
         String jsonStringResponse = detailRequest(id);
         try {
@@ -45,6 +50,7 @@ public class TmdbService {
         }
     }
 
+    @Cacheable
     public Episode[] getEpisodes(int seriesId, int season_number) {
         String jsonStringResponse = seasonRequest(seriesId, season_number);
         try {

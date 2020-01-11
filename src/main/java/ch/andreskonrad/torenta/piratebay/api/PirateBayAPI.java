@@ -1,27 +1,22 @@
 package ch.andreskonrad.torenta.piratebay.api;
 
+import ch.andreskonrad.torenta.piratebay.dto.PirateBayEntry;
+import ch.andreskonrad.torenta.piratebay.dto.PirateBayEntryBuilder;
+import ch.andreskonrad.torenta.piratebay.service.PirateBaySearchException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
-import ch.andreskonrad.torenta.piratebay.dto.PirateBayEntry;
-import ch.andreskonrad.torenta.piratebay.dto.PirateBayEntryBuilder;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.stream.Collectors;
 
-//found in https://github.com/anthony-salutari/Java-Pirate-Bay-Api
+//originally found in https://github.com/anthony-salutari/Java-Pirate-Bay-Api
 public class PirateBayAPI {
 
-	public static ArrayList<PirateBayEntry> search(PirateBayQuery query) throws IOException {
-		
-		Jsoup.connect(PirateBayConstants.Url);
+	public static ArrayList<PirateBayEntry> search(PirateBayQuery query) throws PirateBaySearchException {
 
-		Document doc = Jsoup.connect(query.TranslateToUrl())
-				.userAgent(PirateBayConstants.UserAgent)
-				.timeout(5000)
-				.get();
+		Document doc = getDocumentWithRetries(query, 3);
 
 		Elements tableRows = doc.getElementsByTag("tr");
 
@@ -29,6 +24,20 @@ public class PirateBayAPI {
 				.filter(element -> !element.hasClass("header"))
 				.map(PirateBayAPI::parsePiratebayEntry)
 				.collect(Collectors.toCollection(ArrayList::new));
+	}
+
+	private static Document getDocumentWithRetries(PirateBayQuery query, int retriesLeft) throws PirateBaySearchException {
+		if (retriesLeft < 0) {
+			throw new PirateBaySearchException("Could not connect to piratebay");
+		}
+		try {
+			return Jsoup.connect(query.TranslateToUrl())
+					.userAgent(PirateBayConstants.UserAgent)
+					.timeout(5000)
+					.get();
+		} catch (Exception e ) {
+			return getDocumentWithRetries(query, retriesLeft - 1);
+		}
 	}
 
 	private static PirateBayEntry parsePiratebayEntry(Element element) {

@@ -42,7 +42,10 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
   private getSuggestions() {
     const selectedSearchString = this.searchString ? this.searchString: this.createSearchString();
     this.pirateBayService.searchPirateBay(selectedSearchString).subscribe(suggestions => {
-      this.suggestions = suggestions;
+      //only save new suggestions if the user did not already search for another string
+      if (this.searchString == null || selectedSearchString == this.searchString) {
+        this.suggestions = suggestions;
+      }
     });
   }
 
