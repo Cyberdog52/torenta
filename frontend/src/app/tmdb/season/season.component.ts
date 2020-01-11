@@ -67,6 +67,15 @@ export class SeasonComponent implements OnInit, OnChanges {
     return this.seriesDirectoryHasThisEpisode(foundSeries, episode);
   }
 
+  notAiredYet(episode: Episode): boolean {
+    if (episode.air_date == null) {
+      return true;
+    }
+    let airDate = new Date(episode.air_date);
+    let currentDate = new Date();
+    return airDate.valueOf() > currentDate.valueOf();
+  }
+
   private getEpisodeTitle(episode: Episode) {
     let episodeTitle = "S";
     if (episode.season_number < 10) {

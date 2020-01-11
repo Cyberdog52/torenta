@@ -13,3 +13,10 @@ $app-warn:    mat-palette($mat-pink);
 $primary: mat-color($app-primary);
 $accent: mat-color($app-accent);
 $warn: mat-color($app-warn);
+
+.topRightIcon {
+  margin-left: -16pt;
+  margin-top: -8pt;
+  position: absolute;
+  z-index: 10;
+}

@@ -8,9 +8,11 @@
   </p>
   <p>
     <span *ngFor="let episode of episodes">
-      <button mat-raised-button  [matBadgeHidden]="!isAlreadyDownloaded(episode)" matBadge="Ok" matBadgePosition="after" matBadgeColor="primary" class="episodeButton" (click)="showEpisode = episode">
+      <button mat-raised-button class="episodeButton" (click)="showEpisode = episode">
         {{getEpisodeButtonTitle(episode)}}
       </button>
+      <mat-icon class="topRightIcon" *ngIf="isAlreadyDownloaded(episode)">done</mat-icon>
+      <mat-icon class="topRightIcon" *ngIf="notAiredYet(episode)">date_range</mat-icon>
     </span>
 
   </p>
