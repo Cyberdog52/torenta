@@ -5,7 +5,7 @@
 <div *ngIf="!isLoading()" class="seriesDetail" [ngStyle]="{'background-image':'url('+getBackgroundImageFor(seriesDetail)+')'}">
   <p>
       <mat-icon>date_range</mat-icon>{{seriesDetail.first_air_date}} •
-      <mat-icon>timer</mat-icon>{{getRuntime(seriesDetail) }} •
+      <mat-icon>timer</mat-icon>{{getRuntime() }} •
       <mat-icon>star</mat-icon>{{seriesDetail.vote_average}}
   </p>
   <p>
@@ -17,9 +17,14 @@
   </p>
   <p class="overview">{{seriesDetail.overview}}</p>
   <p>
-    <button mat-raised-button class="seasonButton" *ngFor="let season of seriesDetail.seasons" (click)="showSeason = season">
-      {{getSeasonTitle(season)}}
-    </button>
+    <span *ngFor="let season of seriesDetail.seasons">
+       <button mat-raised-button class="seasonButton" (click)="showSeason = season">
+         {{getSeasonTitle(season)}}
+      </button>
+      <mat-icon class="topRightIcon" *ngIf="isPartiallyDownloaded(season)">done</mat-icon>
+      <mat-icon class="topRightIcon" *ngIf="notAiredYet(season)">date_range</mat-icon>
+    </span>
+
   </p>
   <season [season]="showSeason" [seriesDetail]="seriesDetail" *ngIf="showSeason"></season>
 </div>
