@@ -3,8 +3,9 @@
   </mat-progress-spinner>
 </div>
 <div *ngIf="!isLoading()" class="seriesDetail">
-  <div class="background-container" [ngStyle]="{'background-image':'url('+getBackgroundImageFor(seriesDetail)+')'}">
-    <img class="hidden-background-image" src="{{getBackgroundImageFor(seriesDetail)}}" />
+  <div class="background-container">
+    <img class="background-image" src="{{getBackgroundImageFor(seriesDetail)}}" />
+    <div class="background-image-shadow"></div>
   </div>
   <div class="foreground-container">
     <p class="overview">

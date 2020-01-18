@@ -16,9 +16,26 @@ mat-progress-spinner {
 
 }
 
-.hidden-background-image {
-  visibility: hidden;
+.background-container {
+  position: absolute;
+  width: 70%;
+  right: 0;
+  top: 0;
+  overflow: hidden;
+}
+
+.background-image {
   width: 100%;
+}
+
+.background-image-shadow {
+  background: transparent;
+  position:absolute;
+  top:0;
+  left:0;
+  width:100%;
+  height:100%;
+  box-shadow: inset 120pt -120pt 100pt 0pt black;
 }
 
 .foreground-container {
@@ -27,16 +44,7 @@ mat-progress-spinner {
 }
 
 
-.background-container {
-  background: transparent no-repeat top right;
-  background-size: 100%;
-  position: absolute;
-  width: 70%;
-  right: 0pt;
-  top: 0pt;
-  overflow: hidden;
-  box-shadow: inset 120pt -120pt 100pt 0pt black;
-}
+
 
 .overview {
   text-shadow: 0.5pt 0.5pt black;
