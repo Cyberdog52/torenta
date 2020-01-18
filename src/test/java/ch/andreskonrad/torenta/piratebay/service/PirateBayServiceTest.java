@@ -23,7 +23,7 @@ public class PirateBayServiceTest {
 
     @Ignore
     @Test
-    public void manualSearch() {
+    public void manualSearch() throws PirateBaySearchException {
         ArrayList<PirateBayEntry> entries = piratebayService.search("Walking Dead");
 
         assertTrue(entries.size() > 0);
