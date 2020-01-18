@@ -26,6 +26,8 @@ public class TmdbService {
     private final String host = "api.themoviedb.org";
     private final String scheme = "https";
 
+    private static final RequestThrottler requestThrottler = new RequestThrottler(10, 1000);
+
     private static HttpClient httpClient = HttpClient.newHttpClient();
 
     @Cacheable
@@ -97,6 +99,7 @@ public class TmdbService {
                 .build();
 
         try {
+            requestThrottler.throttle();
             return httpClient.send(request, HttpResponse.BodyHandlers.ofString()).body();
         } catch (Exception e) {
             return null;
