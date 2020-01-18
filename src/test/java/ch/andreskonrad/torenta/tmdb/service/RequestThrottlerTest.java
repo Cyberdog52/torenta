@@ -22,7 +22,7 @@ public class RequestThrottlerTest {
     }
 
     @Test
-    public void requestThrottle_threeRequestsPerSecond_throttled() throws InterruptedException {
+    public void requestThrottle_threeRequestsPerSecond_notThrottled() throws InterruptedException {
         StopWatch stopWatch = new StopWatch();
         stopWatch.start();
 
