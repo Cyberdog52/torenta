@@ -66,7 +66,7 @@ Designs:
 
  
 
-## Useful links that helped the implementation:
+## Further reading:
 
 https://pub.tik.ee.ethz.ch/students/2006-So/MA-2006-26.pdf
 
@@ -77,4 +77,6 @@ https://wiki.theory.org/index.php/BitTorrentSpecification
 https://github.com/atomashpolskiy/bittorrent
 
 https://github.com/pmoor/bitthief
+
+https://github.com/clamarque/HubMovies
 

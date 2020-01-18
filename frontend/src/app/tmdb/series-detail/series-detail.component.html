@@ -2,21 +2,25 @@
   <mat-progress-spinner mode="indeterminate">
   </mat-progress-spinner>
 </div>
-<div *ngIf="!isLoading()" class="seriesDetail" [ngStyle]="{'background-image':'url('+getBackgroundImageFor(seriesDetail)+')'}">
-  <p>
+<div *ngIf="!isLoading()" class="seriesDetail">
+  <div class="background-container" [ngStyle]="{'background-image':'url('+getBackgroundImageFor(seriesDetail)+')'}">
+    <img class="hidden-background-image" src="{{getBackgroundImageFor(seriesDetail)}}" />
+  </div>
+  <div class="foreground-container">
+    <p class="overview">
       <mat-icon>date_range</mat-icon>{{seriesDetail.first_air_date}} •
       <mat-icon>timer</mat-icon>{{getRuntime() }} •
       <mat-icon>star</mat-icon>{{seriesDetail.vote_average}}
-  </p>
-  <p>
-    <mat-chip-list>
-      <mat-chip *ngFor="let genre of seriesDetail.genres">
-        {{genre.name}}
-      </mat-chip>
-    </mat-chip-list>
-  </p>
-  <p class="overview">{{seriesDetail.overview}}</p>
-  <p>
+    </p>
+    <p>
+      <mat-chip-list>
+        <mat-chip *ngFor="let genre of seriesDetail.genres">
+          {{genre.name}}
+        </mat-chip>
+      </mat-chip-list>
+    </p>
+    <p class="overview">{{seriesDetail.overview}}</p>
+    <p>
     <span *ngFor="let season of seriesDetail.seasons">
        <button mat-raised-button class="seasonButton" (click)="showSeason = season">
          {{getSeasonTitle(season)}}
@@ -25,6 +29,7 @@
       <mat-icon class="topRightIcon" *ngIf="notAiredYet(season)">date_range</mat-icon>
     </span>
 
-  </p>
-  <season [season]="showSeason" [seriesDetail]="seriesDetail" *ngIf="showSeason"></season>
+    </p>
+    <season [season]="showSeason" [seriesDetail]="seriesDetail" *ngIf="showSeason"></season>
+  </div>
 </div>

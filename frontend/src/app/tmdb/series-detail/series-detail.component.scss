@@ -5,17 +5,43 @@ mat-progress-spinner {
 
 .seriesDetail {
   min-height: 100px;
-  background: black no-repeat top right;
+  background: black;
   background-size: 70%;
   color: whitesmoke;
   padding-left: 12pt;
   padding-top: 8pt;
   padding-bottom: 12pt;
+  overflow: hidden;
+  position: relative;
 
+}
+
+.hidden-background-image {
+  visibility: hidden;
+  width: 100%;
+}
+
+.foreground-container {
+  background: transparent;
+  z-index: 10;
+}
+
+
+.background-container {
+  background: transparent no-repeat top right;
+  background-size: 100%;
+  position: absolute;
+  width: 70%;
+  right: 0pt;
+  top: 0pt;
+  overflow: hidden;
+  box-shadow: inset 120pt -120pt 100pt 0pt black;
 }
 
 .overview {
   text-shadow: 0.5pt 0.5pt black;
+  z-index: 9999;
+  position: relative;
 }
 
 .seasonButton {
