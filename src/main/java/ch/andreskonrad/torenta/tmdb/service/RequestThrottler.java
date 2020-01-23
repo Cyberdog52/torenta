@@ -12,7 +12,7 @@ public class RequestThrottler {
         this.timeSpanForMaxRequestsInMillis = timeSpanForMaxRequestsInMillis;
     }
 
-    private ArrayList<Long> requestTimes = new ArrayList();
+    private ArrayList<Long> requestTimes = new ArrayList<>();
 
     public synchronized void throttle() throws InterruptedException {
         boolean gotThrough = false;
