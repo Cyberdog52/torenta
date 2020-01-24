@@ -46,7 +46,7 @@ public class DirectoryService {
     }
 
     private String removeIllegalCharacters(String seriesName) {
-        return seriesName.replaceAll("[^a-zA-Z0-9\\.\\-]", "");
+        return seriesName.replaceAll("[^a-zA-Z0-9.\\- ]", "");
     }
 
     public Path getRootDirectoryPath() {
