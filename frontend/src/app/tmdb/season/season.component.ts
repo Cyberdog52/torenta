@@ -61,7 +61,7 @@ export class SeasonComponent implements OnInit, OnChanges {
       return false;
     }
     const foundSeries = this.fileHierarchy.seriesRootDirectoryDto.series.find(series => {
-      return series.name === this.seriesDetail.name
+      return series.name === this.seriesDetail.name.replace(/[^a-zA-Z0-9.\- ]/, "")
     });
 
     return this.seriesDirectoryHasThisEpisode(foundSeries, episode);

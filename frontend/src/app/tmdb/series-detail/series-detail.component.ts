@@ -66,7 +66,7 @@ export class SeriesDetailComponent implements OnInit {
       return false;
     }
     const seriesFolder = this.fileHierarchy.seriesRootDirectoryDto.series.find(directoryDto=> {
-      return directoryDto.name == this.seriesDetail.name;
+      return directoryDto.name == this.seriesDetail.name.replace(/[^a-zA-Z0-9.\- ]/, "");
     });
     if (seriesFolder == null) {
       return false;
