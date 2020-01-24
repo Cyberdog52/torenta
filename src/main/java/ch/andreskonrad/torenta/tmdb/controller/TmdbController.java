@@ -46,13 +46,13 @@ public class TmdbController {
 
     @GetMapping("tv/{id}/season/{season_number}")
     public ResponseEntity<Episode[]> getEpisodes(@PathVariable("id") int seriesId, @PathVariable("season_number") int season_number) {
-        Episode[] detail;
+        Episode[] episodes;
         try {
-            detail = this.tmdbService.getEpisodes(seriesId, season_number);
+            episodes = this.tmdbService.getEpisodes(seriesId, season_number);
         } catch (Exception exception) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(detail, HttpStatus.OK);
+        return new ResponseEntity<>(episodes, HttpStatus.OK);
     }
 
 

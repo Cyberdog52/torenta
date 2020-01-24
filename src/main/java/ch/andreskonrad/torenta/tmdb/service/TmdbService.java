@@ -59,7 +59,7 @@ public class TmdbService {
                     .getEpisodes();
         } catch (Exception e) {
             e.printStackTrace();
-            return null;
+            return new Episode[0];
         }
     }
 
