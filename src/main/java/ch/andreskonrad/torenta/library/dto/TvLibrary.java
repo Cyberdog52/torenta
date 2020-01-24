@@ -11,6 +11,10 @@ public class TvLibrary {
         seriesEntries = new ArrayList<>();
     }
 
+    public List<SeriesEntry> getSeriesEntries() {
+        return seriesEntries;
+    }
+
     public void addSeries(SeriesEntry seriesEntry) {
         seriesEntries.add(seriesEntry);
     }
