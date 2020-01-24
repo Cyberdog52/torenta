@@ -40,9 +40,13 @@ public class DirectoryService {
     }
 
     public Path getPathForSeries(String seriesName) {
-        Path seriesPath = tvDirectoryPath.resolve(seriesName);
+        Path seriesPath = tvDirectoryPath.resolve(removeIllagalCharacters(seriesName));
         createDirectoryIfNeeded(seriesPath);
         return seriesPath;
+    }
+
+    private String removeIllagalCharacters(String seriesName) {
+        return seriesName.replaceAll("[^a-zA-Z0-9\\.\\-]", "");
     }
 
     public Path getRootDirectoryPath() {
