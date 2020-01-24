@@ -1,5 +1,6 @@
 package ch.andreskonrad.torenta.library.service;
 
+import ch.andreskonrad.torenta.bittorrent.service.BitTorrentService;
 import ch.andreskonrad.torenta.directory.dto.DirectoryDto;
 import ch.andreskonrad.torenta.directory.service.DirectoryService;
 import ch.andreskonrad.torenta.library.dto.SeriesEntry;
@@ -19,11 +20,13 @@ public class LibraryService {
 
     private final DirectoryService directoryService;
     private final TmdbService tmdbService;
+    private final BitTorrentService bitTorrentService;
 
     @Autowired
-    public LibraryService(TmdbService tmdbService, DirectoryService directoryService) {
+    public LibraryService(TmdbService tmdbService, DirectoryService directoryService, BitTorrentService bitTorrentService) {
         this.directoryService = directoryService;
         this.tmdbService = tmdbService;
+        this.bitTorrentService = bitTorrentService;
     }
 
     public TvLibrary getTvLibrary() {
@@ -48,21 +51,23 @@ public class LibraryService {
 
 
         HashMap<Integer, Episode[]> episodesBySeasonNumber = new HashMap<>();
-        for (DirectoryDto seasonDirectory: seriesDirectoryDto.getDirectories()) {
+        HashMap<Integer, DirectoryDto> seasonDirectoriesBySeasonNumber = new HashMap<>();
+        for (DirectoryDto seasonDirectory : seriesDirectoryDto.getDirectories()) {
             int seasonNumber = getSeasonNumberForFolderName(seasonDirectory.getName());
-            if (seasonNumber != -1){
+            if (seasonNumber != -1) {
                 episodesBySeasonNumber.put(seasonNumber, tmdbService.getEpisodes(seriesId, seasonNumber));
+                seasonDirectoriesBySeasonNumber.put(seasonNumber, seasonDirectory);
             }
         }
 
-        SeriesEntry seriesEntry = new SeriesEntry(seriesDirectoryDto, seriesDetail, episodesBySeasonNumber);
+        SeriesEntry seriesEntry = new SeriesEntry(seriesDirectoryDto, seriesDetail, episodesBySeasonNumber, seasonDirectoriesBySeasonNumber, bitTorrentService.getAllDownloadDtos());
         return seriesEntry;
     }
 
     private Integer getSeasonNumberForFolderName(String folderName) {
         try {
             return Integer.valueOf(folderName.replaceAll("[^\\d]", ""));
-        } catch(Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
             return -1;
         }
@@ -71,12 +76,15 @@ public class LibraryService {
 
     private int getId(SearchResult searchResult, String seriesName) {
         switch (searchResult.getResults().size()) {
-            case 0: return -1;
-            case 1: return searchResult.getResults().get(0).getId();
-            default: return searchResult.getResults().stream()
-                    .filter(seriesOverview -> seriesOverview.getName().equals(seriesName))
-                    .min((s1, s2) -> (int) s2.getPopularity() - (int) s1.getPopularity())
-                    .get().getId();
+            case 0:
+                return -1;
+            case 1:
+                return searchResult.getResults().get(0).getId();
+            default:
+                return searchResult.getResults().stream()
+                        .filter(seriesOverview -> seriesOverview.getName().equals(seriesName))
+                        .min((s1, s2) -> (int) s2.getPopularity() - (int) s1.getPopularity())
+                        .get().getId();
         }
     }
 }
