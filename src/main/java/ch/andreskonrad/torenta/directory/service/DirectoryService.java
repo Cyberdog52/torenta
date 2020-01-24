@@ -40,12 +40,12 @@ public class DirectoryService {
     }
 
     public Path getPathForSeries(String seriesName) {
-        Path seriesPath = tvDirectoryPath.resolve(removeIllagalCharacters(seriesName));
+        Path seriesPath = tvDirectoryPath.resolve(removeIllegalCharacters(seriesName));
         createDirectoryIfNeeded(seriesPath);
         return seriesPath;
     }
 
-    private String removeIllagalCharacters(String seriesName) {
+    private String removeIllegalCharacters(String seriesName) {
         return seriesName.replaceAll("[^a-zA-Z0-9\\.\\-]", "");
     }
 
