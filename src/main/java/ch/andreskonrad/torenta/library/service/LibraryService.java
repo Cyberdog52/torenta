@@ -3,11 +3,11 @@ package ch.andreskonrad.torenta.library.service;
 import ch.andreskonrad.torenta.bittorrent.service.BitTorrentService;
 import ch.andreskonrad.torenta.directory.dto.DirectoryDto;
 import ch.andreskonrad.torenta.directory.service.DirectoryService;
-import ch.andreskonrad.torenta.library.dto.SeriesEntry;
+import ch.andreskonrad.torenta.library.dto.Series;
 import ch.andreskonrad.torenta.library.dto.TvLibrary;
-import ch.andreskonrad.torenta.tmdb.dto.Episode;
-import ch.andreskonrad.torenta.tmdb.dto.SearchResult;
-import ch.andreskonrad.torenta.tmdb.dto.SeriesDetail;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbSearchResultDto;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbSeriesDetailDto;
 import ch.andreskonrad.torenta.tmdb.service.TmdbService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -36,21 +36,21 @@ public class LibraryService {
 
         TvLibrary tvLibrary = new TvLibrary();
         for (DirectoryDto seriesDirectoryDto : series) {
-            SeriesEntry seriesEntry = getSeriesEntry(seriesDirectoryDto);
+            Series seriesEntry = getSeriesEntry(seriesDirectoryDto);
             tvLibrary.addSeries(seriesEntry);
         }
         return tvLibrary;
     }
 
-    private SeriesEntry getSeriesEntry(DirectoryDto seriesDirectoryDto) {
+    private Series getSeriesEntry(DirectoryDto seriesDirectoryDto) {
         String seriesName = seriesDirectoryDto.getName();
-        SearchResult searchResult = tmdbService.search(seriesName);
-        int seriesId = getId(searchResult, seriesName);
+        TmdbSearchResultDto tmdbSearchResultDto = tmdbService.search(seriesName);
+        int seriesId = getId(tmdbSearchResultDto, seriesName);
 
-        SeriesDetail seriesDetail = tmdbService.get(seriesId);
+        TmdbSeriesDetailDto seriesDetail = tmdbService.get(seriesId);
 
 
-        HashMap<Integer, Episode[]> episodesBySeasonNumber = new HashMap<>();
+        HashMap<Integer, TmdbEpisodeDto[]> episodesBySeasonNumber = new HashMap<>();
         HashMap<Integer, DirectoryDto> seasonDirectoriesBySeasonNumber = new HashMap<>();
         for (DirectoryDto seasonDirectory : seriesDirectoryDto.getDirectories()) {
             int seasonNumber = getSeasonNumberForFolderName(seasonDirectory.getName());
@@ -60,8 +60,8 @@ public class LibraryService {
             }
         }
 
-        SeriesEntry seriesEntry = new SeriesEntry(seriesDirectoryDto, seriesDetail, episodesBySeasonNumber, seasonDirectoriesBySeasonNumber, bitTorrentService.getAllDownloadDtos());
-        return seriesEntry;
+        Series series = new Series(seriesDirectoryDto, seriesDetail, episodesBySeasonNumber, seasonDirectoriesBySeasonNumber, bitTorrentService.getAllDownloadDtos());
+        return series;
     }
 
     private Integer getSeasonNumberForFolderName(String folderName) {
@@ -74,14 +74,14 @@ public class LibraryService {
 
     }
 
-    private int getId(SearchResult searchResult, String seriesName) {
-        switch (searchResult.getResults().size()) {
+    private int getId(TmdbSearchResultDto tmdbSearchResultDto, String seriesName) {
+        switch (tmdbSearchResultDto.getResults().size()) {
             case 0:
                 return -1;
             case 1:
-                return searchResult.getResults().get(0).getId();
+                return tmdbSearchResultDto.getResults().get(0).getId();
             default:
-                return searchResult.getResults().stream()
+                return tmdbSearchResultDto.getResults().stream()
                         .filter(seriesOverview -> seriesOverview.getName().equals(seriesName))
                         .min((s1, s2) -> (int) s2.getPopularity() - (int) s1.getPopularity())
                         .get().getId();

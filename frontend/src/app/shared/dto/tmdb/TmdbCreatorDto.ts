@@ -1,4 +1,4 @@
-export interface Creator {
+export interface TmdbCreatorDto {
   id: number;
   credit_id: number;
   name: string;

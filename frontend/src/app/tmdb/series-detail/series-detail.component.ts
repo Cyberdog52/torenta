@@ -1,7 +1,7 @@
 import {Component, Input, OnInit} from '@angular/core';
 import {SearchService} from "../../search/search.service";
-import {SeriesDetail} from "../../shared/dto/tmdb/SeriesDetail";
-import {Season} from "../../shared/dto/tmdb/Season";
+import {TmdbSeriesDetailDto} from "../../shared/dto/tmdb/TmdbSeriesDetailDto";
+import {TmdbSeasonDto} from "../../shared/dto/tmdb/TmdbSeasonDto";
 import {DirectoryService} from "../../directory/directory.service";
 import {FileHierarchyDto} from "../../shared/dto/directory/FileHierarchyDto";
 
@@ -13,8 +13,8 @@ import {FileHierarchyDto} from "../../shared/dto/directory/FileHierarchyDto";
 export class SeriesDetailComponent implements OnInit {
 
   @Input() id : number;
-  public seriesDetail: SeriesDetail;
-  public showSeason: Season;
+  public seriesDetail: TmdbSeriesDetailDto;
+  public showSeason: TmdbSeasonDto;
   private fileHierarchy: FileHierarchyDto;
 
   constructor(private searchService: SearchService,
@@ -38,7 +38,7 @@ export class SeriesDetailComponent implements OnInit {
   }
 
 
-  getBackgroundImageFor(seriesDetail: SeriesDetail): string {
+  getBackgroundImageFor(seriesDetail: TmdbSeriesDetailDto): string {
     if (seriesDetail.backdrop_path == null) {
       return "../../assets/tvnotfound.png";
     }
@@ -52,7 +52,7 @@ export class SeriesDetailComponent implements OnInit {
     return "?"
   }
 
-  getSeasonTitle(season: Season): string {
+  getSeasonTitle(season: TmdbSeasonDto): string {
     if (season.season_number < 10) {
       return "S0" + season.season_number.toString();
     }
@@ -61,7 +61,7 @@ export class SeriesDetailComponent implements OnInit {
 
 
 
-  isPartiallyDownloaded(season: Season): boolean {
+  isPartiallyDownloaded(season: TmdbSeasonDto): boolean {
     if (this.fileHierarchy == null) {
       return false;
     }
@@ -79,7 +79,7 @@ export class SeriesDetailComponent implements OnInit {
     return seasonFolder != null;
   }
 
-  notAiredYet(season: Season): boolean {
+  notAiredYet(season: TmdbSeasonDto): boolean {
     if (season.air_date == null) {
       return true;
     }

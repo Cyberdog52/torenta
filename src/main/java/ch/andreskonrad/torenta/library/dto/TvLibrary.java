@@ -5,17 +5,17 @@ import java.util.List;
 
 public class TvLibrary {
 
-    private final List<SeriesEntry> seriesEntries;
+    private final List<Series> series;
 
     public TvLibrary() {
-        seriesEntries = new ArrayList<>();
+        series = new ArrayList<>();
     }
 
-    public List<SeriesEntry> getSeriesEntries() {
-        return seriesEntries;
+    public List<Series> getSeries() {
+        return series;
     }
 
-    public void addSeries(SeriesEntry seriesEntry) {
-        seriesEntries.add(seriesEntry);
+    public void addSeries(Series series) {
+        this.series.add(series);
     }
 }

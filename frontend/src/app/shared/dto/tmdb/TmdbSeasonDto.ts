@@ -1,6 +1,6 @@
-import {Episode} from "./Episode";
+import {TmdbEpisodeDto} from "./TmdbEpisodeDto";
 
-export interface Season {
+export interface TmdbSeasonDto {
   air_date: string;
   episode_count: number;
   id: number;
@@ -8,5 +8,5 @@ export interface Season {
   overview: string;
   poster_path: string;
   season_number: number;
-  episodes: Episode[];
+  episodes: TmdbEpisodeDto[];
 }

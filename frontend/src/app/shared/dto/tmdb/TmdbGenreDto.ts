@@ -1,4 +1,4 @@
-export interface Genre {
+export interface TmdbGenreDto {
   id: number;
   name: string;
 }

@@ -1,7 +1,10 @@
 package ch.andreskonrad.torenta.tmdb.service;
 
 import ch.andreskonrad.torenta.CustomCacheConfig;
-import ch.andreskonrad.torenta.tmdb.dto.*;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbSearchResultDto;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbSeasonDto;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbSeriesDetailDto;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
@@ -13,8 +16,6 @@ import java.net.URI;
 import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
-import java.util.HashMap;
-import java.util.List;
 
 @Service
 @CacheConfig(cacheNames={CustomCacheConfig.TMDB_CACHE_NAME})
@@ -29,10 +30,10 @@ public class TmdbService {
 
 
     @Cacheable
-    public SearchResult search(String searchString) {
+    public TmdbSearchResultDto search(String searchString) {
         String jsonStringResponse = searchRequest(searchString);
         try {
-            return new ObjectMapper().readValue(jsonStringResponse, SearchResult.class);
+            return new ObjectMapper().readValue(jsonStringResponse, TmdbSearchResultDto.class);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -40,10 +41,10 @@ public class TmdbService {
     }
 
     @Cacheable
-    public SeriesDetail get(int id) {
+    public TmdbSeriesDetailDto get(int id) {
         String jsonStringResponse = detailRequest(id);
         try {
-            return new ObjectMapper().readValue(jsonStringResponse, SeriesDetail.class);
+            return new ObjectMapper().readValue(jsonStringResponse, TmdbSeriesDetailDto.class);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -51,15 +52,15 @@ public class TmdbService {
     }
 
     @Cacheable
-    public Episode[] getEpisodes(int seriesId, int season_number) {
+    public TmdbEpisodeDto[] getEpisodes(int seriesId, int season_number) {
         String jsonStringResponse = seasonRequest(seriesId, season_number);
         try {
             return new ObjectMapper()
-                    .readValue(jsonStringResponse, Season.class)
+                    .readValue(jsonStringResponse, TmdbSeasonDto.class)
                     .getEpisodes();
         } catch (Exception e) {
             e.printStackTrace();
-            return new Episode[0];
+            return new TmdbEpisodeDto[0];
         }
     }
 

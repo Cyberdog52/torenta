@@ -1,9 +1,6 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {Episode} from "../../shared/dto/tmdb/Episode";
-import {SeriesDetail} from "../../shared/dto/tmdb/SeriesDetail";
-import {DirectoryService} from "../../directory/directory.service";
-import {FileHierarchyDto} from "../../shared/dto/directory/FileHierarchyDto";
-import {DirectoryDto} from "../../shared/dto/directory/DirectoryDto";
+import {TmdbEpisodeDto} from "../../shared/dto/tmdb/TmdbEpisodeDto";
+import {TmdbSeriesDetailDto} from "../../shared/dto/tmdb/TmdbSeriesDetailDto";
 
 @Component({
   selector: 'episode',
@@ -12,8 +9,8 @@ import {DirectoryDto} from "../../shared/dto/directory/DirectoryDto";
 })
 export class EpisodeComponent implements OnInit {
 
-  @Input() episode : Episode;
-  @Input() seriesDetail: SeriesDetail;
+  @Input() tmdbEpisodeDto : TmdbEpisodeDto;
+  @Input() seriesDetail: TmdbSeriesDetailDto;
   @Input() alreadyDownloaded: boolean;
 
   constructor() { }

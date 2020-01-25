@@ -1,9 +1,9 @@
-import {Episode} from "../tmdb/Episode";
+import {TmdbEpisodeDto} from "../tmdb/TmdbEpisodeDto";
 import {PirateBayEntry} from "../pirateBay/PirateBayEntry";
-import {SeriesDetail} from "../tmdb/SeriesDetail";
+import {TmdbSeriesDetailDto} from "../tmdb/TmdbSeriesDetailDto";
 
 export interface DownloadRequest {
-  episode: Episode;
-  seriesDetail: SeriesDetail;
+  tmdbEpisodeDto: TmdbEpisodeDto;
+  seriesDetail: TmdbSeriesDetailDto;
   pirateBayEntry: PirateBayEntry;
 }

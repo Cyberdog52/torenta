@@ -3,22 +3,22 @@ package ch.andreskonrad.torenta.tmdb.dto;
 import java.util.List;
 import java.util.Objects;
 
-public class SeriesDetail {
+public class TmdbSeriesDetailDto {
 
     private String backdrop_path;
-    private List<Creator> created_by;
+    private List<TmdbCreatorDto> created_by;
     private List<Integer> episode_run_time;
     private String first_air_date;
-    private List<Genre> genres;
+    private List<TmdbGenreDto> genres;
     private String homepage;
     private int id;
     private boolean in_production;
     private List<String> languages;
     private String last_air_date;
-    private Episode last_episode_to_air;
+    private TmdbEpisodeDto last_episode_to_air;
     private String name;
-    private Episode next_episode_to_air;
-    private List<Network> networks;
+    private TmdbEpisodeDto next_episode_to_air;
+    private List<TmdbNetworkDto> networks;
     private int number_of_episodes;
     private int number_of_seasons;
     private List<String> origin_country;
@@ -27,22 +27,22 @@ public class SeriesDetail {
     private String overview;
     private double popularity;
     private String poster_path;
-    private List<ProductionCompany> production_companies;
-    private List<Season> seasons;
+    private List<TmdbProductionCompanyDto> production_companies;
+    private List<TmdbSeasonDto> seasons;
     private String status;
     private String type;
     private double vote_average;
     private int vote_count;
 
     //used for jackson
-    public SeriesDetail() {
+    public TmdbSeriesDetailDto() {
     }
 
     public String getBackdrop_path() {
         return backdrop_path;
     }
 
-    public List<Creator> getCreated_by() {
+    public List<TmdbCreatorDto> getCreated_by() {
         return created_by;
     }
 
@@ -54,7 +54,7 @@ public class SeriesDetail {
         return first_air_date;
     }
 
-    public List<Genre> getGenres() {
+    public List<TmdbGenreDto> getGenres() {
         return genres;
     }
 
@@ -78,7 +78,7 @@ public class SeriesDetail {
         return last_air_date;
     }
 
-    public Episode getLast_episode_to_air() {
+    public TmdbEpisodeDto getLast_episode_to_air() {
         return last_episode_to_air;
     }
 
@@ -86,11 +86,11 @@ public class SeriesDetail {
         return name;
     }
 
-    public Episode getNext_episode_to_air() {
+    public TmdbEpisodeDto getNext_episode_to_air() {
         return next_episode_to_air;
     }
 
-    public List<Network> getNetworks() {
+    public List<TmdbNetworkDto> getNetworks() {
         return networks;
     }
 
@@ -126,11 +126,11 @@ public class SeriesDetail {
         return poster_path;
     }
 
-    public List<ProductionCompany> getProduction_companies() {
+    public List<TmdbProductionCompanyDto> getProduction_companies() {
         return production_companies;
     }
 
-    public List<Season> getSeasons() {
+    public List<TmdbSeasonDto> getSeasons() {
         return seasons;
     }
 
@@ -154,7 +154,7 @@ public class SeriesDetail {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SeriesDetail detail = (SeriesDetail) o;
+        TmdbSeriesDetailDto detail = (TmdbSeriesDetailDto) o;
         return id == detail.id;
     }
 

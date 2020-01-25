@@ -1,8 +1,8 @@
 import {Component, Input, OnChanges, OnInit} from '@angular/core';
-import {Season} from "../../shared/dto/tmdb/Season";
+import {TmdbSeasonDto} from "../../shared/dto/tmdb/TmdbSeasonDto";
 import {SearchService} from "../../search/search.service";
-import {Episode} from "../../shared/dto/tmdb/Episode";
-import {SeriesDetail} from "../../shared/dto/tmdb/SeriesDetail";
+import {TmdbEpisodeDto} from "../../shared/dto/tmdb/TmdbEpisodeDto";
+import {TmdbSeriesDetailDto} from "../../shared/dto/tmdb/TmdbSeriesDetailDto";
 import {DirectoryDto} from "../../shared/dto/directory/DirectoryDto";
 import {FileHierarchyDto} from "../../shared/dto/directory/FileHierarchyDto";
 import {DirectoryService} from "../../directory/directory.service";
@@ -14,11 +14,11 @@ import {DirectoryService} from "../../directory/directory.service";
 })
 export class SeasonComponent implements OnInit, OnChanges {
 
-  @Input() season : Season;
-  @Input() seriesDetail: SeriesDetail;
-  public showEpisode: Episode;
+  @Input() tmdbSeasonDto : TmdbSeasonDto;
+  @Input() seriesDetail: TmdbSeriesDetailDto;
+  public showEpisode: TmdbEpisodeDto;
 
-  public episodes: Episode[];
+  public episodes: TmdbEpisodeDto[];
   private fileHierarchy: FileHierarchyDto;
 
   constructor(private searchService: SearchService,
@@ -37,12 +37,12 @@ export class SeasonComponent implements OnInit, OnChanges {
 
   //get episodes because season does not automatically come with all episodes
   private getEpisodes() {
-    this.searchService.getEpisodes(this.seriesDetail.id, this.season.season_number).subscribe(episodes => {
+    this.searchService.getEpisodes(this.seriesDetail.id, this.tmdbSeasonDto.season_number).subscribe(episodes => {
       this.episodes = episodes;
     });
   }
 
-  getEpisodeButtonTitle(episode: Episode): string {
+  getEpisodeButtonTitle(episode: TmdbEpisodeDto): string {
     if (episode.episode_number < 10) {
       return "E0" + episode.episode_number.toString();
     }
@@ -56,7 +56,7 @@ export class SeasonComponent implements OnInit, OnChanges {
     });
   }
 
-  public isAlreadyDownloaded(episode: Episode): boolean {
+  public isAlreadyDownloaded(episode: TmdbEpisodeDto): boolean {
     if (this.fileHierarchy == null) {
       return false;
     }
@@ -67,7 +67,7 @@ export class SeasonComponent implements OnInit, OnChanges {
     return this.seriesDirectoryHasThisEpisode(foundSeries, episode);
   }
 
-  notAiredYet(episode: Episode): boolean {
+  notAiredYet(episode: TmdbEpisodeDto): boolean {
     if (episode.air_date == null) {
       return true;
     }
@@ -76,7 +76,7 @@ export class SeasonComponent implements OnInit, OnChanges {
     return airDate.valueOf() > currentDate.valueOf();
   }
 
-  private getEpisodeTitle(episode: Episode) {
+  private getEpisodeTitle(episode: TmdbEpisodeDto) {
     let episodeTitle = "S";
     if (episode.season_number < 10) {
       episodeTitle += "0";
@@ -87,7 +87,7 @@ export class SeasonComponent implements OnInit, OnChanges {
     return episodeTitle;
   }
 
-  private seriesDirectoryHasThisEpisode(series: DirectoryDto, episode: Episode): boolean {
+  private seriesDirectoryHasThisEpisode(series: DirectoryDto, episode: TmdbEpisodeDto): boolean {
     if (series == null) {
       return false;
     }

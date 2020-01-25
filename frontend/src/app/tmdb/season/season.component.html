@@ -1,22 +1,22 @@
 <div class="season">
   <p>
-    <mat-icon>queue_play_next</mat-icon> {{season.name }} •
-    <mat-icon>date_range</mat-icon>{{season.air_date}}
+    <mat-icon>queue_play_next</mat-icon> {{tmdbSeasonDto.name }} •
+    <mat-icon>date_range</mat-icon>{{tmdbSeasonDto.air_date}}
   </p>
   <p class="overview">
-    {{season.overview}}
+    {{tmdbSeasonDto.overview}}
   </p>
   <p>
-    <span *ngFor="let episode of episodes">
-      <button mat-raised-button class="episodeButton" (click)="showEpisode = episode">
-        {{getEpisodeButtonTitle(episode)}}
+    <span *ngFor="let tmdbEpisodeDto of episodes">
+      <button mat-raised-button class="episodeButton" (click)="showEpisode = tmdbEpisodeDto">
+        {{getEpisodeButtonTitle(tmdbEpisodeDto)}}
       </button>
-      <mat-icon class="topRightIcon" *ngIf="isAlreadyDownloaded(episode)">done</mat-icon>
-      <mat-icon class="topRightIcon" *ngIf="notAiredYet(episode)">date_range</mat-icon>
+      <mat-icon class="topRightIcon" *ngIf="isAlreadyDownloaded(tmdbEpisodeDto)">done</mat-icon>
+      <mat-icon class="topRightIcon" *ngIf="notAiredYet(tmdbEpisodeDto)">date_range</mat-icon>
     </span>
 
   </p>
-  <episode [episode]="showEpisode" [seriesDetail]="seriesDetail" [alreadyDownloaded]="isAlreadyDownloaded(showEpisode)" *ngIf="showEpisode"></episode>
+  <episode [tmdbEpisodeDto]="showEpisode" [seriesDetail]="seriesDetail" [alreadyDownloaded]="isAlreadyDownloaded(showEpisode)" *ngIf="showEpisode"></episode>
 </div>
 
 

@@ -3,8 +3,8 @@ import {PirateBayService} from "../piratebay.service";
 import {PirateBayEntry} from "../../shared/dto/pirateBay/PirateBayEntry";
 import {TorrentService} from "../torrent.service";
 import {DownloadRequest} from "../../shared/dto/torrent/DownloadRequest";
-import {Episode} from "../../shared/dto/tmdb/Episode";
-import {SeriesDetail} from "../../shared/dto/tmdb/SeriesDetail";
+import {TmdbEpisodeDto} from "../../shared/dto/tmdb/TmdbEpisodeDto";
+import {TmdbSeriesDetailDto} from "../../shared/dto/tmdb/TmdbSeriesDetailDto";
 import {DownloadDto} from "../../shared/dto/torrent/DownloadDto";
 
 @Component({
@@ -14,8 +14,8 @@ import {DownloadDto} from "../../shared/dto/torrent/DownloadDto";
 })
 export class TorrentSuggestionsComponent implements OnInit, OnChanges {
 
-  @Input() seriesDetail: SeriesDetail;
-  @Input() episode: Episode;
+  @Input() seriesDetail: TmdbSeriesDetailDto;
+  @Input() tmdbEpisodeDto: TmdbEpisodeDto;
   @Input() searchString: string;
   suggestions: PirateBayEntry[];
   displayedColumns: string[] = ['name', 'seeders', 'time', 'size', 'trusted', 'startDownload'];
@@ -55,7 +55,7 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
 
   startDownload(pirateBayEntry: PirateBayEntry) {
     const downloadRequest: DownloadRequest = {
-      "episode": this.episode,
+      "tmdbEpisodeDto": this.tmdbEpisodeDto,
       "seriesDetail": this.seriesDetail,
       "pirateBayEntry": pirateBayEntry
 
@@ -71,15 +71,15 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
 
   getEpisodeString() : string{
     let episodeStr = "S";
-    if (this.episode.season_number < 10) {
+    if (this.tmdbEpisodeDto.season_number < 10) {
       episodeStr += "0";
     }
-    episodeStr += this.episode.season_number.toString();
+    episodeStr += this.tmdbEpisodeDto.season_number.toString();
     episodeStr += "E";
-    if (this.episode.episode_number < 10) {
+    if (this.tmdbEpisodeDto.episode_number < 10) {
       episodeStr += "0";
     }
-    episodeStr += this.episode.episode_number.toString();
+    episodeStr += this.tmdbEpisodeDto.episode_number.toString();
     return episodeStr;
   }
 
