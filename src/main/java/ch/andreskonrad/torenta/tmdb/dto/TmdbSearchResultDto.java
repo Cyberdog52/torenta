@@ -3,14 +3,14 @@ package ch.andreskonrad.torenta.tmdb.dto;
 import java.util.List;
 import java.util.Objects;
 
-public class SearchResult {
+public class TmdbSearchResultDto {
 
     private int page;
     private int total_results;
     private int total_pages;
-    private List<SeriesOverview> results;
+    private List<TmdbSeriesOverviewDto> results;
 
-    public SearchResult() {
+    public TmdbSearchResultDto() {
     }
 
     public int getPage() {
@@ -25,7 +25,7 @@ public class SearchResult {
         return total_pages;
     }
 
-    public List<SeriesOverview> getResults() {
+    public List<TmdbSeriesOverviewDto> getResults() {
         return results;
     }
 
@@ -33,7 +33,7 @@ public class SearchResult {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SearchResult that = (SearchResult) o;
+        TmdbSearchResultDto that = (TmdbSearchResultDto) o;
         return page == that.page &&
                 total_results == that.total_results &&
                 total_pages == that.total_pages &&

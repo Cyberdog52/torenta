@@ -1,6 +1,6 @@
-export interface ProductionCompany {
+export interface TmdbNetworkDto {
+  name: string;
   id: number;
   logo_path: string;
-  name: string;
   origin_country: string;
 }

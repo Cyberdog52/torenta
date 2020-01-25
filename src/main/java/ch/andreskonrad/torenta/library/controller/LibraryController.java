@@ -2,7 +2,6 @@ package ch.andreskonrad.torenta.library.controller;
 
 import ch.andreskonrad.torenta.library.dto.TvLibrary;
 import ch.andreskonrad.torenta.library.service.LibraryService;
-import ch.andreskonrad.torenta.tmdb.dto.SeriesDetail;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

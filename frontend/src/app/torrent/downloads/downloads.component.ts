@@ -1,4 +1,4 @@
-import {Component, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {TorrentService} from "../torrent.service";
 import {DownloadDto} from "../../shared/dto/torrent/DownloadDto";
 import {DownloadState} from "../../shared/dto/torrent/DownloadState";
@@ -43,19 +43,19 @@ export class DownloadsComponent implements OnInit{
   }
 
   getEpisodeString(downloadDto: DownloadDto) : string{
-    if (downloadDto.downloadRequest.episode == null) {
+    if (downloadDto.downloadRequest.tmdbEpisodeDto == null) {
       return "";
     }
     let episodeStr = "S";
-    if (downloadDto.downloadRequest.episode.season_number < 10) {
+    if (downloadDto.downloadRequest.tmdbEpisodeDto.season_number < 10) {
       episodeStr += "0";
     }
-    episodeStr += downloadDto.downloadRequest.episode.season_number.toString();
+    episodeStr += downloadDto.downloadRequest.tmdbEpisodeDto.season_number.toString();
     episodeStr += "E";
-    if (downloadDto.downloadRequest.episode.episode_number < 10) {
+    if (downloadDto.downloadRequest.tmdbEpisodeDto.episode_number < 10) {
       episodeStr += "0";
     }
-    episodeStr += downloadDto.downloadRequest.episode.episode_number.toString();
+    episodeStr += downloadDto.downloadRequest.tmdbEpisodeDto.episode_number.toString();
     return episodeStr;
   }
 

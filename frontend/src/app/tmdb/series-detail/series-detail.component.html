@@ -22,15 +22,15 @@
     </p>
     <p class="overview">{{seriesDetail.overview}}</p>
     <p>
-    <span *ngFor="let season of seriesDetail.seasons">
-       <button mat-raised-button class="seasonButton" (click)="showSeason = season">
-         {{getSeasonTitle(season)}}
+    <span *ngFor="let tmdbSeasonDto of seriesDetail.seasons">
+       <button mat-raised-button class="seasonButton" (click)="showSeason = tmdbSeasonDto">
+         {{getSeasonTitle(tmdbSeasonDto)}}
       </button>
-      <mat-icon class="topRightIcon" *ngIf="isPartiallyDownloaded(season)">done</mat-icon>
-      <mat-icon class="topRightIcon" *ngIf="notAiredYet(season)">date_range</mat-icon>
+      <mat-icon class="topRightIcon" *ngIf="isPartiallyDownloaded(tmdbSeasonDto)">done</mat-icon>
+      <mat-icon class="topRightIcon" *ngIf="notAiredYet(tmdbSeasonDto)">date_range</mat-icon>
     </span>
 
     </p>
-    <season [season]="showSeason" [seriesDetail]="seriesDetail" *ngIf="showSeason"></season>
+    <season [tmdbSeasonDto]="showSeason" [seriesDetail]="seriesDetail" *ngIf="showSeason"></season>
   </div>
 </div>

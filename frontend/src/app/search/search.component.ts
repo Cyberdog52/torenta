@@ -1,6 +1,5 @@
-import {Component, OnInit, ɵEMPTY_MAP} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {SearchService} from "./search.service";
-import {buildOptimizerLoader} from "@angular-devkit/build-angular/src/angular-cli-files/models/webpack-configs";
 import {PirateBayService} from "../torrent/piratebay.service";
 
 @Component({
@@ -15,7 +14,7 @@ export class SearchComponent implements OnInit {
   public searchTVString : string;
   public searchPiratebayString: string;
   public delayedPirateBaySearchString: string;
-  public searchResult: SearchResult;
+  public searchResult: TmdbSearchResultDto;
   public listOfOpenendPanels: number[] = [];
 
   ngOnInit() {
@@ -31,14 +30,14 @@ export class SearchComponent implements OnInit {
     })
   }
 
-  public getSeriesOverviews(): SeriesOverview[] {
+  public getSeriesOverviews(): TmdbSeriesOverviewDto[] {
     if (this.searchResult == null) {
       return [];
     }
     return this.searchResult.results.sort((a, b) => b.popularity - a.popularity);
   }
 
-  getImageFor(seriesOverview: SeriesOverview): string {
+  getImageFor(seriesOverview: TmdbSeriesOverviewDto): string {
     if (seriesOverview.poster_path == null) {
       return "../../assets/tvnotfound.png";
     }

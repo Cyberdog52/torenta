@@ -1,9 +1,8 @@
 package ch.andreskonrad.torenta.tmdb.dto;
 
-import java.util.Arrays;
 import java.util.Objects;
 
-public class Episode {
+public class TmdbEpisodeDto {
 
     private String air_date;
     private int episode_number;
@@ -16,11 +15,11 @@ public class Episode {
     private String still_path;
     private double vote_average;
     private int vote_count;
-    private Creator[] crew;
-    private Creator[] guest_stars;
+    private TmdbCreatorDto[] crew;
+    private TmdbCreatorDto[] guest_stars;
 
     //used for jackson
-    public Episode() {
+    public TmdbEpisodeDto() {
     }
 
     public String getAir_date() {
@@ -67,11 +66,11 @@ public class Episode {
         return vote_count;
     }
 
-    public Creator[] getCrew() {
+    public TmdbCreatorDto[] getCrew() {
         return crew;
     }
 
-    public Creator[] getGuest_stars() {
+    public TmdbCreatorDto[] getGuest_stars() {
         return guest_stars;
     }
 
@@ -79,9 +78,9 @@ public class Episode {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Episode episode = (Episode) o;
-        return id == episode.id &&
-                show_id == episode.show_id;
+        TmdbEpisodeDto tmdbEpisodeDto = (TmdbEpisodeDto) o;
+        return id == tmdbEpisodeDto.id &&
+                show_id == tmdbEpisodeDto.show_id;
     }
 
     @Override

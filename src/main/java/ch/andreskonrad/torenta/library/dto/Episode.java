@@ -3,25 +3,25 @@ package ch.andreskonrad.torenta.library.dto;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadDto;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadState;
 import ch.andreskonrad.torenta.directory.dto.DirectoryDto;
-import ch.andreskonrad.torenta.tmdb.dto.Episode;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
 
 import java.time.LocalDate;
 
-public class EpisodeEntry {
+public class Episode {
 
     private final AirStatus airStatus;
     private final DownloadStatus downloadStatus;
-    private final Episode episode;
+    private final TmdbEpisodeDto tmdbEpisodeDto;
     private final int seasonNumber;
     private final int episodeNumber;
     private final String episodeString;
     private final DownloadDto downloadDto;
 
 
-    public EpisodeEntry(Episode episode, DirectoryDto seasonDirectory, DownloadDto downloadDto) {
-        this.episode = episode;
-        this.seasonNumber = episode.getSeason_number();
-        this.episodeNumber = episode.getEpisode_number();
+    public Episode(TmdbEpisodeDto tmdbEpisodeDto, DirectoryDto seasonDirectory, DownloadDto downloadDto) {
+        this.tmdbEpisodeDto = tmdbEpisodeDto;
+        this.seasonNumber = tmdbEpisodeDto.getSeason_number();
+        this.episodeNumber = tmdbEpisodeDto.getEpisode_number();
         this.episodeString = createEpisodeString();
         this.airStatus = getEpisodeAirStatus();
         this.downloadDto = downloadDto;
@@ -36,8 +36,8 @@ public class EpisodeEntry {
         return downloadStatus;
     }
 
-    public Episode getEpisode() {
-        return episode;
+    public TmdbEpisodeDto getTmdbEpisodeDto() {
+        return tmdbEpisodeDto;
     }
 
     public int getSeasonNumber() {
@@ -100,10 +100,10 @@ public class EpisodeEntry {
     }
 
     private AirStatus getEpisodeAirStatus() {
-        if (episode == null || episode.getAir_date() == null) {
+        if (tmdbEpisodeDto == null || tmdbEpisodeDto.getAir_date() == null) {
             return AirStatus.NOT_AIRED;
         }
-        LocalDate airTime = LocalDate.parse(episode.getAir_date());
+        LocalDate airTime = LocalDate.parse(tmdbEpisodeDto.getAir_date());
         if (airTime.isAfter(LocalDate.now())) {
             return AirStatus.NOT_AIRED;
         } else {

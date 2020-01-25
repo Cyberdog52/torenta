@@ -2,7 +2,7 @@ package ch.andreskonrad.torenta.tmdb.dto;
 
 import java.util.Objects;
 
-public class Creator {
+public class TmdbCreatorDto {
 
     private int id;
     private String credit_id;
@@ -14,7 +14,7 @@ public class Creator {
     private String character;
     private int order;
 
-    public Creator() {
+    public TmdbCreatorDto() {
     }
 
     public int getId() {
@@ -57,7 +57,7 @@ public class Creator {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Creator creator = (Creator) o;
+        TmdbCreatorDto creator = (TmdbCreatorDto) o;
         return id == creator.id;
     }
 

@@ -3,7 +3,7 @@ package ch.andreskonrad.torenta.tmdb.dto;
 import java.util.List;
 import java.util.Objects;
 
-public class SeriesOverview {
+public class TmdbSeriesOverviewDto {
 
     private String original_name;
     private List<Integer> genre_ids;
@@ -20,7 +20,7 @@ public class SeriesOverview {
     private String poster_path;
 
     //used for jackson
-    public SeriesOverview() {
+    public TmdbSeriesOverviewDto() {
     }
 
     public String getOriginal_name() {
@@ -79,7 +79,7 @@ public class SeriesOverview {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        SeriesOverview that = (SeriesOverview) o;
+        TmdbSeriesOverviewDto that = (TmdbSeriesOverviewDto) o;
         return id == that.id;
     }
 

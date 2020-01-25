@@ -1,6 +1,6 @@
-import {Creator} from "./Creator";
+import {TmdbCreatorDto} from "./TmdbCreatorDto";
 
-export interface Episode {
+export interface TmdbEpisodeDto {
   air_date: string;
   episode_number: number;
   id: number;
@@ -12,6 +12,6 @@ export interface Episode {
   still_path?: any;
   vote_average: number;
   vote_count: number;
-  crew: Creator[];
-  guest_stars: Creator[];
+  crew: TmdbCreatorDto[];
+  guest_stars: TmdbCreatorDto[];
 }

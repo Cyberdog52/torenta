@@ -2,7 +2,7 @@ package ch.andreskonrad.torenta.tmdb.dto;
 
 import java.util.Objects;
 
-public class Season {
+public class TmdbSeasonDto {
 
     private String air_date;
     private int episode_count;
@@ -12,9 +12,9 @@ public class Season {
     private String overview;
     private String poster_path;
     private int season_number;
-    private Episode[] episodes;
+    private TmdbEpisodeDto[] episodes;
 
-    public Season() {
+    public TmdbSeasonDto() {
     }
 
     public String getAir_date() {
@@ -49,7 +49,7 @@ public class Season {
         return season_number;
     }
 
-    public Episode[] getEpisodes() {
+    public TmdbEpisodeDto[] getEpisodes() {
         return episodes;
     }
 
@@ -57,8 +57,8 @@ public class Season {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Season season = (Season) o;
-        return id == season.id;
+        TmdbSeasonDto tmdbSeasonDto = (TmdbSeasonDto) o;
+        return id == tmdbSeasonDto.id;
     }
 
     @Override

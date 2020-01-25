@@ -2,21 +2,21 @@ package ch.andreskonrad.torenta.library.dto;
 
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadDto;
 import ch.andreskonrad.torenta.directory.dto.DirectoryDto;
-import ch.andreskonrad.torenta.tmdb.dto.Episode;
-import ch.andreskonrad.torenta.tmdb.dto.Season;
-import ch.andreskonrad.torenta.tmdb.dto.SeriesDetail;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbSeasonDto;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbSeriesDetailDto;
 
 import java.util.*;
 
-public class SeriesEntry {
+public class Series {
     private final DirectoryDto directoryDto;
 
-    private final SeriesDetail seriesDetail;
-    private final Map<Integer, Episode[]> episodesBySeasonNumber;
+    private final TmdbSeriesDetailDto seriesDetail;
+    private final Map<Integer, TmdbEpisodeDto[]> episodesBySeasonNumber;
     private final Map<Integer, DirectoryDto> seasonDirectoriesBySeasonNumber;
-    private final List<SeasonEntry> seasonEntryList = new ArrayList<>();
+    private final List<Season> seasonList = new ArrayList<>();
 
-    public SeriesEntry(DirectoryDto seriesDirectoryDto, SeriesDetail seriesDetail, Map<Integer, Episode[]> episodesBySeasonNumber, HashMap<Integer, DirectoryDto> seasonDirectoriesBySeasonNumber, Set<DownloadDto> downloadDtoSet) {
+    public Series(DirectoryDto seriesDirectoryDto, TmdbSeriesDetailDto seriesDetail, Map<Integer, TmdbEpisodeDto[]> episodesBySeasonNumber, HashMap<Integer, DirectoryDto> seasonDirectoriesBySeasonNumber, Set<DownloadDto> downloadDtoSet) {
         this.directoryDto = seriesDirectoryDto;
         this.seriesDetail = seriesDetail;
         this.episodesBySeasonNumber = episodesBySeasonNumber;
@@ -25,11 +25,11 @@ public class SeriesEntry {
 
         for (Integer seasonNumber : episodesBySeasonNumber.keySet()) {
             DirectoryDto seasonDirectory = seasonDirectoriesBySeasonNumber.get(seasonNumber);
-            Episode[] episodes = episodesBySeasonNumber.get(seasonNumber);
-            Season season = seriesDetail.getSeasons().stream()
+            TmdbEpisodeDto[] tmdbEpisodeDtos = episodesBySeasonNumber.get(seasonNumber);
+            TmdbSeasonDto tmdbSeasonDto = seriesDetail.getSeasons().stream()
                     .filter(s -> s.getSeason_number() == seasonNumber).findFirst()
                     .orElse(null);
-            seasonEntryList.add(new SeasonEntry(season, episodes, seasonDirectory, downloadDtoSet));
+            seasonList.add(new Season(tmdbSeasonDto, tmdbEpisodeDtos, seasonDirectory, downloadDtoSet));
         }
     }
 
@@ -37,11 +37,11 @@ public class SeriesEntry {
         return directoryDto;
     }
 
-    public SeriesDetail getSeriesDetail() {
+    public TmdbSeriesDetailDto getSeriesDetail() {
         return seriesDetail;
     }
 
-    public Map<Integer, Episode[]> getEpisodesBySeasonNumber() {
+    public Map<Integer, TmdbEpisodeDto[]> getEpisodesBySeasonNumber() {
         return episodesBySeasonNumber;
     }
 
@@ -49,7 +49,7 @@ public class SeriesEntry {
         return seasonDirectoriesBySeasonNumber;
     }
 
-    public List<SeasonEntry> getSeasonEntryList() {
-        return seasonEntryList;
+    public List<Season> getSeasonList() {
+        return seasonList;
     }
 }

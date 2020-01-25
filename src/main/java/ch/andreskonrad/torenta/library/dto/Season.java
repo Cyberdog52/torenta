@@ -2,40 +2,40 @@ package ch.andreskonrad.torenta.library.dto;
 
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadDto;
 import ch.andreskonrad.torenta.directory.dto.DirectoryDto;
-import ch.andreskonrad.torenta.tmdb.dto.Episode;
-import ch.andreskonrad.torenta.tmdb.dto.Season;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbSeasonDto;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
-public class SeasonEntry {
+public class Season {
 
     private final AirStatus airStatus;
     private final DownloadStatus downloadStatus;
-    private final List<EpisodeEntry> episodeEntryList = new ArrayList<>();
-    private final Season season;
+    private final List<Episode> episodeList = new ArrayList<>();
+    private final TmdbSeasonDto tmdbSeasonDto;
 
-    public SeasonEntry(Season season, Episode[] episodes, DirectoryDto seasonDirectory, Set<DownloadDto> downloadDtoSet) {
-        this.season = season;
+    public Season(TmdbSeasonDto tmdbSeasonDto, TmdbEpisodeDto[] tmdbEpisodeDtos, DirectoryDto seasonDirectory, Set<DownloadDto> downloadDtoSet) {
+        this.tmdbSeasonDto = tmdbSeasonDto;
 
-        for (Episode episode : episodes) {
-            DownloadDto episodeDownloadDto = getDownloadDtoForEpisode(downloadDtoSet, episode);
-            episodeEntryList.add(new EpisodeEntry(episode, seasonDirectory, episodeDownloadDto));
+        for (TmdbEpisodeDto tmdbEpisodeDto : tmdbEpisodeDtos) {
+            DownloadDto episodeDownloadDto = getDownloadDtoForEpisode(downloadDtoSet, tmdbEpisodeDto);
+            episodeList.add(new Episode(tmdbEpisodeDto, seasonDirectory, episodeDownloadDto));
         }
 
         this.airStatus = getSeasonAirStatus();
         this.downloadStatus = getSeasonDownloadStatus();
     }
 
-    private DownloadDto getDownloadDtoForEpisode(Set<DownloadDto> downloadDtoSet, Episode episode) {
+    private DownloadDto getDownloadDtoForEpisode(Set<DownloadDto> downloadDtoSet, TmdbEpisodeDto tmdbEpisodeDto) {
         DownloadDto episodeDownloadDto = null;
         for (DownloadDto downloadDto : downloadDtoSet) {
             if (downloadDto.getDownloadRequest() == null ||
-                    downloadDto.getDownloadRequest().getEpisode() == null) {
+                    downloadDto.getDownloadRequest().getTmdbEpisodeDto() == null) {
                 continue;
             }
-            if (downloadDto.getDownloadRequest().getEpisode().equals(episode)) {
+            if (downloadDto.getDownloadRequest().getTmdbEpisodeDto().equals(tmdbEpisodeDto)) {
                 episodeDownloadDto = downloadDto;
             }
         }
@@ -50,17 +50,17 @@ public class SeasonEntry {
         return downloadStatus;
     }
 
-    public List<EpisodeEntry> getEpisodeEntryList() {
-        return episodeEntryList;
+    public List<Episode> getEpisodeList() {
+        return episodeList;
     }
 
-    public Season getSeason() {
-        return season;
+    public TmdbSeasonDto getTmdbSeasonDto() {
+        return tmdbSeasonDto;
     }
 
     private AirStatus getSeasonAirStatus() {
         int numberOfAiredEpisodes = 0;
-        for (EpisodeEntry episode : episodeEntryList) {
+        for (Episode episode : episodeList) {
             if (episode.getAirStatus() == AirStatus.AIRED) {
                 numberOfAiredEpisodes++;
             }
@@ -69,7 +69,7 @@ public class SeasonEntry {
         if (numberOfAiredEpisodes == 0) {
             return AirStatus.NOT_AIRED;
         }
-        if (numberOfAiredEpisodes == episodeEntryList.size()) {
+        if (numberOfAiredEpisodes == episodeList.size()) {
             return AirStatus.AIRED;
         }
 
@@ -78,7 +78,7 @@ public class SeasonEntry {
 
     private DownloadStatus getSeasonDownloadStatus() {
         int numberOfDownloadedEpisodes = 0;
-        for (EpisodeEntry episode : episodeEntryList) {
+        for (Episode episode : episodeList) {
             if (episode.getDownloadStatus() == DownloadStatus.DOWNLOADED) {
                 numberOfDownloadedEpisodes++;
             }
@@ -87,7 +87,7 @@ public class SeasonEntry {
         if (numberOfDownloadedEpisodes == 0) {
             return DownloadStatus.NOT_DOWNLOADED;
         }
-        if (numberOfDownloadedEpisodes == episodeEntryList.size()) {
+        if (numberOfDownloadedEpisodes == episodeList.size()) {
             return DownloadStatus.DOWNLOADED;
         }
 
