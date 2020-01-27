@@ -15,9 +15,11 @@ public class Season {
     private final DownloadStatus downloadStatus;
     private final List<Episode> episodeList = new ArrayList<>();
     private final TmdbSeasonDto tmdbSeasonDto;
+    private final int seasonNumber;
 
     public Season(TmdbSeasonDto tmdbSeasonDto, TmdbEpisodeDto[] tmdbEpisodeDtos, DirectoryDto seasonDirectory, Set<DownloadDto> downloadDtoSet) {
         this.tmdbSeasonDto = tmdbSeasonDto;
+        this.seasonNumber = tmdbSeasonDto.getSeason_number();
 
         for (TmdbEpisodeDto tmdbEpisodeDto : tmdbEpisodeDtos) {
             DownloadDto episodeDownloadDto = getDownloadDtoForEpisode(downloadDtoSet, tmdbEpisodeDto);
@@ -95,4 +97,7 @@ public class Season {
     }
 
 
+    public int getSeasonNumber() {
+        return seasonNumber;
+    }
 }

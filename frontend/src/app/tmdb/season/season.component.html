@@ -11,8 +11,7 @@
       <button mat-raised-button class="episodeButton" (click)="showEpisode = tmdbEpisodeDto">
         {{getEpisodeButtonTitle(tmdbEpisodeDto)}}
       </button>
-      <mat-icon class="topRightIcon" *ngIf="isAlreadyDownloaded(tmdbEpisodeDto)">done</mat-icon>
-      <mat-icon class="topRightIcon" *ngIf="notAiredYet(tmdbEpisodeDto)">date_range</mat-icon>
+      <mat-icon class="topRightIcon" *ngIf="getEpisodeIcon(tmdbEpisodeDto) != null">{{getEpisodeIcon(tmdbEpisodeDto)}}</mat-icon>
     </span>
 
   </p>
