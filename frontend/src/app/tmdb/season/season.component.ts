@@ -3,9 +3,13 @@ import {TmdbSeasonDto} from "../../shared/dto/tmdb/TmdbSeasonDto";
 import {SearchService} from "../../search/search.service";
 import {TmdbEpisodeDto} from "../../shared/dto/tmdb/TmdbEpisodeDto";
 import {TmdbSeriesDetailDto} from "../../shared/dto/tmdb/TmdbSeriesDetailDto";
-import {DirectoryDto} from "../../shared/dto/directory/DirectoryDto";
-import {FileHierarchyDto} from "../../shared/dto/directory/FileHierarchyDto";
-import {DirectoryService} from "../../directory/directory.service";
+import {LibraryService} from "../../library/library.service";
+import {TvLibrary} from "../../shared/dto/library/TvLibrary";
+import {Series} from "../../shared/dto/library/Series";
+import {DownloadStatus} from "../../shared/dto/library/DownloadStatus";
+import {Episode} from "../../shared/dto/library/Episode";
+import {Season} from "../../shared/dto/library/Season";
+import {AirStatus} from "../../shared/dto/library/AirStatus";
 
 @Component({
   selector: 'season',
@@ -19,14 +23,14 @@ export class SeasonComponent implements OnInit, OnChanges {
   public showEpisode: TmdbEpisodeDto;
 
   public episodes: TmdbEpisodeDto[];
-  private fileHierarchy: FileHierarchyDto;
+  private tvLibrary: TvLibrary;
 
   constructor(private searchService: SearchService,
-              private directoryService: DirectoryService) { }
+              private libraryService: LibraryService) { }
 
   ngOnInit() {
     this.getEpisodes();
-    this.updateFileHierarchy();
+    this.updateTvLibrary();
   }
 
   ngOnChanges() {
@@ -50,58 +54,64 @@ export class SeasonComponent implements OnInit, OnChanges {
   }
 
 
-  private updateFileHierarchy(): void {
-    this.directoryService.getFileHierarchyAsObservable().subscribe(fileHierarchy => {
-      this.fileHierarchy = fileHierarchy;
+
+  private updateTvLibrary(): void {
+    this.libraryService.getTvLibraryAsObservable().subscribe(tvLibrary => {
+      this.tvLibrary = tvLibrary;
     });
   }
 
   public isAlreadyDownloaded(episode: TmdbEpisodeDto): boolean {
-    if (this.fileHierarchy == null) {
+    const e = this.getEpisode(episode);
+    if (e == null) {
       return false;
     }
-    const foundSeries = this.fileHierarchy.seriesRootDirectoryDto.series.find(series => {
-      return series.name === this.seriesDetail.name.replace(/[^a-zA-Z0-9.\- ]/, "")
+    return e.downloadStatus == DownloadStatus.DOWNLOADED;
+  }
+
+
+  private getSeries(episode: TmdbEpisodeDto): Series {
+    if (this.tvLibrary == null) {
+      return null;
+    }
+    return this.tvLibrary.series.find(series => {
+      return series.seriesDetail.name === this.seriesDetail.name
     });
-
-    return this.seriesDirectoryHasThisEpisode(foundSeries, episode);
   }
-
-  notAiredYet(episode: TmdbEpisodeDto): boolean {
-    if (episode.air_date == null) {
-      return true;
-    }
-    let airDate = new Date(episode.air_date);
-    let currentDate = new Date();
-    return airDate.valueOf() > currentDate.valueOf();
-  }
-
-  private getEpisodeTitle(episode: TmdbEpisodeDto) {
-    let episodeTitle = "S";
-    if (episode.season_number < 10) {
-      episodeTitle += "0";
-    }
-    episodeTitle += episode.season_number.toString();
-    episodeTitle += this.getEpisodeButtonTitle(episode);
-
-    return episodeTitle;
-  }
-
-  private seriesDirectoryHasThisEpisode(series: DirectoryDto, episode: TmdbEpisodeDto): boolean {
+  private getSeason(episode: TmdbEpisodeDto): Season {
+    const series = this.getSeries(episode);
     if (series == null) {
-      return false;
+      return null;
+    }
+    return series.seasonList.find(season => {
+      return season.seasonNumber === episode.season_number;
+    });
+  }
+
+  public getEpisode(episode: TmdbEpisodeDto): Episode {
+    const season = this.getSeason(episode);
+    if (season == null) {
+      return null;
+    }
+    return season.episodeList.find(e => {
+      return e.episodeNumber == episode.episode_number;
+    });
+  }
+
+  getEpisodeIcon(tmdbEpisodeDto: TmdbEpisodeDto): string {
+    const episode = this.getEpisode(tmdbEpisodeDto);
+    if (episode == null) {
+      return null;
     }
 
-    const thisDirectoryHasEpisode = series.files.some(file => {
-      return file.name.toLowerCase().includes(this.getEpisodeTitle(episode).toLowerCase());
-    });
-
-    if (thisDirectoryHasEpisode) {
-      return true;
+    if (episode.downloadStatus == DownloadStatus.DOWNLOADED) {
+      return "done";
     }
-
-    return series.directories.some(subDirectory => {
-      return this.seriesDirectoryHasThisEpisode(subDirectory, episode);
-    });
+    if (episode.downloadStatus == DownloadStatus.DOWNLOADING) {
+      return "date_range"
+    }
+    if (episode.airStatus == AirStatus.NOT_AIRED) {
+      return "arrow_downward"
+    }
   }
 }
