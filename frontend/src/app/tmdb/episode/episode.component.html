@@ -4,8 +4,8 @@
     <mat-icon>date_range</mat-icon>{{tmdbEpisodeDto.air_date}}
 
   </p>
-  <p *ngIf="alreadyDownloaded">
-    <mat-icon>archive</mat-icon> Downloaded
+  <p *ngIf="hasDownloadStatus()">
+    <mat-icon>archive</mat-icon> {{getDownloadText()}}
   </p>
   <p class="overview">
     {{tmdbEpisodeDto.overview}}
