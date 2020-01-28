@@ -9,7 +9,6 @@ import {Series} from "../../shared/dto/library/Series";
 import {DownloadStatus} from "../../shared/dto/library/DownloadStatus";
 import {Episode} from "../../shared/dto/library/Episode";
 import {Season} from "../../shared/dto/library/Season";
-import {AirStatus} from "../../shared/dto/library/AirStatus";
 
 @Component({
   selector: 'season',
@@ -58,15 +57,12 @@ export class SeasonComponent implements OnInit, OnChanges {
   private updateTvLibrary(): void {
     this.libraryService.getTvLibraryAsObservable().subscribe(tvLibrary => {
       this.tvLibrary = tvLibrary;
+      console.log(this.tvLibrary);
     });
   }
 
   public isAlreadyDownloaded(episode: TmdbEpisodeDto): boolean {
-    const e = this.getEpisode(episode);
-    if (e == null) {
-      return false;
-    }
-    return e.downloadStatus == DownloadStatus.DOWNLOADED;
+    return this.getDownloadStatus(episode) == DownloadStatus.DOWNLOADED;
   }
 
 
@@ -78,6 +74,7 @@ export class SeasonComponent implements OnInit, OnChanges {
       return series.seriesDetail.name === this.seriesDetail.name
     });
   }
+
   private getSeason(episode: TmdbEpisodeDto): Season {
     const series = this.getSeries(episode);
     if (series == null) {
@@ -88,30 +85,44 @@ export class SeasonComponent implements OnInit, OnChanges {
     });
   }
 
-  public getEpisode(episode: TmdbEpisodeDto): Episode {
-    const season = this.getSeason(episode);
+  public getEpisode(tmdbEpisodeDto: TmdbEpisodeDto): Episode {
+    const season = this.getSeason(tmdbEpisodeDto);
     if (season == null) {
       return null;
     }
-    return season.episodeList.find(e => {
-      return e.episodeNumber == episode.episode_number;
+    return season.episodeList.find(episode => {
+      return episode.episodeNumber == tmdbEpisodeDto.episode_number;
     });
   }
 
-  getEpisodeIcon(tmdbEpisodeDto: TmdbEpisodeDto): string {
+  static notAiredYet(episode: TmdbEpisodeDto): boolean {
+    if (episode.air_date == null) {
+      return true;
+    }
+    let airDate = new Date(episode.air_date);
+    let currentDate = new Date();
+    return airDate.valueOf() > currentDate.valueOf();
+  }
+
+  getDownloadStatus(tmdbEpisodeDto: TmdbEpisodeDto): DownloadStatus {
     const episode = this.getEpisode(tmdbEpisodeDto);
     if (episode == null) {
       return null;
     }
 
-    if (episode.downloadStatus == DownloadStatus.DOWNLOADED) {
-      return "done";
+    return episode.downloadStatus;
+  }
+
+
+  getEpisodeIcon(tmdbEpisodeDto: TmdbEpisodeDto): string {
+    if (SeasonComponent.notAiredYet(tmdbEpisodeDto)) {
+      return "date_range";
     }
-    if (episode.downloadStatus == DownloadStatus.DOWNLOADING) {
-      return "date_range"
-    }
-    if (episode.airStatus == AirStatus.NOT_AIRED) {
-      return "arrow_downward"
+
+    switch (this.getDownloadStatus(tmdbEpisodeDto)) {
+      case DownloadStatus.DOWNLOADED: return "done";
+      case DownloadStatus.DOWNLOADING: return "arrow_downward";
+      default: return null;
     }
   }
 }
