@@ -19,7 +19,7 @@ public class Season {
 
     public Season(TmdbSeasonDto tmdbSeasonDto, TmdbEpisodeDto[] tmdbEpisodeDtos, DirectoryDto seasonDirectory, Set<DownloadDto> downloadDtoSet) {
         this.tmdbSeasonDto = tmdbSeasonDto;
-        this.seasonNumber = tmdbSeasonDto.getSeason_number();
+        this.seasonNumber = tmdbSeasonDto != null ? tmdbSeasonDto.getSeason_number() : -1;
 
         for (TmdbEpisodeDto tmdbEpisodeDto : tmdbEpisodeDtos) {
             DownloadDto episodeDownloadDto = getDownloadDtoForEpisode(downloadDtoSet, tmdbEpisodeDto);
