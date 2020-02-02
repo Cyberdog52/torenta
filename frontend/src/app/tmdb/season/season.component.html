@@ -15,7 +15,7 @@
     </span>
 
   </p>
-  <episode [tmdbEpisodeDto]="showEpisode" [seriesDetail]="seriesDetail" [alreadyDownloaded]="isAlreadyDownloaded(showEpisode)" *ngIf="showEpisode"></episode>
+  <episode [tmdbEpisodeDto]="showEpisode" [seriesDetail]="seriesDetail" [downloadStatus]="getDownloadStatus(showEpisode)" *ngIf="showEpisode"></episode>
 </div>
 
 
