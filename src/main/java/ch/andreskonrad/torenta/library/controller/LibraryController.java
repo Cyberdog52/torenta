@@ -27,7 +27,7 @@ public class LibraryController {
         try {
             tvLibrary = this.libraryService.getTvLibrary();
         } catch (Exception exception) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return new ResponseEntity<>(tvLibrary, HttpStatus.OK);
     }
