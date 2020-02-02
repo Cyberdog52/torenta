@@ -59,8 +59,6 @@ export class SeriesDetailComponent implements OnInit {
     return "S" + season.season_number.toString();
   }
 
-
-
   isPartiallyDownloaded(season: TmdbSeasonDto): boolean {
     if (this.fileHierarchy == null) {
       return false;
