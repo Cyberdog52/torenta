@@ -6,6 +6,8 @@ import {DownloadRequest} from "../../shared/dto/torrent/DownloadRequest";
 import {TmdbEpisodeDto} from "../../shared/dto/tmdb/TmdbEpisodeDto";
 import {TmdbSeriesDetailDto} from "../../shared/dto/tmdb/TmdbSeriesDetailDto";
 import {DownloadDto} from "../../shared/dto/torrent/DownloadDto";
+import {NotificationService} from "../../shared/notification/notification.service";
+import {NotificationType} from "../../shared/dto/notification/Notification";
 
 @Component({
   selector: 'torrent-suggestions',
@@ -22,7 +24,9 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
   downloadDtos: DownloadDto[] = [];
 
   constructor(private pirateBayService: PirateBayService,
-              private torrentService: TorrentService) { }
+              private torrentService: TorrentService,
+              private notificationService: NotificationService) {
+  }
 
   ngOnInit() {
     this.updateDownloadDtos();
@@ -40,7 +44,7 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
   }
 
   private getSuggestions() {
-    const selectedSearchString = this.searchString ? this.searchString: this.createSearchString();
+    const selectedSearchString = this.searchString ? this.searchString : this.createSearchString();
     this.pirateBayService.searchPirateBay(selectedSearchString).subscribe(suggestions => {
       //only save new suggestions if the user did not already search for another string
       if (this.searchString == null || selectedSearchString == this.searchString) {
@@ -62,6 +66,10 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
     };
     this.torrentService.startTorrent(downloadRequest).subscribe(response => {
       console.log("Torrent started for downloadRequest ", downloadRequest);
+      this.notificationService.addNotifications({
+        content: `started downloading ${downloadRequest.seriesDetail.name} S${downloadRequest.tmdbEpisodeDto.season_number}E${downloadRequest.tmdbEpisodeDto.episode_number}`,
+        type: NotificationType.INFO
+      })
     });
   }
 
@@ -69,7 +77,7 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
     return this.seriesDetail.name + " " + this.getEpisodeString();
   }
 
-  getEpisodeString() : string{
+  getEpisodeString(): string {
     let episodeStr = "S";
     if (this.tmdbEpisodeDto.season_number < 10) {
       episodeStr += "0";
@@ -88,7 +96,9 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
   }
 
   hasStartedDownload(pirateBayEntry: PirateBayEntry): boolean {
-    return this.downloadDtos.some(downloadDto => {return downloadDto.downloadRequest.pirateBayEntry.magnetLink == pirateBayEntry.magnetLink})
+    return this.downloadDtos.some(downloadDto => {
+      return downloadDto.downloadRequest.pirateBayEntry.magnetLink == pirateBayEntry.magnetLink
+    })
   }
 
   hasFullyDownloaded(pirateBayEntry: PirateBayEntry): boolean {

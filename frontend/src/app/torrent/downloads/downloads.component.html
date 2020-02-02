@@ -6,7 +6,7 @@
         <mat-list-item *ngFor="let downloadDto of downloadDtos">
           <p class="download_title"> {{getDownloadTitle(downloadDto)}} {{getEpisodeString(downloadDto)}}</p>
           <mat-progress-bar [mode]="determinate" [value]="downloadDto.progress * 100"></mat-progress-bar>
-          <p>{{getProgessString(downloadDto)}}</p>
+          <p>{{getProgressString(downloadDto)}}</p>
         </mat-list-item>
       </mat-list>
       <p *ngIf="downloadDtos.length == 0"> Downloads will be shown here</p>
