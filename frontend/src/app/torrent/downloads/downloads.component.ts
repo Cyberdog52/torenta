@@ -27,7 +27,7 @@ export class DownloadsComponent implements OnInit {
       downloadDtos.forEach(updatedDto => {
         if (updatedDto.state === "FINISHED" && this.stateChanged(this.downloadDtos, updatedDto)) {
           this.notificationService.addNotifications({
-            content: `${this.getEpisodeString(updatedDto)} successfully downloaded`,
+            content: `${this.getDownloadTitle(updatedDto)} ${this.getEpisodeString(updatedDto)} successfully downloaded.`,
             type: NotificationType.INFO
           })
         }
