@@ -67,7 +67,7 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
     this.torrentService.startTorrent(downloadRequest).subscribe(response => {
       console.log("Torrent started for downloadRequest ", downloadRequest);
       this.notificationService.addNotifications({
-        content: `started downloading ${downloadRequest.seriesDetail.name} S${downloadRequest.tmdbEpisodeDto.season_number}E${downloadRequest.tmdbEpisodeDto.episode_number}`,
+        content: `Started downloading ${downloadRequest.seriesDetail.name} S${downloadRequest.tmdbEpisodeDto.season_number}E${downloadRequest.tmdbEpisodeDto.episode_number}`,
         type: NotificationType.INFO
       })
     });
