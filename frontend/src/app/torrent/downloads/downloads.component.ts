@@ -38,7 +38,8 @@ export class DownloadsComponent implements OnInit {
 
   private stateChanged(existingDownloadDtos, updatedDto) {
     let existingDto = existingDownloadDtos.find(existing => existing.id == updatedDto.id);
-    return existingDto !== null ? existingDto.state != updatedDto.state : false;
+    if (existingDto == null || updatedDto == null) return false;
+    return existingDto.state != updatedDto.state;
   }
 
   downloadsLoaded() {
