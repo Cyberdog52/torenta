@@ -99,7 +99,7 @@ class DefaultDataDescriptor implements DataDescriptor {
                         throw new IllegalStateException("Failed to initialize storage unit: " + unit);
                     }
                 } catch (Exception e) {
-                    LOGGER.warn("Failed to create empty storage unit: " + unit, e);
+                    LOGGER.warn("Failed to create empty storage unit: {}. Exception: {}", unit, e.toString());
                 }
             }
         }

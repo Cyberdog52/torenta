@@ -70,7 +70,7 @@ public class InitializeMagnetTorrentProcessingStage extends InitializeTorrentPro
                 peersUpdated.add(peer);
                 statistics.addBitfield(peer, new Bitfield(bitfieldBytes, BitOrder.LITTLE_ENDIAN, statistics.getPiecesTotal()));
             } catch (Exception e) {
-                LOGGER.warn("Error happened when processing peer's bitfield", e);
+                LOGGER.warn("Error happened when processing peer's bitfield: {}", e.toString());
             }
         });
         context.getBitfieldConsumer().getHaves().forEach((peer, pieces) -> {
@@ -78,7 +78,7 @@ public class InitializeMagnetTorrentProcessingStage extends InitializeTorrentPro
                 peersUpdated.add(peer);
                 pieces.forEach(piece -> statistics.addPiece(peer, piece));
             } catch (Exception e) {
-                LOGGER.warn("Error happened when processing peer's haves", e);
+                LOGGER.warn("Error happened when processing peer's haves: {}", e.toString());
             }
         });
         peersUpdated.forEach(peer -> {

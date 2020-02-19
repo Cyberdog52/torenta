@@ -123,7 +123,7 @@ public class TrackerAnnouncer {
         }
 
         if (e.isPresent()) {
-            LOGGER.warn(log, e.get());
+            LOGGER.warn(log, e.get().toString());
         } else {
             LOGGER.warn(log);
         }

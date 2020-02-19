@@ -86,10 +86,8 @@ public class PieceConsumer {
             disposeOfBlock(piece);
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace(
-                        "Discarding received block because the chunk is already complete and/or verified: " +
-                        "piece index {" + piece.getPieceIndex() + "}, " +
-                        "offset {" + piece.getOffset() + "}, " +
-                        "length {" + piece.getLength() + "}");
+                        "Discarding received block because the chunk is already complete and/or verified: Piece index {}. Offset {}. Length {}",
+                        piece.getPieceIndex() ,piece.getOffset() ,piece.getLength());
             }
             return;
         }
@@ -100,9 +98,9 @@ public class PieceConsumer {
         } else {
             future.whenComplete((block, error) -> {
                 if (error != null) {
-                    LOGGER.warn("Failed to perform request to write block", error);
+                    LOGGER.warn("Failed to perform request to write block: {}", error.toString());
                 } else if (block.getError().isPresent()) {
-                    LOGGER.warn("Failed to perform request to write block", block.getError().get());
+                    LOGGER.warn("Failed to perform request to write block: {}", block.getError().get().toString());
                 }
                 if (block.isRejected()) {
                     if (LOGGER.isTraceEnabled()) {
@@ -110,20 +108,19 @@ public class PieceConsumer {
                     }
                 } else {
                     Optional<CompletableFuture<Boolean>> verificationFuture = block.getVerificationFuture();
-                    if (verificationFuture.isPresent()) {
-                        verificationFuture.get().whenComplete((verified, error1) -> {
-                            if (error1 != null) {
-                                LOGGER.warn("Failed to verify piece index {" + piece.getPieceIndex() + "}", error1);
-                            } else if (verified) {
-                                completedPieces.add(piece.getPieceIndex());
-                                eventSink.firePieceVerified(context.getTorrentId(), piece.getPieceIndex());
-                            } else {
-                                LOGGER.warn("Failed to verify piece index {" + piece.getPieceIndex() + "}." +
-                                        " No error has been provided by I/O worker," +
-                                        " which means that the data itself might have been corrupted. Will re-download.");
-                            }
-                        });
-                    }
+                    verificationFuture.ifPresent(booleanCompletableFuture -> booleanCompletableFuture.whenComplete((verified, error1) -> {
+                        if (error1 != null) {
+                            LOGGER.warn("Failed to verify piece index {}. Exception: {}", piece.getPieceIndex(), error1.toString());
+                        } else if (verified) {
+                            completedPieces.add(piece.getPieceIndex());
+                            eventSink.firePieceVerified(context.getTorrentId(), piece.getPieceIndex());
+                        } else {
+                            LOGGER.warn("Failed to verify piece index {}." +
+                                    " No error has been provided by I/O worker, " +
+                                    "which means that the data itself might have been corrupted. " +
+                                    "Will re-download.", piece.getPieceIndex());
+                        }
+                    }));
                 }
             });
         }

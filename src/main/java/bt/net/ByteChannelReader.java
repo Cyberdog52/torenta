@@ -76,7 +76,7 @@ public class ByteChannelReader {
         this.limit = limit;
     }
 
-    public int sync(ByteBuffer buf, byte[] syncToken) throws IOException {
+    public int sync(ByteBuffer buf, byte[] syncToken) throws IOException, IllegalArgumentException {
         ensureSufficientSpace(buf);
         if (syncToken.length == 0) {
             throw new IllegalArgumentException("Empty synchronization token");

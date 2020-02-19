@@ -61,7 +61,7 @@ public class SocketChannelHandler implements ChannelHandler {
     }
 
     @Override
-    public void send(Message message) {
+    public void send(Message message) throws IllegalStateException {
         if (!context.pipeline().encode(message)) {
             flush();
             if (!context.pipeline().encode(message)) {
@@ -82,7 +82,7 @@ public class SocketChannelHandler implements ChannelHandler {
             return processInboundData();
         } catch (Exception e) {
             shutdown();
-            throw new RuntimeException("Unexpected error", e);
+            return false;
         }
     }
 
@@ -147,7 +147,6 @@ public class SocketChannelHandler implements ChannelHandler {
             } catch (IOException e) {
                 outboundBuffer.unlock(); // can't use finally block due to possibility of double-unlock
                 shutdown();
-                throw new RuntimeException("Unexpected I/O error", e);
             }
         }
     }
@@ -166,7 +165,7 @@ public class SocketChannelHandler implements ChannelHandler {
             try {
                 unregister();
             } catch (Exception e) {
-                LOGGER.warn("Failed to unregister channel", e);
+                LOGGER.warn("Failed to unregister channel: {}", e.toString());
             }
             closeChannel();
             releaseBuffers();
@@ -177,7 +176,7 @@ public class SocketChannelHandler implements ChannelHandler {
         try {
             channel.close();
         } catch (IOException e) {
-            LOGGER.warn("Failed to close channel", e);
+            LOGGER.warn("Failed to close channel: {}", e.toString());
         }
     }
 
@@ -190,7 +189,7 @@ public class SocketChannelHandler implements ChannelHandler {
         try {
             buffer.release();
         } catch (Exception e) {
-            LOGGER.warn("Failed to release buffer", e);
+            LOGGER.warn("Failed to release buffer: {}", e.toString());
         }
     }
 

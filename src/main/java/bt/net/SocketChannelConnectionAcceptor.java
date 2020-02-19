@@ -72,7 +72,7 @@ public class SocketChannelConnectionAcceptor implements PeerConnectionAcceptor {
     }
 
     @Override
-    public ConnectionRoutine accept() {
+    public ConnectionRoutine accept() throws RuntimeException {
         ServerSocketChannel serverChannel;
         SocketAddress localAddress;
         try {
@@ -93,7 +93,7 @@ public class SocketChannelConnectionAcceptor implements PeerConnectionAcceptor {
                     try {
                         remoteAddress = channel.getRemoteAddress();
                     } catch (IOException e) {
-                        LOGGER.warn("Failed to establish incoming connection", e);
+                        LOGGER.warn("Failed to establish incoming connection: " + e.toString());
                     }
                 }
             } while (channel == null || remoteAddress == null);
@@ -140,7 +140,7 @@ public class SocketChannelConnectionAcceptor implements PeerConnectionAcceptor {
                 try {
                     incomingChannel.close();
                 } catch (IOException e) {
-                    LOGGER.warn("Failed to close incoming channel: " + remoteAddress, e);
+                    LOGGER.warn("Failed to close incoming channel: {}. Exception: {}", remoteAddress, e.toString());
                 }
             }
         };
@@ -152,7 +152,7 @@ public class SocketChannelConnectionAcceptor implements PeerConnectionAcceptor {
             Peer peer = InetPeer.builder(address).build();
             return connectionFactory.createIncomingConnection(peer, incomingChannel);
         } catch (Exception e) {
-            LOGGER.warn("Failed to establish incoming connection from peer: " + remoteAddress, e);
+            LOGGER.warn("Failed to establish incoming connection from peer: " + remoteAddress + ", Exception: " + e.toString());
             try {
                 incomingChannel.close();
             } catch (IOException e1) {

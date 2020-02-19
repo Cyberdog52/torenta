@@ -128,9 +128,9 @@ public class MagnetUriParser {
                 builder.peer(parsePeer(value));
             } catch (Exception e) {
                 if (lenient) {
-                    LOGGER.warn("Failed to parse peer address: " + value, e);
+                    LOGGER.warn("Failed to parse peer address: {}. Exception: {}", value, e.toString());
                 } else {
-                    throw new RuntimeException("Failed to parse peer address: " + value, e);
+                    throw new RuntimeException("Failed to parse peer address: " + value + ". Exception: " + e.toString());
                 }
             }
         });

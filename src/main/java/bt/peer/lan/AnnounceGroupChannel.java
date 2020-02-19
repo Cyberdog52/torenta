@@ -151,7 +151,7 @@ public class AnnounceGroupChannel {
                     channel.close();
                 }
             } catch (IOException e) {
-                LOGGER.warn("Failed to close channel", e);
+                LOGGER.warn("Failed to close channel: {}", e.toString());
             } finally {
                 channel = null;
             }

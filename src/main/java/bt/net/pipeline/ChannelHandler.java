@@ -28,7 +28,7 @@ public interface ChannelHandler {
     /**
      * @since 1.6
      */
-    void send(Message message);
+    void send(Message message) throws IllegalStateException;
 
     /**
      * @return Message or null, if there are no incoming messages

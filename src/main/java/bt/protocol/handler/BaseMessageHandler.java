@@ -40,7 +40,7 @@ import static bt.protocol.StandardBittorrentProtocol.MESSAGE_TYPE_SIZE;
 public abstract class BaseMessageHandler<T extends Message> implements MessageHandler<T> {
 
     @Override
-    public boolean encode(EncodingContext context, T message, ByteBuffer buffer) {
+    public boolean encode(EncodingContext context, T message, ByteBuffer buffer) throws IllegalStateException {
 
         if (buffer.remaining() < MESSAGE_PREFIX_SIZE) {
             return false;
@@ -79,7 +79,7 @@ public abstract class BaseMessageHandler<T extends Message> implements MessageHa
      * @return true if message has been successfully encoded and fully written into the provided buffer
      * @since 1.3
      */
-    protected abstract boolean doEncode(EncodingContext context, T message, ByteBuffer buffer);
+    protected abstract boolean doEncode(EncodingContext context, T message, ByteBuffer buffer) throws IllegalStateException;
 
     @Override
     public int decode(DecodingContext context, ByteBufferView buffer) {
