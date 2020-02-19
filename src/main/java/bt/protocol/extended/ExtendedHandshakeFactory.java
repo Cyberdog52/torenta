@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -105,17 +106,17 @@ public class ExtendedHandshakeFactory implements IExtendedHandshakeFactory {
                 builder.property(UT_METADATA_SIZE_PROPERTY, new BEInteger(null, BigInteger.valueOf(metadataSize)));
             });
         } catch (Exception e) {
-            LOGGER.warn("Failed to get metadata size for torrent ID: " + torrentId, e);
+            LOGGER.warn("Failed to get metadata size for torrent ID: {}. Exception: {}", torrentId, e.toString());
         }
 
         String version;
         try {
             version = getVersion();
         } catch (Exception e) {
-            LOGGER.warn("Failed to get version", e);
+            LOGGER.warn("Failed to get version: {}", e.toString());
             version = getDefaultVersion();
         }
-        builder.property(VERSION_PROPERTY, new BEString(version.getBytes(Charset.forName("UTF-8"))));
+        builder.property(VERSION_PROPERTY, new BEString(version.getBytes(StandardCharsets.UTF_8)));
 
         messageTypeMapping.visitMappings(builder::addMessageType);
         return builder.build();

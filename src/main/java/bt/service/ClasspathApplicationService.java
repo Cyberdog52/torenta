@@ -37,7 +37,7 @@ import java.util.regex.Pattern;
  * by testing if 'Bundle-SymbolicName' attribute is present in the manifest
  * and if its' value starts with 'com.github.atomashpolskiy.bt'.</p>
  *
- *<p><b>Note that this class implements a service.
+ * <p><b>Note that this class implements a service.
  * Hence, is not a part of the public API and is a subject to change.</b></p>
  */
 public class ClasspathApplicationService implements ApplicationService {
@@ -82,7 +82,7 @@ public class ClasspathApplicationService implements ApplicationService {
                 }
             } catch (Throwable e) {
                 if (LOGGER.isDebugEnabled()) {
-                    LOGGER.debug("Failed to read manifest file: " + url.toExternalForm(), e);
+                    LOGGER.debug("Failed to read manifest file: {}. Exception: {}", url.toExternalForm(), e.toString());
                 }
             }
         }

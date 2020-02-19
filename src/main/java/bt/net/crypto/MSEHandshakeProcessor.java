@@ -119,7 +119,7 @@ public class MSEHandshakeProcessor {
         this.protocol = protocol;
     }
 
-    public Optional<MSECipher> negotiateOutgoing(Peer peer, ByteChannel channel, TorrentId torrentId, ByteBuffer in, ByteBuffer out) throws IOException {
+    public Optional<MSECipher> negotiateOutgoing(Peer peer, ByteChannel channel, TorrentId torrentId, ByteBuffer in, ByteBuffer out) throws IOException, IllegalArgumentException {
         if (mseDisabled) {
             return Optional.empty();
         }

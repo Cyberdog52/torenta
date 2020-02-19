@@ -215,7 +215,7 @@ public class EventBus implements EventSink, EventSource {
                 try {
                     listener.accept(event);
                 } catch (Exception ex) {
-                    LOGGER.warn("Listener invocation failed", ex);
+                    LOGGER.warn("Listener invocation failed. Exception: " +  ex.toString());
                 }
             };
             listeners.add(safeListener);

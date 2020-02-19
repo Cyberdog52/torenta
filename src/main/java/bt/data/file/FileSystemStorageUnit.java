@@ -206,7 +206,7 @@ class FileSystemStorageUnit implements StorageUnit {
             try {
                 sbc.close();
             } catch (IOException e) {
-                LOGGER.warn("Failed to close file: " + file, e);
+                LOGGER.warn("Failed to close file: {}. Exception: {} ", file, e.toString());
             } finally {
                 closed = true;
             }

@@ -134,7 +134,7 @@ class MultiTracker implements Tracker {
                             return response;
                         } else if (response.getError().isPresent()) {
                             Throwable e = response.getError().get();
-                            LOGGER.warn("Unexpected error during interaction with the tracker: " + currentTracker, e);
+                            LOGGER.warn("Unexpected error during interaction with the tracker: {}. Exception: {}", currentTracker, e.toString());
                         } else {
                             LOGGER.warn("Unexpected error during interaction with the tracker: " + currentTracker +
                                     "; message: " + response.getErrorMessage());

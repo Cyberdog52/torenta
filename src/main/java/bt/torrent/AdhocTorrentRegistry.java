@@ -76,19 +76,9 @@ public class AdhocTorrentRegistry implements TorrentRegistry {
     }
 
     @Override
-    public Optional<TorrentDescriptor> getDescriptor(Torrent torrent) {
-        return Optional.ofNullable(descriptors.get(torrent.getTorrentId()));
-    }
-
-    @Override
     public Optional<TorrentDescriptor> getDescriptor(TorrentId torrentId) {
         Objects.requireNonNull(torrentId, "Missing torrent ID");
         return Optional.ofNullable(descriptors.get(torrentId));
-    }
-
-    @Override
-    public TorrentDescriptor getOrCreateDescriptor(Torrent torrent, Storage storage) {
-        return register(torrent, storage);
     }
 
     @Override

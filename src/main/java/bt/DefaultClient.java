@@ -61,7 +61,7 @@ class DefaultClient<C extends ProcessingContext> implements BtClient {
     }
 
     @Override
-    public synchronized CompletableFuture<?> startAsync(Consumer<TorrentSessionState> listener, long period) {
+    public synchronized CompletableFuture<?> startAsync(Consumer<TorrentSessionState> listener, long period) throws BtException {
         if (futureOptional.isPresent()) {
             throw new BtException("Can't start -- already running");
         }
@@ -84,7 +84,7 @@ class DefaultClient<C extends ProcessingContext> implements BtClient {
     }
 
     @Override
-    public synchronized CompletableFuture<?> startAsync() {
+    public synchronized CompletableFuture<?> startAsync() throws BtException {
         if (futureOptional.isPresent()) {
             throw new BtException("Can't start -- already running");
         }

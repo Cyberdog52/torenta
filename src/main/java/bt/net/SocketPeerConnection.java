@@ -161,7 +161,7 @@ public class SocketPeerConnection implements PeerConnection {
         try {
             close();
         } catch (IOException e) {
-            LOGGER.warn("Failed to close connection for peer: " + getPeerString(), e);
+            LOGGER.warn("Failed to close connection for peer: {}. Exception: {}", getPeerString(), e.toString());
         }
     }
 

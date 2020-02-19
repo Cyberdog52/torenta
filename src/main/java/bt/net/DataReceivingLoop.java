@@ -121,7 +121,7 @@ public class DataReceivingLoop implements Runnable, DataReceiver {
                             // selector has been closed, there's no point to continue processing
                             throw e;
                         } catch (Exception e) {
-                            LOGGER.warn("Failed to process key", e);
+                            LOGGER.warn("Failed to process key. Exception: " + e.toString());
                             selectedKeys.remove();
                         }
                     }
@@ -156,7 +156,7 @@ public class DataReceivingLoop implements Runnable, DataReceiver {
                 selector.keyFor(entry.getKey())
                         .ifPresent(key -> key.interestOps(interestOps));
             } catch (Exception e) {
-                LOGGER.warn("Failed to set interest ops for channel " + channel + " to " + interestOps, e);
+                LOGGER.warn("Failed to set interest ops for channel {} to {}. Exception: {}",  channel, interestOps, e.toString());
             } finally {
                 iter.remove();
             }

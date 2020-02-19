@@ -58,8 +58,8 @@ public class TmdbService {
             return new ObjectMapper()
                     .readValue(jsonStringResponse, TmdbSeasonDto.class)
                     .getEpisodes();
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (Throwable t) {
+            t.printStackTrace();
             return new TmdbEpisodeDto[0];
         }
     }

@@ -59,7 +59,7 @@ public class IncomingConnectionListener {
                         try {
                             connectionRoutine = acceptor.accept();
                         } catch (Exception e) {
-                            LOGGER.warn("Unexpected error", e);
+                            LOGGER.warn("Could not accept connection " + e.toString());
                             return;
                         }
 

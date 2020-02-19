@@ -61,9 +61,9 @@ public class PeerRequestConsumer {
         if (!connectionState.isChoking()) {
             addBlockRequest(context.getPeer(), request).whenComplete((block, error) -> {
                 if (error != null) {
-                    LOGGER.warn("Failed to perform request to read block", error);
+                    LOGGER.warn("Failed to perform request to read block: " + error.toString());
                 } else if (block.getError().isPresent()) {
-                    LOGGER.warn("Failed to perform request to read block", block.getError().get());
+                    LOGGER.warn("Failed to perform request to read block: " + block.getError().get().toString());
                 } else if (block.isRejected()) {
                     LOGGER.warn("Failed to perform request to read block: rejected by I/O worker");
                 } else {

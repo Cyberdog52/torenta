@@ -128,7 +128,7 @@ public class MetadataConsumer {
                     try {
                         fetchedTorrent = metadataService.fromByteArray(metadata.getBytes());
                     } catch (Exception e) {
-                        LOGGER.warn("Processing of metadata failed: " + torrentId, e);
+                        LOGGER.warn("Processing of metadata failed: {}. Exception: {}", torrentId, e.toString());
                         metadata = null;
                     }
 

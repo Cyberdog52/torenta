@@ -160,7 +160,7 @@ public class MessageDispatcher implements IMessageDispatcher {
                             try {
                                 message = connection.readMessageNow();
                             } catch (Exception ex) {
-                                LOGGER.warn("Error when reading message from peer connection: " + connectionKey.getPeer(), ex);
+                                LOGGER.warn("Error when reading message from peer connection: " + connectionKey.getPeer() + " error: " + ex.toString());
                                 break;
                             }
 
@@ -173,7 +173,7 @@ public class MessageDispatcher implements IMessageDispatcher {
                                 try {
                                     consumer.accept(message);
                                 } catch (Exception ex) {
-                                    LOGGER.warn("Error in message consumer", ex);
+                                    LOGGER.warn("Error in message consumer " + ex.toString());
                                 }
                             }
                         }
@@ -207,7 +207,7 @@ public class MessageDispatcher implements IMessageDispatcher {
                             try {
                                 message = messageSupplier.get();
                             } catch (Exception ex) {
-                                LOGGER.warn("Error in message supplier", ex);
+                                LOGGER.warn("Error in message supplier " +  ex.toString());
                                 continue;
                             }
 
@@ -219,7 +219,7 @@ public class MessageDispatcher implements IMessageDispatcher {
                             try {
                                 connection.postMessage(message);
                             } catch (Exception ex) {
-                                LOGGER.warn("Error when writing message", ex);
+                                LOGGER.warn("Error when writing message " + ex.toString());
                             }
                         }
                     }
@@ -265,7 +265,8 @@ public class MessageDispatcher implements IMessageDispatcher {
                 try {
                     wait(timeToSleep);
                 } catch (InterruptedException e) {
-                    throw new RuntimeException("Unexpectedly interrupted", e);
+                    //will be interrupted once download finishes
+                    //throw new RuntimeException("Unexpectedly interrupted", e);
                 }
 
                 if (timeToSleep < maxTimeToSleep) {

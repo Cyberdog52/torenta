@@ -98,7 +98,7 @@ public class PeerConnectionFactory implements IPeerConnectionFactory {
         } catch (IOException e) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Failed to establish connection with peer: {}. Reason: {} ({})",
-                        peer, e.getClass().getName(), e.getMessage());
+                        peer, e.getClass().getName(), e.toString());
             }
             return ConnectionResult.failure("I/O error", e);
         }
@@ -129,7 +129,7 @@ public class PeerConnectionFactory implements IPeerConnectionFactory {
         } catch (Exception e) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Failed to establish connection with peer: {}. Reason: {} ({})",
-                        peer, e.getClass().getName(), e.getMessage());
+                        peer, e.getClass().getName(), e.toString());
             }
             closeQuietly(channel);
             releaseBuffer(in);
@@ -261,7 +261,7 @@ public class PeerConnectionFactory implements IPeerConnectionFactory {
         try {
             buffer.release();
         } catch (Exception e) {
-            LOGGER.warn("Failed to release buffer", e);
+            LOGGER.warn("Failed to release buffer: " + e.toString());
         }
     }
 }

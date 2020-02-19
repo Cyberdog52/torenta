@@ -58,30 +58,10 @@ public interface TorrentRegistry {
      * Get a torrent descriptor for a given torrent, if exists.
      *
      * @return {@link Optional#empty()} if torrent descriptor hasn't been created yet.
-     * @since 1.0
-     * @deprecated since 1.3 in favor of {@link #getDescriptor(TorrentId)}
-     */
-    Optional<TorrentDescriptor> getDescriptor(Torrent torrent);
-
-    /**
-     * Get a torrent descriptor for a given torrent, if exists.
-     *
-     * @return {@link Optional#empty()} if torrent descriptor hasn't been created yet.
      * @since 1.3
      */
     Optional<TorrentDescriptor> getDescriptor(TorrentId torrentId);
 
-    /**
-     * Get an existing torrent descriptor for a given torrent
-     * or create a new one if it does not exist.
-     *
-     * @param storage Storage to use for storing this torrent's files.
-     *                Will be used when creating a new torrent descriptor.
-     * @return Torrent descriptor
-     * @since 1.0
-     * @deprecated since 1.3 in favor of more clearly named {@link #register(Torrent, Storage)}
-     */
-    TorrentDescriptor getOrCreateDescriptor(Torrent torrent, Storage storage);
 
     /**
      * Get an existing torrent descriptor for a given torrent

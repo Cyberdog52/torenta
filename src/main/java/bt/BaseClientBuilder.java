@@ -101,7 +101,7 @@ public abstract class BaseClientBuilder<B extends BaseClientBuilder> {
      */
     protected abstract <C extends ProcessingContext> void collectStageListeners(ListenerSource<C> listenerSource);
 
-    private <C extends ProcessingContext> Processor<C> processor(BtRuntime runtime, Class<C> contextType) {
+    private <C extends ProcessingContext> Processor<C> processor(BtRuntime runtime, Class<C> contextType) throws IllegalStateException {
         Processor<C> processor = runtime.service(ProcessorFactory.class).processor(contextType);
         if (processor == null) {
             throw new IllegalStateException("No processors found for context type: " + contextType.getName());

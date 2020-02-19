@@ -60,7 +60,7 @@ class OutgoingHandshakeHandler implements ConnectionHandler {
         } catch (IOException e) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Failed to send handshake to peer: {}. Reason: {} ({})",
-                        peer, e.getClass().getName(), e.getMessage());
+                        peer, e.getClass().getName(), e.toString());
             }
             return false;
         }
@@ -71,7 +71,7 @@ class OutgoingHandshakeHandler implements ConnectionHandler {
         } catch (IOException e) {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Failed to receive handshake from peer: {}. Reason: {} ({})",
-                        peer, e.getClass().getName(), e.getMessage());
+                        peer, e.getClass().getName(), e.toString());
             }
         }
         if (firstMessage != null) {

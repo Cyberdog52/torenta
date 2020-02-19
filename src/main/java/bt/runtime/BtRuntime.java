@@ -160,7 +160,7 @@ public class BtRuntime {
     public void startup() {
         if (started.compareAndSet(false, true)) {
             synchronized (lock) {
-                runHooks(LifecycleEvent.STARTUP, e -> LOGGER.warn("Error on runtime startup", e));
+                runHooks(LifecycleEvent.STARTUP, e -> LOGGER.warn("Error on runtime startup: {}", e.toString()));
             }
         }
     }
@@ -220,7 +220,7 @@ public class BtRuntime {
                     try {
                         client.stop();
                     } catch (Throwable e) {
-                        LOGGER.warn("Error when stopping client", e);
+                        LOGGER.warn("Error when stopping client {}", e.toString());
                     }
                 });
 
@@ -296,7 +296,7 @@ public class BtRuntime {
             }
         } catch (InterruptedException e) {
             // ignore
-            LOGGER.warn("Interrupted while waiting for shutdown", e);
+            LOGGER.warn("Interrupted while waiting for shutdown: {}", e.toString());
             executor.shutdownNow();
         }
     }

@@ -148,7 +148,7 @@ public class ExtendedProtocol extends BaseMessageHandler<ExtendedMessage> {
     }
 
     @SuppressWarnings("unchecked")
-    private <T extends Message> boolean doEncode(EncodingContext context, Message message, Class<T> messageType, ByteBuffer buffer) {
+    private <T extends Message> boolean doEncode(EncodingContext context, Message message, Class<T> messageType, ByteBuffer buffer) throws IllegalStateException {
 
         if (!buffer.hasRemaining()) {
             return false;

@@ -126,7 +126,7 @@ public class ChainProcessor<C extends ProcessingContext> implements Processor<C>
                 // TODO: different listeners may return different next stages (including nulls)
                 next = listener.apply(context, next);
             } catch (Exception e) {
-                LOGGER.warn("Listener invocation failed", e);
+                LOGGER.warn("Listener invocation failed: {}", e.toString());
             }
         }
 
