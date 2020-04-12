@@ -1,15 +1,15 @@
 package ch.andreskonrad.torenta.bittorrent.dto;
 
-import ch.andreskonrad.torenta.piratebay.dto.PirateBayEntry;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbSeriesDetailDto;
+import ch.andreskonrad.torenta.torrent.dto.TorrentEntry;
 
 import java.util.Objects;
 
 public class DownloadRequest {
 
     private TmdbEpisodeDto tmdbEpisodeDto;
-    private PirateBayEntry pirateBayEntry;
+    private TorrentEntry torrentEntry;
     private TmdbSeriesDetailDto seriesDetail;
 
     //used for jackson
@@ -20,8 +20,8 @@ public class DownloadRequest {
         return tmdbEpisodeDto;
     }
 
-    public PirateBayEntry getPirateBayEntry() {
-        return pirateBayEntry;
+    public TorrentEntry getTorrentEntry() {
+        return torrentEntry;
     }
 
     public TmdbSeriesDetailDto getSeriesDetail() {
@@ -34,12 +34,12 @@ public class DownloadRequest {
         if (o == null || getClass() != o.getClass()) return false;
         DownloadRequest that = (DownloadRequest) o;
         return Objects.equals(tmdbEpisodeDto, that.tmdbEpisodeDto) &&
-                Objects.equals(pirateBayEntry, that.pirateBayEntry) &&
+                Objects.equals(torrentEntry, that.torrentEntry) &&
                 Objects.equals(seriesDetail, that.seriesDetail);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(tmdbEpisodeDto, pirateBayEntry, seriesDetail);
+        return Objects.hash(tmdbEpisodeDto, torrentEntry, seriesDetail);
     }
 }

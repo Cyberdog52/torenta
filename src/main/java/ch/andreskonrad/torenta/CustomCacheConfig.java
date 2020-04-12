@@ -14,7 +14,7 @@ import static javax.management.timer.Timer.ONE_HOUR;
 public class CustomCacheConfig {
 
     public static final String TMDB_CACHE_NAME = "tmdbSearch";
-    public static final String PIRATE_BAY_CACHE_NAME = "pirateBaySearch";
+    public static final String PIRATE_BAY_CACHE_NAME = "torrentSearch";
 
     //fully clear cache every hour
     @Scheduled(fixedRate = ONE_HOUR)

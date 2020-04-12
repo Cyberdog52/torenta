@@ -1,6 +1,5 @@
 import {Component, OnInit} from '@angular/core';
 import {SearchService} from "./search.service";
-import {PirateBayService} from "../torrent/piratebay.service";
 
 @Component({
   selector: 'search',
@@ -9,11 +8,11 @@ import {PirateBayService} from "../torrent/piratebay.service";
 })
 export class SearchComponent implements OnInit {
 
-  constructor(private searchService: SearchService, private pirateBayService: PirateBayService) { }
+  constructor(private searchService: SearchService) { }
 
   public searchTVString : string;
-  public searchPiratebayString: string;
-  public delayedPirateBaySearchString: string;
+  public searchTorrentString: string;
+  public delayedTorrentSearchString: string;
   public searchResult: TmdbSearchResultDto;
   public listOfOpenendPanels: number[] = [];
 
@@ -65,7 +64,7 @@ export class SearchComponent implements OnInit {
     return this.listOfOpenendPanels.includes(id, 0);
   }
 
-  public searchPiratebay() {
-    this.delayedPirateBaySearchString = this.searchPiratebayString;
+  public searchTorrent() {
+    this.delayedTorrentSearchString = this.searchTorrentString;
   }
 }
