@@ -1,30 +1,30 @@
-package ch.andreskonrad.torenta.piratebay.service;
+package ch.andreskonrad.torenta.torrent.service;
 
+import ch.andreskonrad.torenta.torrent.dto.TorrentEntry;
+import org.junit.Ignore;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import ch.andreskonrad.torenta.piratebay.dto.PirateBayEntry;
-import org.junit.Ignore;
-import org.junit.Test;
 
 import java.util.ArrayList;
 
 import static org.junit.Assert.assertTrue;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = PirateBayService.class)
+@SpringBootTest(classes = TorrentService.class)
 @EnableConfigurationProperties
-public class PirateBayServiceTest {
+public class TorrentServiceTest {
 
     @Autowired
-    private PirateBayService piratebayService;
+    private TorrentService torrentService;
 
     @Ignore
     @Test
-    public void manualSearch() throws PirateBaySearchException {
-        ArrayList<PirateBayEntry> entries = piratebayService.search("Walking Dead");
+    public void manualSearch() throws TorrentSearchException {
+        ArrayList<TorrentEntry> entries = torrentService.search("Walking Dead");
 
         assertTrue(entries.size() > 0);
     }

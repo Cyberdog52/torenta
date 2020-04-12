@@ -1,8 +1,8 @@
-package ch.andreskonrad.torenta.piratebay.dto;
+package ch.andreskonrad.torenta.torrent.dto;
 
 import java.util.Objects;
 
-public class PirateBayEntry {
+public class TorrentEntry {
     private String name;
     private String magnetLink;
     private String link;
@@ -17,10 +17,10 @@ public class PirateBayEntry {
     private boolean uploaderIsTrusted;
 
     //used for jackson
-    public PirateBayEntry() {
+    public TorrentEntry() {
     }
 
-    PirateBayEntry(String name, String magnetLink, String link, String uploadedTime, String size, String uploader, int numberOfSeeders, int numberOfLeechers, String categoryParent, String subCategory, boolean uploaderIsVIP, boolean uploaderIsTrusted) {
+    TorrentEntry(String name, String magnetLink, String link, String uploadedTime, String size, String uploader, int numberOfSeeders, int numberOfLeechers, String categoryParent, String subCategory, boolean uploaderIsVIP, boolean uploaderIsTrusted) {
         this.name = name;
         this.magnetLink = magnetLink;
         this.link = link;
@@ -87,7 +87,7 @@ public class PirateBayEntry {
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        PirateBayEntry that = (PirateBayEntry) o;
+        TorrentEntry that = (TorrentEntry) o;
         return numberOfSeeders == that.numberOfSeeders &&
                 numberOfLeechers == that.numberOfLeechers &&
                 uploaderIsVIP == that.uploaderIsVIP &&
@@ -109,7 +109,7 @@ public class PirateBayEntry {
 
     @Override
     public String toString() {
-        return "PirateBayEntry{" +
+        return "TorrentEntry{" +
                 "name='" + name + '\'' +
                 ", magnetLink='" + magnetLink + '\'' +
                 ", link='" + link + '\'' +

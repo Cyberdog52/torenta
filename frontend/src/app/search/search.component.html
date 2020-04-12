@@ -25,14 +25,14 @@
 
 <mat-card>
   <mat-card-title>
-    Search Piratebay
+    Search Torrents
   </mat-card-title>
   <mat-card-content>
-    <input matInput placeholder="Piratebay Search" [(ngModel)]="searchPiratebayString"
-           (delayedKeyup)="searchPiratebay()">
+    <input matInput placeholder="TorrentSerach" [(ngModel)]="searchTorrentString"
+           (delayedKeyup)="searchTorrent()">
   </mat-card-content>
-  <mat-card-footer *ngIf="delayedPirateBaySearchString != null && delayedPirateBaySearchString.length > 0">
-    <torrent-suggestions [searchString]="delayedPirateBaySearchString" ></torrent-suggestions>
+  <mat-card-footer *ngIf="delayedTorrentSearchString != null && delayedTorrentSearchString.length > 0">
+    <torrent-suggestions [searchString]="delayedTorrentSearchString" ></torrent-suggestions>
   </mat-card-footer>
 </mat-card>
 

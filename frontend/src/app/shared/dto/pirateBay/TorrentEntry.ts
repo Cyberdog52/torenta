@@ -1,4 +1,4 @@
-export interface PirateBayEntry {
+export interface TorrentEntry {
   name: string;
   magnetLink: string;
   link: string;

@@ -80,7 +80,7 @@ export class DownloadsComponent implements OnInit {
     if (downloadDto.downloadRequest.seriesDetail != null) {
       return downloadDto.downloadRequest.seriesDetail.name;
     } else {
-      return downloadDto.downloadRequest.pirateBayEntry.name;
+      return downloadDto.downloadRequest.torrentEntry.name;
     }
   }
 }

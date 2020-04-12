@@ -39,7 +39,7 @@ const mockDto = <DownloadDto>{
     seriesDetail: {
       name: 'test'
     },
-    pirateBayEntry: {}
+    torrentEntry: {}
   },
   progress: 1,
   startTimeInMs: 100

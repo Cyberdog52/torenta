@@ -3,6 +3,7 @@ import {HttpClient} from "@angular/common/http";
 import {BehaviorSubject, Observable} from "rxjs";
 import {DownloadDto} from "../shared/dto/torrent/DownloadDto";
 import {DownloadRequest} from "../shared/dto/torrent/DownloadRequest";
+import {TorrentEntry} from "../shared/dto/pirateBay/TorrentEntry";
 
 @Injectable({
   providedIn: 'root'
@@ -42,5 +43,10 @@ export class TorrentService implements OnDestroy{
       const sortedDownloadDtos = downloadDtos.sort((a, b) => b.startTimeInMs - a.startTimeInMs);
       this._downloadDtos.next(sortedDownloadDtos);
     });
+  }
+
+  public searchTorrent(searchString: string): Observable<TorrentEntry[]> {
+    let url = `api/torrent/?search=${searchString}`;
+    return this.httpClient.get<TorrentEntry[]>(url);
   }
 }

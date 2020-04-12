@@ -1,6 +1,6 @@
-package ch.andreskonrad.torenta.piratebay.dto;
+package ch.andreskonrad.torenta.torrent.dto;
 
-public class PirateBayEntryBuilder {
+public class TorrentSearchBuilder {
     private String name;
     private String magnetLink;
     private String link;
@@ -14,67 +14,67 @@ public class PirateBayEntryBuilder {
     private boolean uploaderIsVIP;
     private boolean uploaderIsTrusted;
 
-    public PirateBayEntryBuilder setName(String name) {
+    public TorrentSearchBuilder setName(String name) {
         this.name = name;
         return this;
     }
 
-    public PirateBayEntryBuilder setMagnetLink(String magnetLink) {
+    public TorrentSearchBuilder setMagnetLink(String magnetLink) {
         this.magnetLink = magnetLink;
         return this;
     }
 
-    public PirateBayEntryBuilder setLink(String link) {
+    public TorrentSearchBuilder setLink(String link) {
         this.link = link;
         return this;
     }
 
-    public PirateBayEntryBuilder setUploadedTime(String uploadedTime) {
+    public TorrentSearchBuilder setUploadedTime(String uploadedTime) {
         this.uploadedTime = uploadedTime;
         return this;
     }
 
-    public PirateBayEntryBuilder setSize(String size) {
+    public TorrentSearchBuilder setSize(String size) {
         this.size = size;
         return this;
     }
 
-    public PirateBayEntryBuilder setUploader(String uploader) {
+    public TorrentSearchBuilder setUploader(String uploader) {
         this.uploader = uploader;
         return this;
     }
 
-    public PirateBayEntryBuilder setNumberOfSeeders(int numberOfSeeders) {
+    public TorrentSearchBuilder setNumberOfSeeders(int numberOfSeeders) {
         this.numberOfSeeders = numberOfSeeders;
         return this;
     }
 
-    public PirateBayEntryBuilder setNumberOfLeechers(int numberOfLeechers) {
+    public TorrentSearchBuilder setNumberOfLeechers(int numberOfLeechers) {
         this.numberOfLeechers = numberOfLeechers;
         return this;
     }
 
-    public PirateBayEntryBuilder setCategory(String category) {
+    public TorrentSearchBuilder setCategory(String category) {
         this.category = category;
         return this;
     }
 
-    public PirateBayEntryBuilder setSubCategory(String subCategory) {
+    public TorrentSearchBuilder setSubCategory(String subCategory) {
         this.subCategory = subCategory;
         return this;
     }
 
-    public PirateBayEntryBuilder setUploaderIsVIP(boolean uploaderIsVIP) {
+    public TorrentSearchBuilder setUploaderIsVIP(boolean uploaderIsVIP) {
         this.uploaderIsVIP = uploaderIsVIP;
         return this;
     }
 
-    public PirateBayEntryBuilder setUploaderIsTrusted(boolean uploaderIsTrusted) {
+    public TorrentSearchBuilder setUploaderIsTrusted(boolean uploaderIsTrusted) {
         this.uploaderIsTrusted = uploaderIsTrusted;
         return this;
     }
 
-    public PirateBayEntry createPiratebayEntry() {
-        return new PirateBayEntry(name, magnetLink, link, uploadedTime, size, uploader, numberOfSeeders, numberOfLeechers, category, subCategory, uploaderIsVIP, uploaderIsTrusted);
+    public TorrentEntry createTorrentEntry() {
+        return new TorrentEntry(name, magnetLink, link, uploadedTime, size, uploader, numberOfSeeders, numberOfLeechers, category, subCategory, uploaderIsVIP, uploaderIsTrusted);
     }
 }

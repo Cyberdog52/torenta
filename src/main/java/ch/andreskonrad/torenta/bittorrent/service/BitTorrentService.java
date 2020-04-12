@@ -32,13 +32,13 @@ public class BitTorrentService {
     }
 
     public synchronized void startDownload(DownloadRequest downloadRequest, Path targetDirectory) throws IllegalStateException {
-        String magnetLink = downloadRequest.getPirateBayEntry().getMagnetLink();
+        String magnetLink = downloadRequest.getTorrentEntry().getMagnetLink();
         int id = generateId(magnetLink);
 
         BtClient client = Bt.client()
                 .config(getConfig())
                 .storage(new FileSystemStorage(targetDirectory))
-                .magnet(magnetLink)
+                .magnet(magnetLink.replace(" ", "%20"))
                 .autoLoadModules()
                 .stopWhenDownloaded()
                 .build();
