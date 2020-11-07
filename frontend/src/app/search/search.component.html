@@ -28,7 +28,7 @@
     Search Torrents
   </mat-card-title>
   <mat-card-content>
-    <input matInput placeholder="TorrentSerach" [(ngModel)]="searchTorrentString"
+    <input matInput placeholder="TorrentSearch" [(ngModel)]="searchTorrentString"
            (delayedKeyup)="searchTorrent()">
   </mat-card-content>
   <mat-card-footer *ngIf="delayedTorrentSearchString != null && delayedTorrentSearchString.length > 0">
