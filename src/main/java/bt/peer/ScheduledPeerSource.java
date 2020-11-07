@@ -71,7 +71,7 @@ public abstract class ScheduledPeerSource implements PeerSource {
                         try {
                             future.get();
                         } catch (InterruptedException | ExecutionException e) {
-                            LOGGER.warn("Peer collection finished with exception in peer source: " + toString() + e.toString());
+                            LOGGER.debug("Peer collection finished with exception in peer source: " + toString() + e.toString());
                         }
                         futureOptional.set(null);
                     }

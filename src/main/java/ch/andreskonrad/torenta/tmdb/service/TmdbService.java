@@ -26,7 +26,7 @@ public class TmdbService {
     private final String host = "api.themoviedb.org";
     private final String scheme = "https";
 
-    private static final RequestThrottler requestThrottler = new RequestThrottler(10, 1000);
+    private static final RequestThrottler requestThrottler = new RequestThrottler(9, 1000);
 
 
     @Cacheable

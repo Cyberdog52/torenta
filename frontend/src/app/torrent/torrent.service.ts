@@ -14,7 +14,7 @@ export class TorrentService implements OnDestroy{
 
   private _downloadDtos = new BehaviorSubject<DownloadDto[]>([]);
   private intervalId: any;
-  private updateIntervalInMs = 200;
+  private updateIntervalInMs = 1000;
 
   constructor(private httpClient: HttpClient) {
     this.intervalId = setInterval(() => this.updateDownloadDtos(), this.updateIntervalInMs);

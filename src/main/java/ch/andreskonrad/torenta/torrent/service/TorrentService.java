@@ -8,14 +8,14 @@ import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @CacheConfig(cacheNames={CustomCacheConfig.PIRATE_BAY_CACHE_NAME})
 public class TorrentService {
 
     @Cacheable
-    public ArrayList<TorrentEntry> search(String searchString) throws TorrentSearchException {
+    public List<TorrentEntry> search(String searchString) throws TorrentSearchException {
         TorrentQuery query = new TorrentQuery(searchString);
 
         return TorrentParseAPI.search(query);
