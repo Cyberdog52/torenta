@@ -1,7 +1,8 @@
 package ch.andreskonrad.torenta.directory.service;
 
 
-import ch.andreskonrad.torenta.directory.dto.*;
+import ch.andreskonrad.torenta.directory.dto.DirectoryDto;
+import ch.andreskonrad.torenta.directory.dto.FileDto;
 import ch.andreskonrad.torenta.preference.service.PreferenceService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,9 +41,7 @@ public class DirectoryService {
     }
 
     public Path getPathForSeries(String seriesName) {
-        Path seriesPath = tvDirectoryPath.resolve(removeIllegalCharacters(seriesName));
-        createDirectoryIfNeeded(seriesPath);
-        return seriesPath;
+        return tvDirectoryPath.resolve(removeIllegalCharacters(seriesName));
     }
 
     private String removeIllegalCharacters(String seriesName) {
@@ -60,8 +59,9 @@ public class DirectoryService {
         return moviesPath;
     }
 
-    public Path getPathForSeason(String seriesName, int seasonNumber) {
+    public Path getDirectoryToSave(String seriesName, int seasonNumber) {
         Path seriesPath = getPathForSeries(seriesName);
+        createDirectoryIfNeeded(seriesPath);
         Path seasonPath = seriesPath.resolve(getSeasonName(seasonNumber));
         createDirectoryIfNeeded(seasonPath);
         return seasonPath;
@@ -74,41 +74,6 @@ public class DirectoryService {
         }
         seasonNameBuilder.append(seasonNumber);
         return seasonNameBuilder.toString();
-    }
-
-    public FileHierarchyDto getDirectoryHierarchy() {
-        MoviesRootDirectoryDto moviesRootDirectoryDto = getMoviesRootDirectoryDto();
-        SeriesRootDirectoryDto seriesRootDirectoryDto = getSeriesRootDirectoryDto();
-
-        return new FileHierarchyDto(moviesRootDirectoryDto, seriesRootDirectoryDto, rootDirectoryPath.toAbsolutePath().toString());
-    }
-
-    private MoviesRootDirectoryDto getMoviesRootDirectoryDto() {
-        Set<DirectoryDto> movies = null;
-        try {
-            movies = Files.list(moviesDirectoryPath)
-                    .filter(path -> Files.isDirectory(path))
-                    .map(this::getDirectoryDto)
-                    .collect(Collectors.toSet());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return new MoviesRootDirectoryDto(moviesDirectoryPath.toAbsolutePath().toString(), movies);
-    }
-
-    private SeriesRootDirectoryDto getSeriesRootDirectoryDto() {
-        Set<DirectoryDto> series = null;
-        try {
-            series = Files.list(tvDirectoryPath)
-                    .filter(path -> Files.isDirectory(path))
-                    .map(this::getDirectoryDto)
-                    .collect(Collectors.toSet());
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        return new SeriesRootDirectoryDto(tvDirectoryPath.toAbsolutePath().toString(), series);
     }
 
     private DirectoryDto getDirectoryDto(Path path) {
@@ -159,5 +124,11 @@ public class DirectoryService {
             }
         }
         return true;
+    }
+
+    public DirectoryDto getSeriesDirectory(String seriesTitle) {
+        Path pathForSeries = getPathForSeries(seriesTitle);
+
+        return getDirectoryDto(pathForSeries);
     }
 }

@@ -4,7 +4,6 @@ import {SearchService} from "../../search/search.service";
 import {TmdbEpisodeDto} from "../../shared/dto/tmdb/TmdbEpisodeDto";
 import {TmdbSeriesDetailDto} from "../../shared/dto/tmdb/TmdbSeriesDetailDto";
 import {LibraryService} from "../../library/library.service";
-import {TvLibrary} from "../../shared/dto/library/TvLibrary";
 import {Series} from "../../shared/dto/library/Series";
 import {DownloadStatus} from "../../shared/dto/library/DownloadStatus";
 import {Episode} from "../../shared/dto/library/Episode";
@@ -22,14 +21,14 @@ export class SeasonComponent implements OnInit, OnChanges {
   public showEpisode: TmdbEpisodeDto;
 
   public episodes: TmdbEpisodeDto[];
-  private tvLibrary: TvLibrary;
+  private series: Series;
 
   constructor(private searchService: SearchService,
               private libraryService: LibraryService) { }
 
   ngOnInit() {
     this.getEpisodes();
-    this.updateTvLibrary();
+    this.getSeriesInLibrary();
   }
 
   ngOnChanges() {
@@ -54,33 +53,20 @@ export class SeasonComponent implements OnInit, OnChanges {
 
 
 
-  private updateTvLibrary(): void {
-    this.libraryService.getTvLibraryAsObservable().subscribe(tvLibrary => {
-      this.tvLibrary = tvLibrary;
-      console.log(this.tvLibrary);
+  private getSeriesInLibrary(): void {
+    this.libraryService.getSeriesInLibrary(this.seriesDetail.name).subscribe(series => {
+      this.series = series;
     });
   }
 
   public isAlreadyDownloaded(episode: TmdbEpisodeDto): boolean {
     return this.getDownloadStatus(episode) == DownloadStatus.DOWNLOADED;
   }
-
-
-  private getSeries(episode: TmdbEpisodeDto): Series {
-    if (this.tvLibrary == null) {
-      return null;
-    }
-    return this.tvLibrary.series.find(series => {
-      return series.seriesDetail.name === this.seriesDetail.name
-    });
-  }
-
   private getSeason(episode: TmdbEpisodeDto): Season {
-    const series = this.getSeries(episode);
-    if (series == null) {
+    if (this.series == null) {
       return null;
     }
-    return series.seasonList.find(season => {
+    return this.series.seasonList.find(season => {
       return season.seasonNumber === episode.season_number;
     });
   }

@@ -5,7 +5,8 @@ import java.util.List;
 
 class TorrentSearchConstants {
 
-    static String Url = "https://apibay.org/q.php";
+    public static String PirateBayFrontendUrl = "https://tpb.party/search/";
+    public static String PirateBayBackendURL = "https://apibay.org";
 
     public static final List<String> trackerList = Arrays.asList(
             "udp://tracker.coppersurfer.tk:6969/announce",

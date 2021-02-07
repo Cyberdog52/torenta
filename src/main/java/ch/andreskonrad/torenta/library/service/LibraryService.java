@@ -4,7 +4,6 @@ import ch.andreskonrad.torenta.bittorrent.service.BitTorrentService;
 import ch.andreskonrad.torenta.directory.dto.DirectoryDto;
 import ch.andreskonrad.torenta.directory.service.DirectoryService;
 import ch.andreskonrad.torenta.library.dto.Series;
-import ch.andreskonrad.torenta.library.dto.TvLibrary;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbSearchResultDto;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbSeriesDetailDto;
@@ -13,7 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
-import java.util.Set;
 
 @Service
 public class LibraryService {
@@ -29,17 +27,11 @@ public class LibraryService {
         this.bitTorrentService = bitTorrentService;
     }
 
-    public TvLibrary getTvLibrary() {
-        Set<DirectoryDto> series = this.directoryService.getDirectoryHierarchy()
-                .getSeriesRootDirectoryDto()
-                .getSeries();
 
-        TvLibrary tvLibrary = new TvLibrary();
-        for (DirectoryDto seriesDirectoryDto : series) {
-            Series seriesEntry = getSeriesEntry(seriesDirectoryDto);
-            tvLibrary.addSeries(seriesEntry);
-        }
-        return tvLibrary;
+    public Series getSeriesInLibrary(String seriesName) {
+        DirectoryDto seriesDirectory = this.directoryService.getSeriesDirectory(seriesName);
+
+        return getSeriesEntry(seriesDirectory);
     }
 
     private Series getSeriesEntry(DirectoryDto seriesDirectoryDto) {
@@ -60,8 +52,7 @@ public class LibraryService {
             }
         }
 
-        Series series = new Series(seriesDirectoryDto, seriesDetail, episodesBySeasonNumber, seasonDirectoriesBySeasonNumber, bitTorrentService.getAllDownloadDtos());
-        return series;
+        return new Series(seriesDirectoryDto, seriesDetail, episodesBySeasonNumber, seasonDirectoriesBySeasonNumber, bitTorrentService.getAllDownloadDtos());
     }
 
     private Integer getSeasonNumberForFolderName(String folderName) {

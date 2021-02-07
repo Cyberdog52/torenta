@@ -13,12 +13,25 @@ public class TorrentQuery {
     	this.searchString = term;
     }
     
-    public URI getURI() {
+    public URI getPirateBayBackendSearchString() {
         URIBuilder b;
         try {
-            b = new URIBuilder(TorrentSearchConstants.Url);
+            b = new URIBuilder(TorrentSearchConstants.PirateBayBackendURL);
             b.addParameter("q", searchString);
             b.addParameter("cat", "");
+            return b.build();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    public URI getPirateBayFrontendSearchURI() {
+        URIBuilder b;
+        try {
+            b = new URIBuilder(TorrentSearchConstants.PirateBayFrontendUrl);
+            b.setPathSegments("search", searchString);
             return b.build();
         } catch (Exception e) {
             e.printStackTrace();

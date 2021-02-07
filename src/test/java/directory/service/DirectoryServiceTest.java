@@ -2,7 +2,6 @@ package directory.service;
 
 import ch.andreskonrad.torenta.directory.dto.DirectoryDto;
 import ch.andreskonrad.torenta.directory.dto.FileDto;
-import ch.andreskonrad.torenta.directory.dto.FileHierarchyDto;
 import ch.andreskonrad.torenta.directory.service.DirectoryService;
 import ch.andreskonrad.torenta.preference.dto.UserPreference;
 import ch.andreskonrad.torenta.preference.service.PreferenceServiceMock;
@@ -19,7 +18,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Set;
 
 import static org.junit.Assert.*;
 
@@ -59,14 +57,6 @@ public class DirectoryServiceTest {
     }
 
     @Test
-    public void getDirectoryHierarchy_emptyRoot_noSeriesOrMoviesFound() {
-        FileHierarchyDto directoryHierarchy = directoryService.getDirectoryHierarchy();
-
-        assertEquals(0, directoryHierarchy.getMoviesRootDirectoryDto().getMovies().size());
-        assertEquals(0, directoryHierarchy.getSeriesRootDirectoryDto().getSeries().size());
-    }
-
-    @Test
     public void getMoviePath_createsMovieDirectory() {
         Path moviePath = directoryService.getPathForMovie("Star Wars");
 
@@ -77,18 +67,15 @@ public class DirectoryServiceTest {
     }
 
     @Test
-    public void getSeriesPath_createsSeriesDirectory() {
+    public void getSeriesPath_doesNotCreateDirectory() {
         Path seriesPath = directoryService.getPathForSeries("Mandalorian");
 
-        assertTrue(Files.exists(seriesPath));
-        assertTrue(Files.isDirectory(seriesPath));
-        String parentName = seriesPath.getParent().getFileName().toString();
-        assertEquals("Series", parentName);
+        assertFalse(Files.exists(seriesPath));
     }
 
     @Test
     public void getSeasonPath_season1_createsSeasonDirectory() {
-        Path seasonPath = directoryService.getPathForSeason("Mandalorian", 1);
+        Path seasonPath = directoryService.getDirectoryToSave("Mandalorian", 1);
 
         assertTrue(Files.exists(seasonPath));
         assertTrue(Files.isDirectory(seasonPath));
@@ -99,7 +86,7 @@ public class DirectoryServiceTest {
 
     @Test
     public void getSeasonPath_season10_createsSeasonDirectory() {
-        Path seasonPath = directoryService.getPathForSeason("Mandalorian", 10);
+        Path seasonPath = directoryService.getDirectoryToSave("Mandalorian", 10);
 
         assertTrue(Files.exists(seasonPath));
         assertTrue(Files.isDirectory(seasonPath));
@@ -109,41 +96,13 @@ public class DirectoryServiceTest {
     }
 
     @Test
-    public void getFileHierarchy_newMovie_movieFound() throws IOException {
-        Path moviesPath = rootFolder.getRoot().toPath().resolve("Movies");
-        Path starWarsPath = Files.createDirectory(moviesPath.resolve("Star Wars"));
-        Path movieFilePath = Files.createFile(starWarsPath.resolve("emptyMovie.mp4"));
-
-        FileHierarchyDto directoryHierarchy = directoryService.getDirectoryHierarchy();
-
-        Set<DirectoryDto> movies = directoryHierarchy.getMoviesRootDirectoryDto().getMovies();
-        DirectoryDto starWarsMovie = movies.stream().findFirst().orElse(null);
-
-        assertNotNull(starWarsMovie);
-        assertEquals("Star Wars", starWarsMovie.getName());
-        assertEquals(starWarsPath.toString(), starWarsMovie.getAbsolutePath());
-
-        FileDto movieDto = starWarsMovie.getFiles().stream().findFirst().orElse(null);
-        assertNotNull(movieDto);
-        assertEquals("emptyMovie.mp4", movieDto.getName());
-        assertEquals(movieFilePath.toString(), movieDto.getAbsolutePath());
-
-        assertEquals(0, starWarsMovie.getDirectories().size());
-        assertEquals(1, starWarsMovie.getFiles().size());
-        assertEquals(1, movies.size());
-    }
-
-    @Test
     public void getFileHierarchy_newSeries_episodeFound() throws IOException {
         Path seriesPath = rootFolder.getRoot().toPath().resolve("Series");
         Path mandanlorianPath = Files.createDirectory(seriesPath.resolve("Mandalorian"));
         Path season01 = Files.createDirectory(mandanlorianPath.resolve("S01"));
         Path episodeFilePath = Files.createFile(season01.resolve("empty-episode-S01E01.mp4"));
 
-        FileHierarchyDto directoryHierarchy = directoryService.getDirectoryHierarchy();
-
-        Set<DirectoryDto> series = directoryHierarchy.getSeriesRootDirectoryDto().getSeries();
-        DirectoryDto mandalorian = series.stream().findFirst().orElse(null);
+        DirectoryDto mandalorian = directoryService.getSeriesDirectory("Mandalorian");
 
         assertNotNull(mandalorian);
         assertEquals("Mandalorian", mandalorian.getName());
@@ -163,6 +122,5 @@ public class DirectoryServiceTest {
         assertEquals(0, season.getDirectories().size());
         assertEquals(1, mandalorian.getDirectories().size());
         assertEquals(0, mandalorian.getFiles().size());
-        assertEquals(1, series.size());
     }
 }

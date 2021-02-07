@@ -1,8 +1,11 @@
 package ch.andreskonrad.torenta.tmdb.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.List;
 import java.util.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TmdbSearchResultDto {
 
     private int page;
