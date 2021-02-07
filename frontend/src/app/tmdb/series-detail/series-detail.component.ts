@@ -3,7 +3,7 @@ import {SearchService} from "../../search/search.service";
 import {TmdbSeriesDetailDto} from "../../shared/dto/tmdb/TmdbSeriesDetailDto";
 import {TmdbSeasonDto} from "../../shared/dto/tmdb/TmdbSeasonDto";
 import {DirectoryService} from "../../directory/directory.service";
-import {FileHierarchyDto} from "../../shared/dto/directory/FileHierarchyDto";
+import {DirectoryDto} from "../../shared/dto/directory/DirectoryDto";
 
 @Component({
   selector: 'series-detail',
@@ -15,7 +15,7 @@ export class SeriesDetailComponent implements OnInit {
   @Input() id : number;
   public seriesDetail: TmdbSeriesDetailDto;
   public showSeason: TmdbSeasonDto;
-  private fileHierarchy: FileHierarchyDto;
+  private seriesDirectory: DirectoryDto;
 
   constructor(private searchService: SearchService,
               private directoryService: DirectoryService) { }
@@ -23,17 +23,19 @@ export class SeriesDetailComponent implements OnInit {
   ngOnInit() {
     this.searchService.getTVShow(this.id).subscribe(seriesDetail => {
       this.seriesDetail = seriesDetail;
+      this.getSeriesDirectory();
     });
-    this.updateFileHierarchy();
+
   }
 
   public isLoading(): boolean {
     return this.seriesDetail == null;
   }
 
-  private updateFileHierarchy(): void {
-    this.directoryService.getFileHierarchyAsObservable().subscribe(fileHierarchy => {
-      this.fileHierarchy = fileHierarchy;
+  private getSeriesDirectory(): void {
+    const seriesName = this.seriesDetail.name.replace(/[^a-zA-Z0-9.\- ]/, "");
+    this.directoryService.getSeriesDirectory(seriesName).subscribe(seriesDirectory => {
+      this.seriesDirectory = seriesDirectory;
     });
   }
 
@@ -60,17 +62,11 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   isPartiallyDownloaded(season: TmdbSeasonDto): boolean {
-    if (this.fileHierarchy == null) {
-      return false;
-    }
-    const seriesFolder = this.fileHierarchy.seriesRootDirectoryDto.series.find(directoryDto=> {
-      return directoryDto.name == this.seriesDetail.name.replace(/[^a-zA-Z0-9.\- ]/, "");
-    });
-    if (seriesFolder == null) {
+    if (this.seriesDirectory == null) {
       return false;
     }
 
-    const seasonFolder = seriesFolder.directories.find(directoryDto => {
+    const seasonFolder = this.seriesDirectory.directories.find(directoryDto => {
       return directoryDto.name == this.getSeasonTitle(season);
     });
 

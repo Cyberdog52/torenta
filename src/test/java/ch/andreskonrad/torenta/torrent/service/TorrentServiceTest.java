@@ -9,7 +9,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.Assert.assertTrue;
 
@@ -24,7 +24,7 @@ public class TorrentServiceTest {
     @Ignore
     @Test
     public void manualSearch() throws TorrentSearchException {
-        ArrayList<TorrentEntry> entries = torrentService.search("Walking Dead");
+        List<TorrentEntry> entries = torrentService.search("Walking Dead");
 
         assertTrue(entries.size() > 0);
     }

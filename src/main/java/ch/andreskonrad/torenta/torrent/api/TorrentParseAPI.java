@@ -18,7 +18,7 @@ public class TorrentParseAPI {
 
     public static List<TorrentEntry> search(TorrentQuery query) throws TorrentSearchException {
 
-        URI uri = query.getURI();
+        URI uri = query.getPirateBayBackendSearchString();
         String jsonStringResponse = httpGet(uri);
         if (jsonStringResponse == null) {
             return new ArrayList<>();

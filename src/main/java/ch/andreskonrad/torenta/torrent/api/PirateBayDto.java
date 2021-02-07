@@ -24,6 +24,7 @@ public class PirateBayDto {
     private String status;
     private int category;
     private String imdb;
+    private String magnetLink;
 
     // for jackson
     public PirateBayDto() {
@@ -202,7 +203,7 @@ public class PirateBayDto {
         } else if (k > 1) {
             sizeString = dec.format(k).concat(" KB");
         } else {
-            sizeString = dec.format(size).concat(" mB");
+            sizeString = dec.format(size).concat(" Byte");
         }
         return sizeString;
     }

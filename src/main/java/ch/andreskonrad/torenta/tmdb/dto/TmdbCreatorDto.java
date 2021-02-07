@@ -1,7 +1,10 @@
 package ch.andreskonrad.torenta.tmdb.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TmdbCreatorDto {
 
     private int id;
@@ -13,6 +16,7 @@ public class TmdbCreatorDto {
     private String job;
     private String character;
     private int order;
+    private String adult;
 
     public TmdbCreatorDto() {
     }
@@ -51,6 +55,10 @@ public class TmdbCreatorDto {
 
     public int getOrder() {
         return order;
+    }
+
+    public String getAdult() {
+        return adult;
     }
 
     @Override

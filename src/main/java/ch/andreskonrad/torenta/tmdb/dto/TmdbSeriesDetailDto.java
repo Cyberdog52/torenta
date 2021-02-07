@@ -1,8 +1,11 @@
 package ch.andreskonrad.torenta.tmdb.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+
 import java.util.List;
 import java.util.Objects;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class TmdbSeriesDetailDto {
 
     private String backdrop_path;
@@ -33,6 +36,7 @@ public class TmdbSeriesDetailDto {
     private String type;
     private double vote_average;
     private int vote_count;
+    private String tagline;
 
     //used for jackson
     public TmdbSeriesDetailDto() {
@@ -148,6 +152,10 @@ public class TmdbSeriesDetailDto {
 
     public int getVote_count() {
         return vote_count;
+    }
+
+    public String getTagline() {
+        return tagline;
     }
 
     @Override

@@ -52,7 +52,7 @@ public class BitTorrentService {
     public void startDownloadToPreferredFolder(DownloadRequest downloadRequest) {
         Path preferredDownloadFolder = this.directoryService.getRootDirectoryPath();
         if (downloadRequest.getSeriesDetail() != null && downloadRequest.getTmdbEpisodeDto() != null) {
-            preferredDownloadFolder = this.directoryService.getPathForSeason(downloadRequest.getSeriesDetail().getName(), downloadRequest.getTmdbEpisodeDto().getSeason_number());
+            preferredDownloadFolder = this.directoryService.getDirectoryToSave(downloadRequest.getSeriesDetail().getName(), downloadRequest.getTmdbEpisodeDto().getSeason_number());
         }
         startDownload(downloadRequest, preferredDownloadFolder);
     }
