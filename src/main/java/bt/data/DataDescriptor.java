@@ -59,4 +59,6 @@ public interface DataDescriptor extends Closeable {
      * @since 1.8
      */
     DataReader getReader();
+
+    long getChunkSizeInBytes();
 }

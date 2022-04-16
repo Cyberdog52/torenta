@@ -181,6 +181,11 @@ class DefaultDataDescriptor implements DataDescriptor {
     }
 
     @Override
+    public long getChunkSizeInBytes() {
+        return this.torrent.getChunkSize();
+    }
+
+    @Override
     public void close() {
         storageUnits.forEach(unit -> {
             try {

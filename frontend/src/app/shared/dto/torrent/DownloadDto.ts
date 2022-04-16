@@ -7,4 +7,7 @@ export interface DownloadDto {
   progress: number;
   downloadRequest: DownloadRequest;
   startTimeInMs: number;
+  connectedPeers: number;
+  totalBytes: number;
+  downloadSpeedInBytesPerSecond: number;
 }

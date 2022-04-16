@@ -19,6 +19,7 @@ import {PageNotFoundComponent} from './page-not-found/page-not-found.component';
 import {ToolbarComponent} from './toolbar/toolbar.component';
 import {DelayedKeyupDirective} from "./shared/delayed-keyup.directive";
 import {NotificationComponent} from "./shared/notification/notification.component";
+import {DownloadDetailComponent} from './torrent/downloads/download-detail/download-detail.component';
 
 @NgModule({
   declarations: [
@@ -33,7 +34,8 @@ import {NotificationComponent} from "./shared/notification/notification.componen
     PageNotFoundComponent,
     ToolbarComponent,
     DelayedKeyupDirective,
-    NotificationComponent
+    NotificationComponent,
+    DownloadDetailComponent
   ],
   imports: [
     BrowserModule,

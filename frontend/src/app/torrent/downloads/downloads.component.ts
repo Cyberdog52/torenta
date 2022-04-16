@@ -13,12 +13,14 @@ import {NotificationType} from "../../shared/dto/notification/Notification";
 export class DownloadsComponent implements OnInit {
 
   downloadDtos: DownloadDto[] = [];
+  numberOfColumns: number;
 
   constructor(private torrentService: TorrentService, private notificationService: NotificationService) {
   }
 
   ngOnInit() {
     this.updateDownloadDtos();
+    this.numberOfColumns = this.computeNumberOfColumns(window.innerWidth);
   }
 
 
@@ -46,19 +48,6 @@ export class DownloadsComponent implements OnInit {
     return this.downloadDtos != null;
   }
 
-  getProgressString(downloadDto: DownloadDto): string {
-    if (downloadDto.state == DownloadState.FINISHED) {
-      return "Successfully downloaded";
-    }
-    if (downloadDto.state == DownloadState.CANCELLED) {
-      return "Cancelled";
-    }
-    if (downloadDto.state == DownloadState.STARTED) {
-      return (downloadDto.progress * 100).toFixed(1).toString() + " %";
-    }
-    return downloadDto.state;
-  }
-
   getEpisodeString(downloadDto: DownloadDto): string {
     if (downloadDto.downloadRequest.tmdbEpisodeDto == null) {
       return "";
@@ -83,4 +72,16 @@ export class DownloadsComponent implements OnInit {
       return downloadDto.downloadRequest.torrentEntry.name;
     }
   }
+
+  handleSize(event) {
+    this.numberOfColumns = this.computeNumberOfColumns(event.target.innerWidth);
+  }
+
+  private computeNumberOfColumns(windowWidth: number): number {
+    return windowWidth / 600;
+  }
+
+
+
+
 }
