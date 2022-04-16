@@ -18,6 +18,8 @@ package bt.torrent;
 
 import bt.net.ConnectionKey;
 
+import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.Set;
 
 /**
@@ -80,4 +82,14 @@ public interface TorrentSessionState {
      * @since 1.9
      */
     Set<ConnectionKey> getConnectedPeers();
+
+    /**
+     * @return Download times for downloaded indexes
+     */
+    Collection<LocalDateTime> getSaveTimesOfChunks();
+
+    /**
+     * @return Get chunk size of an index in bytes
+     */
+    long getChunksSizeInBytes();
 }

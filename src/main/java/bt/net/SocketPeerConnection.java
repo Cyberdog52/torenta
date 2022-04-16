@@ -145,7 +145,6 @@ public class SocketPeerConnection implements PeerConnection {
     private void updateLastActive() {
         lastActive.set(System.currentTimeMillis());
     }
-
     @Override
     public Peer getRemotePeer() {
         return remotePeer;

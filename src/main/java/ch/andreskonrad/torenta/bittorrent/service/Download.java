@@ -7,6 +7,7 @@ import ch.andreskonrad.torenta.bittorrent.dto.DownloadRequest;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadState;
 
 import java.nio.file.Path;
+import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 
@@ -68,7 +69,11 @@ public class Download {
     public DownloadDto mapToDownloadDto() {
         double progress = getProgress();
         DownloadState downloadState = getDownloadState();
-        return new DownloadDto(id, downloadState, progress, downloadRequest, this.startTimeInMs);
+        return new DownloadDto(id, downloadState, progress, downloadRequest, this.startTimeInMs, this.getConnectedPeers(), this.getTotalBytes(), this.getDownloadSpeedInBytesPerSecond());
+    }
+
+    private long getTotalBytes() {
+        return this.state.getChunksSizeInBytes() * this.state.getPiecesTotal();
     }
 
     private DownloadState getDownloadState() {
@@ -79,6 +84,18 @@ public class Download {
 
     private double getProgress() {
         return ((double) state.getPiecesComplete()) / state.getPiecesTotal();
+    }
+
+    private long getConnectedPeers() {
+        return this.state.getConnectedPeers() != null ? this.state.getConnectedPeers().size() : 0;
+    }
+
+    private double getDownloadSpeedInBytesPerSecond() {
+        long amountOfChunksSavedInLastMinute = this.state.getSaveTimesOfChunks().stream()
+                .filter(localDateTime -> localDateTime.isAfter(LocalDateTime.now().minusMinutes(1)))
+                .count();
+        long chunkSize = this.state.getChunksSizeInBytes();
+        return amountOfChunksSavedInLastMinute * chunkSize / 60.0;
     }
 
     @Override

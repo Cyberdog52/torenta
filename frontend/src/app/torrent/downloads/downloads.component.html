@@ -2,13 +2,11 @@
   <mat-card-title>Downloads</mat-card-title>
   <div *ngIf="downloadsLoaded()">
     <mat-card-content>
-      <mat-list>
-        <mat-list-item *ngFor="let downloadDto of downloadDtos">
-          <p class="download_title"> {{getDownloadTitle(downloadDto)}} {{getEpisodeString(downloadDto)}}</p>
-          <mat-progress-bar [mode]="determinate" [value]="downloadDto.progress * 100"></mat-progress-bar>
-          <p>{{getProgressString(downloadDto)}}</p>
-        </mat-list-item>
-      </mat-list>
+      <mat-grid-list [cols]="numberOfColumns" rowHeight="240px" (window:resize)="handleSize($event)">
+        <mat-grid-tile *ngFor="let downloadDto of downloadDtos">
+          <app-download-detail [downloadDto]="downloadDto"></app-download-detail>
+        </mat-grid-tile>
+      </mat-grid-list>
       <p *ngIf="downloadDtos.length == 0"> Downloads will be shown here</p>
     </mat-card-content>
   </div>

@@ -31,7 +31,7 @@ public class TorrentQuery {
         URIBuilder b;
         try {
             b = new URIBuilder(TorrentSearchConstants.PirateBayFrontendUrl);
-            b.setPathSegments("search", searchString);
+            b.setPathSegments("search", searchString.replace("'", ""));
             return b.build();
         } catch (Exception e) {
             e.printStackTrace();

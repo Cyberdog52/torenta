@@ -1,0 +1,18 @@
+<div class="downloadDetail">
+  <div class="background-container">
+    <img class="background-image" src="{{getBackgroundImageFor(downloadDto.downloadRequest?.seriesDetail)}}" />
+    <div class="background-image-shadow"></div>
+  </div>
+  <div class="foreground-container">
+    <p class="download_title"> {{getDownloadTitle(downloadDto)}} {{getEpisodeString(downloadDto)}}</p>
+    <p><mat-icon>link</mat-icon> {{getPeers()}}</p>
+    <p><mat-icon>network_check</mat-icon> {{getSpeed()}}</p>
+    <p><mat-icon>timelapse</mat-icon> {{getEstimatedTimeFinished()}}</p>
+    <div class="progress-percentage">
+      <mat-progress-bar class="float-left" [mode]="determinate" [value]="downloadDto.progress * 100"></mat-progress-bar>
+      <a class="float-left" *ngIf="isRunning()">{{getProgressString(downloadDto)}}</a>
+      <mat-icon class="float-left" *ngIf="!isRunning()">done_outline</mat-icon>
+    </div>
+  </div>
+</div>
+

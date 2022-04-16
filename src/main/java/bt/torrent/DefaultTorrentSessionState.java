@@ -20,11 +20,8 @@ import bt.net.ConnectionKey;
 import bt.torrent.messaging.ConnectionState;
 import bt.torrent.messaging.TorrentWorker;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.atomic.AtomicLong;
 
 import static java.util.stream.Collectors.summingLong;
@@ -160,6 +157,24 @@ public class DefaultTorrentSessionState implements TorrentSessionState {
     @Override
     public Set<ConnectionKey> getConnectedPeers() {
         return Collections.unmodifiableSet(worker.getPeers());
+    }
+
+    @Override
+    public Collection<LocalDateTime> getSaveTimesOfChunks() {
+        if (descriptor.getDataDescriptor() != null) {
+            return descriptor.getDataDescriptor().getBitfield().getIndexToSaveTimeMap().values();
+        } else {
+            return new HashSet<>();
+        }
+    }
+
+    @Override
+    public long getChunksSizeInBytes() {
+        if (descriptor.getDataDescriptor() != null) {
+            return descriptor.getDataDescriptor().getChunkSizeInBytes();
+        } else {
+            return 0;
+        }
     }
 
     private static class TransferAmounts {

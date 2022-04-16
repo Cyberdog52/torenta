@@ -20,9 +20,8 @@ import bt.BtException;
 import bt.protocol.BitOrder;
 import bt.protocol.Protocols;
 
-import java.util.BitSet;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDateTime;
+import java.util.*;
 import java.util.concurrent.locks.ReentrantLock;
 
 /**
@@ -69,6 +68,8 @@ public class Bitfield {
 
     private final ReentrantLock lock;
 
+    private final Map<Integer, LocalDateTime> indexToSaveTimeMap;
+
     /**
      * Creates "local" bitfield from a list of chunk descriptors.
      *
@@ -80,6 +81,7 @@ public class Bitfield {
         this.bitmask = new BitSet(chunks.size());
         this.chunks = Optional.of(chunks);
         this.lock = new ReentrantLock();
+        this.indexToSaveTimeMap = new HashMap<>();
     }
 
     /**
@@ -94,6 +96,7 @@ public class Bitfield {
         this.bitmask = new BitSet(piecesTotal);
         this.chunks = Optional.empty();
         this.lock = new ReentrantLock();
+        this.indexToSaveTimeMap = new HashMap<>();
     }
 
     /**
@@ -113,6 +116,10 @@ public class Bitfield {
         this(value, BitOrder.LITTLE_ENDIAN, piecesTotal);
     }
 
+    public Map<Integer, LocalDateTime> getIndexToSaveTimeMap() {
+        return indexToSaveTimeMap;
+    }
+
     /**
      * Creates bitfield based on a bitmask.
      * Used for creating peers' bitfields.
@@ -127,6 +134,7 @@ public class Bitfield {
         this.bitmask = createBitmask(value, bitOrder, piecesTotal);
         this.chunks = Optional.empty();
         this.lock = new ReentrantLock();
+        this.indexToSaveTimeMap = new HashMap<>();
     }
 
     private static BitSet createBitmask(byte[] bytes, BitOrder bitOrder, int piecesTotal) {
@@ -379,6 +387,7 @@ public class Bitfield {
         lock.lock();
         try {
             bitmask.set(pieceIndex);
+            indexToSaveTimeMap.put(pieceIndex, LocalDateTime.now());
         } finally {
             lock.unlock();
         }
