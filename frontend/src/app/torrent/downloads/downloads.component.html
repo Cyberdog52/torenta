@@ -4,7 +4,7 @@
     <mat-card-content>
       <mat-grid-list [cols]="numberOfColumns" rowHeight="240px" (window:resize)="handleSize($event)">
         <mat-grid-tile *ngFor="let downloadDto of downloadDtos">
-          <app-download-detail [downloadDto]="downloadDto"></app-download-detail>
+          <download-detail [downloadDto]="downloadDto"></download-detail>
         </mat-grid-tile>
       </mat-grid-list>
       <p *ngIf="downloadDtos.length == 0"> Downloads will be shown here</p>

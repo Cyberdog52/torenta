@@ -8,11 +8,13 @@ import bt.torrent.TorrentSessionState;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadDto;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRequest;
 import ch.andreskonrad.torenta.directory.service.DirectoryService;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbMovieDetailDto;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -51,10 +53,20 @@ public class BitTorrentService {
 
     public void startDownloadToPreferredFolder(DownloadRequest downloadRequest) {
         Path preferredDownloadFolder = this.directoryService.getRootDirectoryPath();
-        if (downloadRequest.getSeriesDetail() != null && downloadRequest.getTmdbEpisodeDto() != null) {
-            preferredDownloadFolder = this.directoryService.getDirectoryToSave(downloadRequest.getSeriesDetail().getName(), downloadRequest.getTmdbEpisodeDto().getSeason_number());
+        if (downloadRequest.getSeriesDetail() != null && downloadRequest.getTmdbEpisode() != null) {
+            preferredDownloadFolder = this.directoryService.createDirectoryToSaveSeries(downloadRequest.getSeriesDetail().getName(), downloadRequest.getTmdbEpisode().getSeason_number());
+        }
+        if (downloadRequest.getMovieDetail() != null) {
+            preferredDownloadFolder = this.directoryService.createDirectoryToSaveMovie(downloadRequest.getMovieDetail().getTitle(), getReleaseYear(downloadRequest.getMovieDetail()));
         }
         startDownload(downloadRequest, preferredDownloadFolder);
+    }
+
+    private Integer getReleaseYear(TmdbMovieDetailDto movieDetailDto) {
+        if (movieDetailDto.getRelease_date() == null || !movieDetailDto.getRelease_date().contains("-")) {
+            return null;
+        }
+        return Integer.valueOf(movieDetailDto.getRelease_date().split("-")[0]);
     }
 
     private static void processSessionState(TorrentSessionState state, int id) {

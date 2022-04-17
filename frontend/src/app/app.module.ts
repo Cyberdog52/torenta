@@ -20,6 +20,7 @@ import {ToolbarComponent} from './toolbar/toolbar.component';
 import {DelayedKeyupDirective} from "./shared/delayed-keyup.directive";
 import {NotificationComponent} from "./shared/notification/notification.component";
 import {DownloadDetailComponent} from './torrent/downloads/download-detail/download-detail.component';
+import { MovieDetailComponent } from './tmdb/movie-detail/movie-detail.component';
 
 @NgModule({
   declarations: [
@@ -35,7 +36,8 @@ import {DownloadDetailComponent} from './torrent/downloads/download-detail/downl
     ToolbarComponent,
     DelayedKeyupDirective,
     NotificationComponent,
-    DownloadDetailComponent
+    DownloadDetailComponent,
+    MovieDetailComponent
   ],
   imports: [
     BrowserModule,

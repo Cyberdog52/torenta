@@ -1,9 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {TorrentService} from "../torrent.service";
 import {DownloadDto} from "../../shared/dto/torrent/DownloadDto";
-import {DownloadState} from "../../shared/dto/torrent/DownloadState";
 import {NotificationService} from "../../shared/notification/notification.service";
 import {NotificationType} from "../../shared/dto/notification/Notification";
+import {DownloadRequestDto} from "../../shared/dto/torrent/DownloadRequestDto";
 
 @Component({
   selector: 'downloads',
@@ -29,7 +29,7 @@ export class DownloadsComponent implements OnInit {
       downloadDtos.forEach(updatedDto => {
         if (updatedDto.state === "FINISHED" && this.stateChanged(this.downloadDtos, updatedDto)) {
           this.notificationService.addNotifications({
-            content: `${this.getDownloadTitle(updatedDto)} ${this.getEpisodeString(updatedDto)} successfully downloaded.`,
+            content: `${DownloadRequestDto.getDownloadTitle(updatedDto.downloadRequest)} successfully downloaded.`,
             type: NotificationType.INFO
           })
         }
@@ -46,31 +46,6 @@ export class DownloadsComponent implements OnInit {
 
   downloadsLoaded() {
     return this.downloadDtos != null;
-  }
-
-  getEpisodeString(downloadDto: DownloadDto): string {
-    if (downloadDto.downloadRequest.tmdbEpisodeDto == null) {
-      return "";
-    }
-    let episodeStr = "S";
-    if (downloadDto.downloadRequest.tmdbEpisodeDto.season_number < 10) {
-      episodeStr += "0";
-    }
-    episodeStr += downloadDto.downloadRequest.tmdbEpisodeDto.season_number.toString();
-    episodeStr += "E";
-    if (downloadDto.downloadRequest.tmdbEpisodeDto.episode_number < 10) {
-      episodeStr += "0";
-    }
-    episodeStr += downloadDto.downloadRequest.tmdbEpisodeDto.episode_number.toString();
-    return episodeStr;
-  }
-
-  getDownloadTitle(downloadDto: DownloadDto) {
-    if (downloadDto.downloadRequest.seriesDetail != null) {
-      return downloadDto.downloadRequest.seriesDetail.name;
-    } else {
-      return downloadDto.downloadRequest.torrentEntry.name;
-    }
   }
 
   handleSize(event) {

@@ -1,6 +1,6 @@
 package ch.andreskonrad.torenta.tmdb.service;
 
-import ch.andreskonrad.torenta.tmdb.dto.TmdbSearchResultDto;
+import ch.andreskonrad.torenta.tmdb.dto.TmdbSeriesSearchResultDto;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbSeriesDetailDto;
 import org.junit.Ignore;
 import org.junit.Test;
@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = TmdbService.class)
@@ -23,15 +24,15 @@ public class TmdbServiceTest {
     @Ignore
     @Test
     public void manualSearch() {
-        TmdbSearchResultDto result = tmdbService.search("Walking Dead");
+        TmdbSeriesSearchResultDto result = tmdbService.searchSeries("Walking Dead");
 
-        assertEquals(1, result.getPage());
+        assertTrue(result.getResults().size() > 0);
     }
 
     @Ignore
     @Test
     public void manualGetSeries() {
-        TmdbSeriesDetailDto result = tmdbService.get(1402);
+        TmdbSeriesDetailDto result = tmdbService.getSeries(1402);
 
         assertEquals(1402, result.getId());
     }

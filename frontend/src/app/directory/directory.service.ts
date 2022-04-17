@@ -17,4 +17,9 @@ export class DirectoryService {
     let url = `${this.backendUrl}/series/${seriesName}`;
     return this.httpClient.get<DirectoryDto>(url);
   }
+
+  public getMovieDirectory(movieTitle: string, releaseYear: number): Observable<DirectoryDto> {
+    let url = `${this.backendUrl}/movie/${movieTitle}?releaseYear=${releaseYear}`;
+    return this.httpClient.get<DirectoryDto>(url);
+  }
 }

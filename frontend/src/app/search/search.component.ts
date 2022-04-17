@@ -10,37 +10,63 @@ export class SearchComponent implements OnInit {
 
   constructor(private searchService: SearchService) { }
 
-  public searchTVString : string;
+  public searchMovieString: string;
+  public searchSeriesString : string;
   public searchTorrentString: string;
   public delayedTorrentSearchString: string;
-  public searchResult: TmdbSearchResultDto;
+  public searchSeriesResult: TmdbSearchSeriesResultDto;
+  public searchMovieResult: TmdbSearchMoviesResultDto;
   public listOfOpenendPanels: number[] = [];
 
   ngOnInit() {
   }
 
-  public searchTmdb() : void {
-    if (this.searchTVString == null || this.searchTVString.length == 0) {
+  public searchSeries() : void {
+    if (this.searchSeriesString == null || this.searchSeriesString.length == 0) {
       return;
     }
-    this.searchService.searchTmdb(this.searchTVString).subscribe(searchResult => {
-      this.searchResult = searchResult;
+    this.searchService.searchSeries(this.searchSeriesString).subscribe(searchResult => {
+      this.searchSeriesResult = searchResult;
+      this.listOfOpenendPanels = [];
+    })
+  }
+
+  public searchMovie() : void {
+    if (this.searchMovieString == null || this.searchMovieString.length == 0) {
+      return;
+    }
+    this.searchService.searchMovies(this.searchMovieString).subscribe(searchResult => {
+      this.searchMovieResult = searchResult;
       this.listOfOpenendPanels = [];
     })
   }
 
   public getSeriesOverviews(): TmdbSeriesOverviewDto[] {
-    if (this.searchResult == null) {
+    if (this.searchSeriesResult == null) {
       return [];
     }
-    return this.searchResult.results.sort((a, b) => b.popularity - a.popularity);
+    return this.searchSeriesResult.results.sort((a, b) => b.popularity - a.popularity);
   }
 
-  getImageFor(seriesOverview: TmdbSeriesOverviewDto): string {
+  getMovieOverviews(): TmdbMovieOverviewDto[] {
+    if (this.searchMovieResult == null) {
+      return [];
+    }
+    return this.searchMovieResult.results.sort((a, b) => b.popularity - a.popularity);
+  }
+
+  getImageForSeries(seriesOverview: TmdbSeriesOverviewDto): string {
     if (seriesOverview.poster_path == null) {
       return "../../assets/tvnotfound.png";
     }
     return "https://image.tmdb.org/t/p/w500/" + seriesOverview.poster_path;
+  }
+
+  getImageForMovie(tvOverview: TmdbMovieOverviewDto): string {
+    if (tvOverview.poster_path == null) {
+      return "../../assets/tvnotfound.png";
+    }
+    return "https://image.tmdb.org/t/p/w500/" + tvOverview.poster_path;
   }
 
   setPanelClosed(id: number) {
@@ -56,7 +82,6 @@ export class SearchComponent implements OnInit {
     }
     this.listOfOpenendPanels.push(id);
   }
-
   //check if panel is open to make sure you do not load all the seriesDetail before they are opened
   //would exceed maximum of requests per 10 seconds (40)
 

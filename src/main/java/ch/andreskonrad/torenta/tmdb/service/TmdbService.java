@@ -1,10 +1,7 @@
 package ch.andreskonrad.torenta.tmdb.service;
 
 import ch.andreskonrad.torenta.CustomCacheConfig;
-import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
-import ch.andreskonrad.torenta.tmdb.dto.TmdbSearchResultDto;
-import ch.andreskonrad.torenta.tmdb.dto.TmdbSeasonDto;
-import ch.andreskonrad.torenta.tmdb.dto.TmdbSeriesDetailDto;
+import ch.andreskonrad.torenta.tmdb.dto.*;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
@@ -30,10 +27,10 @@ public class TmdbService {
 
 
     @Cacheable
-    public TmdbSearchResultDto search(String searchString) {
-        String jsonStringResponse = searchRequest(searchString);
+    public TmdbSeriesSearchResultDto searchSeries(String searchString) {
+        String jsonStringResponse = searchSeriesRequest(searchString);
         try {
-            return new ObjectMapper().readValue(jsonStringResponse, TmdbSearchResultDto.class);
+            return new ObjectMapper().readValue(jsonStringResponse, TmdbSeriesSearchResultDto.class);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -41,10 +38,32 @@ public class TmdbService {
     }
 
     @Cacheable
-    public TmdbSeriesDetailDto get(int id) {
-        String jsonStringResponse = detailRequest(id);
+    public TmdbMoviesSearchResultDto searchMovies(String searchString) {
+        String jsonStringResponse = searchMovieRequest(searchString);
+        try {
+            return new ObjectMapper().readValue(jsonStringResponse, TmdbMoviesSearchResultDto.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Cacheable
+    public TmdbSeriesDetailDto getSeries(int id) {
+        String jsonStringResponse = detailSeriesRequest(id);
         try {
             return new ObjectMapper().readValue(jsonStringResponse, TmdbSeriesDetailDto.class);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    @Cacheable
+    public TmdbMovieDetailDto getMovie(int id) {
+        String jsonStringResponse = detailMovieRequest(id);
+        try {
+            return new ObjectMapper().readValue(jsonStringResponse, TmdbMovieDetailDto.class);
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -64,7 +83,7 @@ public class TmdbService {
         }
     }
 
-    private String detailRequest(int id) {
+    private String detailSeriesRequest(int id) {
         return httpGet(getDefaultComponentsBuilder()
                 .path("/3/tv/" + String.valueOf(id))
                 .build()
@@ -72,11 +91,30 @@ public class TmdbService {
                 .toUri());
     }
 
-    private String searchRequest(String searchString) {
+    private String detailMovieRequest(int id) {
+        return httpGet(getDefaultComponentsBuilder()
+                .path("/3/movie/" + String.valueOf(id))
+                .build()
+                .encode()
+                .toUri());
+    }
+
+    private String searchSeriesRequest(String searchString) {
         return httpGet(getDefaultComponentsBuilder()
                 .path("/3/search/tv")
                 .queryParam("query", searchString.toLowerCase())
                 .queryParam("page", "1")
+                .build()
+                .encode()
+                .toUri());
+    }
+
+    private String searchMovieRequest(String searchString) {
+        return httpGet(getDefaultComponentsBuilder()
+                .path("/3/search/movie")
+                .queryParam("query", searchString.toLowerCase())
+                .queryParam("page", "1")
+                .queryParam("include_adult", false)
                 .build()
                 .encode()
                 .toUri());

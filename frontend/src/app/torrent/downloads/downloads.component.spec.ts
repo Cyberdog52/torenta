@@ -2,7 +2,7 @@ import {TestBed} from "@angular/core/testing";
 import {DownloadsComponent} from "./downloads.component";
 import {TorrentService} from "../torrent.service";
 import {NotificationService} from "../../shared/notification/notification.service";
-import {DownloadRequest} from "../../shared/dto/torrent/DownloadRequest";
+import {DownloadRequestDto} from "../../shared/dto/torrent/DownloadRequestDto";
 import {of, Subject} from 'rxjs';
 import {DownloadDto} from "../../shared/dto/torrent/DownloadDto";
 import {DownloadState} from "../../shared/dto/torrent/DownloadState";
@@ -14,7 +14,7 @@ const torrentServiceMock = {
   getDownloadDtosObservable: () => {
     return torrentServiceMock.torrents;
   },
-  startTorrent: (downloadRequest: DownloadRequest) => {
+  startTorrent: (downloadRequest: DownloadRequestDto) => {
     return of(true)
   }
 };
@@ -32,7 +32,7 @@ const notificationServiceMock = {
 const mockDto = <DownloadDto>{
   id: 1,
   downloadRequest: {
-    tmdbEpisodeDto: {
+    tmdbEpisode: {
       season_number: 1,
       episode_number: 1
     },

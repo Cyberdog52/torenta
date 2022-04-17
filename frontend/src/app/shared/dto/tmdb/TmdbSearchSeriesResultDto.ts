@@ -1,0 +1,3 @@
+interface TmdbSearchSeriesResultDto {
+  results: TmdbSeriesOverviewDto[];
+}

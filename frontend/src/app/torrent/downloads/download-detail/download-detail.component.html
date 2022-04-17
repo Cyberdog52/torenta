@@ -1,10 +1,10 @@
 <div class="downloadDetail">
   <div class="background-container">
-    <img class="background-image" src="{{getBackgroundImageFor(downloadDto.downloadRequest?.seriesDetail)}}" />
+    <img class="background-image" src="{{getBackgroundImageFor(downloadDto.downloadRequest)}}" />
     <div class="background-image-shadow"></div>
   </div>
   <div class="foreground-container">
-    <p class="download_title"> {{getDownloadTitle(downloadDto)}} {{getEpisodeString(downloadDto)}}</p>
+    <p class="download_title"> {{getDownloadTitle(downloadDto)}}</p>
     <p><mat-icon>link</mat-icon> {{getPeers()}}</p>
     <p><mat-icon>network_check</mat-icon> {{getSpeed()}}</p>
     <p><mat-icon>timelapse</mat-icon> {{getEstimatedTimeFinished()}}</p>

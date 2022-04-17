@@ -1,12 +1,13 @@
 import {Component, Input, OnChanges, OnInit} from '@angular/core';
 import {TorrentEntry} from "../../shared/dto/pirateBay/TorrentEntry";
 import {TorrentService} from "../torrent.service";
-import {DownloadRequest} from "../../shared/dto/torrent/DownloadRequest";
+import {DownloadRequestDto} from "../../shared/dto/torrent/DownloadRequestDto";
 import {TmdbEpisodeDto} from "../../shared/dto/tmdb/TmdbEpisodeDto";
 import {TmdbSeriesDetailDto} from "../../shared/dto/tmdb/TmdbSeriesDetailDto";
 import {DownloadDto} from "../../shared/dto/torrent/DownloadDto";
 import {NotificationService} from "../../shared/notification/notification.service";
 import {NotificationType} from "../../shared/dto/notification/Notification";
+import {TmdbMovieDetailDto} from "../../shared/dto/tmdb/TmdbMovieDetailDto";
 
 @Component({
   selector: 'torrent-suggestions',
@@ -15,9 +16,10 @@ import {NotificationType} from "../../shared/dto/notification/Notification";
 })
 export class TorrentSuggestionsComponent implements OnInit, OnChanges {
 
-  @Input() seriesDetail: TmdbSeriesDetailDto;
-  @Input() tmdbEpisodeDto: TmdbEpisodeDto;
-  @Input() searchString: string;
+  @Input() seriesDetail?: TmdbSeriesDetailDto;
+  @Input() tmdbEpisodeDto?: TmdbEpisodeDto;
+  @Input() movieDetail?: TmdbMovieDetailDto;
+  @Input() searchString?: string;
   suggestions: TorrentEntry[];
   displayedColumns: string[] = ['name', 'seeders', 'time', 'size', 'trusted', 'startDownload'];
   downloadDtos: DownloadDto[] = [];
@@ -57,37 +59,24 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
   }
 
   startDownload(torrentEntry: TorrentEntry) {
-    const downloadRequest: DownloadRequest = {
-      "tmdbEpisodeDto": this.tmdbEpisodeDto,
+    const downloadRequest: DownloadRequestDto = {
+      "tmdbEpisode": this.tmdbEpisodeDto,
       "seriesDetail": this.seriesDetail,
-      "torrentEntry": torrentEntry
-
+      "torrentEntry": torrentEntry,
+      "movieDetail": this.movieDetail
     };
+    console.log(downloadRequest);
     this.torrentService.startTorrent(downloadRequest).subscribe(response => {
       console.log("Torrent started for downloadRequest ", downloadRequest);
       this.notificationService.addNotifications({
-        content: `Started downloading ${downloadRequest.seriesDetail.name} S${downloadRequest.tmdbEpisodeDto.season_number}E${downloadRequest.tmdbEpisodeDto.episode_number}`,
+        content: `Started downloading ${DownloadRequestDto.getDownloadTitle(downloadRequest)}`,
         type: NotificationType.INFO
       })
     });
   }
 
   createSearchString(): string {
-    return this.seriesDetail.name + " " + this.getEpisodeString();
-  }
-
-  getEpisodeString(): string {
-    let episodeStr = "S";
-    if (this.tmdbEpisodeDto.season_number < 10) {
-      episodeStr += "0";
-    }
-    episodeStr += this.tmdbEpisodeDto.season_number.toString();
-    episodeStr += "E";
-    if (this.tmdbEpisodeDto.episode_number < 10) {
-      episodeStr += "0";
-    }
-    episodeStr += this.tmdbEpisodeDto.episode_number.toString();
-    return episodeStr;
+    return this.seriesDetail ? this.seriesDetail.name + " " + DownloadRequestDto.getEpisodeString(this.tmdbEpisodeDto) : this.movieDetail.title;
   }
 
   hasNotStartedDownload(pirateBayEntry: TorrentEntry): boolean {
