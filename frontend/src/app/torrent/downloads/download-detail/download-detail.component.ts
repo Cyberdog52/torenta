@@ -2,9 +2,10 @@ import {Component, Input, OnInit} from '@angular/core';
 import {DownloadDto} from "../../../shared/dto/torrent/DownloadDto";
 import {DownloadState} from "../../../shared/dto/torrent/DownloadState";
 import {TmdbSeriesDetailDto} from "../../../shared/dto/tmdb/TmdbSeriesDetailDto";
+import {DownloadRequestDto} from "../../../shared/dto/torrent/DownloadRequestDto";
 
 @Component({
-  selector: 'app-download-detail',
+  selector: 'download-detail',
   templateUrl: './download-detail.component.html',
   styleUrls: ['./download-detail.component.scss']
 })
@@ -31,36 +32,18 @@ export class DownloadDetailComponent implements OnInit {
     return downloadDto.state;
   }
 
-  getEpisodeString(downloadDto: DownloadDto): string {
-    if (downloadDto.downloadRequest.tmdbEpisodeDto == null) {
-      return "";
-    }
-    let episodeStr = "S";
-    if (downloadDto.downloadRequest.tmdbEpisodeDto.season_number < 10) {
-      episodeStr += "0";
-    }
-    episodeStr += downloadDto.downloadRequest.tmdbEpisodeDto.season_number.toString();
-    episodeStr += "E";
-    if (downloadDto.downloadRequest.tmdbEpisodeDto.episode_number < 10) {
-      episodeStr += "0";
-    }
-    episodeStr += downloadDto.downloadRequest.tmdbEpisodeDto.episode_number.toString();
-    return episodeStr;
-  }
-
   getDownloadTitle(downloadDto: DownloadDto) {
-    if (downloadDto.downloadRequest.seriesDetail != null) {
-      return downloadDto.downloadRequest.seriesDetail.name;
-    } else {
-      return downloadDto.downloadRequest.torrentEntry.name;
-    }
+    return DownloadRequestDto.getDownloadTitle(downloadDto.downloadRequest);
   }
 
-  getBackgroundImageFor(seriesDetail: TmdbSeriesDetailDto): string {
-    if (seriesDetail == null || seriesDetail.backdrop_path == null) {
+  getBackgroundImageFor(downloadRequest: DownloadRequestDto): string {
+    if (downloadRequest.seriesDetail != null && downloadRequest.seriesDetail.backdrop_path != null) {
+      return "https://image.tmdb.org/t/p/original/" + downloadRequest.seriesDetail.backdrop_path;
+    } else if (downloadRequest.movieDetail != null && downloadRequest.movieDetail.backdrop_path != null){
+      return "https://image.tmdb.org/t/p/original/" + downloadRequest.movieDetail.backdrop_path;
+    } else {
       return "../../assets/tvnotfound.png";
     }
-    return "https://image.tmdb.org/t/p/original/" + seriesDetail.backdrop_path;
   }
 
   getSpeed(): string {

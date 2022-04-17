@@ -1,0 +1,3 @@
+interface TmdbSearchMoviesResultDto {
+  results: TmdbMovieOverviewDto[];
+}

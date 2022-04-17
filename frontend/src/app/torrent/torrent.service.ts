@@ -2,7 +2,7 @@ import {Injectable, OnDestroy} from "@angular/core";
 import {HttpClient} from "@angular/common/http";
 import {BehaviorSubject, Observable} from "rxjs";
 import {DownloadDto} from "../shared/dto/torrent/DownloadDto";
-import {DownloadRequest} from "../shared/dto/torrent/DownloadRequest";
+import {DownloadRequestDto} from "../shared/dto/torrent/DownloadRequestDto";
 import {TorrentEntry} from "../shared/dto/pirateBay/TorrentEntry";
 
 @Injectable({
@@ -28,7 +28,7 @@ export class TorrentService implements OnDestroy{
     return this._downloadDtos.asObservable();
   }
 
-  public startTorrent(downloadRequest: DownloadRequest): Observable<any> {
+  public startTorrent(downloadRequest: DownloadRequestDto): Observable<any> {
     let url = `${this.backendUrl}`;
     return this.httpClient.post<any>(url, downloadRequest);
   }

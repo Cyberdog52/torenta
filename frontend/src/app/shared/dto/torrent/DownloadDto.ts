@@ -1,11 +1,11 @@
 import {DownloadState} from "./DownloadState";
-import {DownloadRequest} from "./DownloadRequest";
+import {DownloadRequestDto} from "./DownloadRequestDto";
 
 export interface DownloadDto {
   id: number;
   state: DownloadState;
   progress: number;
-  downloadRequest: DownloadRequest;
+  downloadRequest: DownloadRequestDto;
   startTimeInMs: number;
   connectedPeers: number;
   totalBytes: number;

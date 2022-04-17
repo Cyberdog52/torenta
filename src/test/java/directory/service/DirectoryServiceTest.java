@@ -57,13 +57,14 @@ public class DirectoryServiceTest {
     }
 
     @Test
-    public void getMoviePath_createsMovieDirectory() {
-        Path moviePath = directoryService.getPathForMovie("Star Wars");
+    public void createDirectoryToSaveMovie_createsMovieDirectory() {
+        Path moviePath = directoryService.createDirectoryToSaveMovie("Star Wars", 1977);
 
         assertTrue(Files.exists(moviePath));
         assertTrue(Files.isDirectory(moviePath));
         String parentName = moviePath.getParent().getFileName().toString();
         assertEquals("Movies", parentName);
+        assertEquals("Star Wars (1977)", moviePath.getFileName().toString());
     }
 
     @Test
@@ -75,7 +76,7 @@ public class DirectoryServiceTest {
 
     @Test
     public void getSeasonPath_season1_createsSeasonDirectory() {
-        Path seasonPath = directoryService.getDirectoryToSave("Mandalorian", 1);
+        Path seasonPath = directoryService.createDirectoryToSaveSeries("Mandalorian", 1);
 
         assertTrue(Files.exists(seasonPath));
         assertTrue(Files.isDirectory(seasonPath));
@@ -86,7 +87,7 @@ public class DirectoryServiceTest {
 
     @Test
     public void getSeasonPath_season10_createsSeasonDirectory() {
-        Path seasonPath = directoryService.getDirectoryToSave("Mandalorian", 10);
+        Path seasonPath = directoryService.createDirectoryToSaveSeries("Mandalorian", 10);
 
         assertTrue(Files.exists(seasonPath));
         assertTrue(Files.isDirectory(seasonPath));

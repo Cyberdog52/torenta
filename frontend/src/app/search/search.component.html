@@ -3,20 +3,45 @@
     Search TV Show
   </mat-card-title>
   <mat-card-content>
-    <input matInput placeholder="TV Show" [(ngModel)]="searchTVString" (delayedKeyup)="searchTmdb()">
+    <input matInput placeholder="TV Show" [(ngModel)]="searchSeriesString" (delayedKeyup)="searchSeries()">
   </mat-card-content>
   <mat-card-footer>
-    <mat-accordion *ngIf="searchResult">
+    <mat-accordion *ngIf="searchSeriesResult">
       <mat-expansion-panel *ngFor="let seriesOverview of getSeriesOverviews()" (opened)="setPanelOpen(seriesOverview.id)"
                            (closed)="setPanelClosed(seriesOverview.id)">
         <mat-expansion-panel-header>
           <mat-panel-title>
-            <img class="icon_image" src="{{getImageFor(seriesOverview)}}"/>
+            <img class="icon_image" src="{{getImageForSeries(seriesOverview)}}"/>
             <h4 class="series_title">{{seriesOverview.name}}</h4>
           </mat-panel-title>
         </mat-expansion-panel-header>
         <div *ngIf="isPanelOpen(seriesOverview.id)">
           <series-detail [id]="seriesOverview.id"></series-detail>
+        </div>
+      </mat-expansion-panel>
+    </mat-accordion>
+  </mat-card-footer>
+</mat-card>
+
+<mat-card>
+  <mat-card-title>
+    Search Movie
+  </mat-card-title>
+  <mat-card-content>
+    <input matInput placeholder="Movie" [(ngModel)]="searchMovieString" (delayedKeyup)="searchMovie()">
+  </mat-card-content>
+  <mat-card-footer>
+    <mat-accordion *ngIf="searchMovieResult">
+      <mat-expansion-panel *ngFor="let movieOverview of getMovieOverviews()" (opened)="setPanelOpen(movieOverview.id)"
+                           (closed)="setPanelClosed(movieOverview.id)">
+        <mat-expansion-panel-header>
+          <mat-panel-title>
+            <img class="icon_image" src="{{getImageForMovie(movieOverview)}}"/>
+            <h4 class="series_title">{{movieOverview.original_title}}</h4>
+          </mat-panel-title>
+        </mat-expansion-panel-header>
+        <div *ngIf="isPanelOpen(movieOverview.id)">
+          <movie-detail [id]="movieOverview.id"></movie-detail>
         </div>
       </mat-expansion-panel>
     </mat-accordion>

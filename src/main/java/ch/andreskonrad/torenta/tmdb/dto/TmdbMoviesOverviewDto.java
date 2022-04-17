@@ -6,25 +6,24 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.util.List;
-import java.util.Objects;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
 @EqualsAndHashCode(of = "id")
 @NoArgsConstructor
 @Getter
-public class TmdbSeriesOverviewDto {
-
-    private String original_name;
-    private List<Integer> genre_ids;
-    private String name;
-    private double popularity;
-    private List<String> origin_country;
-    private int vote_count;
-    private String first_air_date;
-    private String backdrop_path;
-    private String original_language;
-    private int id;
-    private double vote_average;
+public class TmdbMoviesOverviewDto {
     private String overview;
     private String poster_path;
+    private boolean adult;
+    private String release_date;
+    private List<Integer> genre_ids;
+    private int id;
+    private String original_title;
+    private String original_language;
+    private String title;
+    private String backdrop_path;
+    private double popularity;
+    private int vote_count;
+    private boolean video;
+    private double vote_average;
 }

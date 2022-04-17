@@ -44,8 +44,8 @@ public class DirectoryService {
         return tvDirectoryPath.resolve(removeIllegalCharacters(seriesName));
     }
 
-    private String removeIllegalCharacters(String seriesName) {
-        return seriesName.replaceAll("[^a-zA-Z0-9\\- ]", "");
+    private String removeIllegalCharacters(String title) {
+        return title.replaceAll("[^a-zA-Z0-9\\- ]", "");
     }
 
     public Path getRootDirectoryPath() {
@@ -53,18 +53,26 @@ public class DirectoryService {
         return rootDirectoryPath;
     }
 
-    public Path getPathForMovie(String movieName) {
-        Path moviesPath = moviesDirectoryPath.resolve(movieName);
-        createDirectoryIfNeeded(moviesPath);
-        return moviesPath;
+    public Path getPathForMovie(String movieTitle, Integer releaseYear) {
+        if (releaseYear != null && releaseYear > 1878) {
+            return moviesDirectoryPath.resolve(removeIllegalCharacters(movieTitle) + " (" + releaseYear + ")");
+        } else {
+            return moviesDirectoryPath.resolve(removeIllegalCharacters(movieTitle));
+        }
     }
 
-    public Path getDirectoryToSave(String seriesName, int seasonNumber) {
+    public Path createDirectoryToSaveSeries(String seriesName, int seasonNumber) {
         Path seriesPath = getPathForSeries(seriesName);
         createDirectoryIfNeeded(seriesPath);
         Path seasonPath = seriesPath.resolve(getSeasonName(seasonNumber));
         createDirectoryIfNeeded(seasonPath);
         return seasonPath;
+    }
+
+    public Path createDirectoryToSaveMovie(String movieName, Integer releaseYear) {
+        Path moviesPath = getPathForMovie(movieName, releaseYear);
+        createDirectoryIfNeeded(moviesPath);
+        return moviesPath;
     }
 
     private String getSeasonName(int seasonNumber) {
@@ -91,7 +99,7 @@ public class DirectoryService {
 
             return new DirectoryDto(name, files, directories, path.toAbsolutePath().toString());
         } catch(IOException e) {
-            e.printStackTrace();
+            LOGGER.info("Couldn't find directory for " + path.getFileName().toString());
             return null;
         }
     }
@@ -128,6 +136,12 @@ public class DirectoryService {
 
     public DirectoryDto getSeriesDirectory(String seriesTitle) {
         Path pathForSeries = getPathForSeries(seriesTitle);
+
+        return getDirectoryDto(pathForSeries);
+    }
+
+    public DirectoryDto getMovieDirectory(String movieTitle, Integer releaseYear) {
+        Path pathForSeries = getPathForMovie(movieTitle, releaseYear);
 
         return getDirectoryDto(pathForSeries);
     }

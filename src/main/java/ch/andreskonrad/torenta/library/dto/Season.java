@@ -34,10 +34,10 @@ public class Season {
         DownloadDto episodeDownloadDto = null;
         for (DownloadDto downloadDto : downloadDtoSet) {
             if (downloadDto.getDownloadRequest() == null ||
-                    downloadDto.getDownloadRequest().getTmdbEpisodeDto() == null) {
+                    downloadDto.getDownloadRequest().getTmdbEpisode() == null) {
                 continue;
             }
-            if (downloadDto.getDownloadRequest().getTmdbEpisodeDto().equals(tmdbEpisodeDto)) {
+            if (downloadDto.getDownloadRequest().getTmdbEpisode().equals(tmdbEpisodeDto)) {
                 episodeDownloadDto = downloadDto;
             }
         }

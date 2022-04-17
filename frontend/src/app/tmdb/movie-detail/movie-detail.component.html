@@ -1,0 +1,32 @@
+<div *ngIf="isLoading()">
+  <mat-progress-spinner mode="indeterminate">
+  </mat-progress-spinner>
+</div>
+<div *ngIf="!isLoading()" class="movieDetail">
+  <div class="background-container">
+    <img class="background-image" src="{{getBackgroundImageFor(movieDetail)}}" />
+    <div class="background-image-shadow"></div>
+  </div>
+  <div class="foreground-container">
+    <p class="overview">
+      <mat-icon>date_range</mat-icon>{{movieDetail.release_date}} •
+      <mat-icon>timer</mat-icon>{{movieDetail.runtime }} •
+      <mat-icon>star</mat-icon>{{movieDetail.vote_average}}
+    </p>
+    <p *ngIf="movieDirectory">
+      <mat-icon>snippet_folder</mat-icon> {{movieDirectory.absolutePath}}
+    </p>
+    <p>
+      <mat-chip-list>
+        <mat-chip *ngFor="let genre of movieDetail.genres">
+          {{genre.name}}
+        </mat-chip>
+      </mat-chip-list>
+    </p>
+    <p class="overview">{{movieDetail.overview}}</p>
+    <p>
+      <torrent-suggestions [movieDetail]="movieDetail"></torrent-suggestions>
+    </p>
+
+  </div>
+</div>
