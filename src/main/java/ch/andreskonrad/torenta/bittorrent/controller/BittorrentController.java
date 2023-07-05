@@ -3,6 +3,7 @@ package ch.andreskonrad.torenta.bittorrent.controller;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadDto;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRequest;
 import ch.andreskonrad.torenta.bittorrent.service.BitTorrentService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -12,6 +13,7 @@ import java.util.Set;
 
 @RestController
 @RequestMapping("/api/bittorrent")
+@Slf4j
 public class BittorrentController {
 
     private final BitTorrentService bitTorrentService;
@@ -26,6 +28,7 @@ public class BittorrentController {
         try {
             this.bitTorrentService.startDownloadToPreferredFolder(downloadRequest);
         } catch (Exception exception) {
+            log.error(exception.getMessage(), exception);
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         return new ResponseEntity<>(HttpStatus.OK);
