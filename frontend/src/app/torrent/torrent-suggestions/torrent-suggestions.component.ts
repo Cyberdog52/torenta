@@ -76,7 +76,8 @@ export class TorrentSuggestionsComponent implements OnInit, OnChanges {
   }
 
   createSearchString(): string {
-    return this.seriesDetail ? this.seriesDetail.name + " " + DownloadRequestDto.getEpisodeString(this.tmdbEpisodeDto) : this.movieDetail.title;
+    let searchString = this.seriesDetail ? this.seriesDetail.name + " " + DownloadRequestDto.getEpisodeString(this.tmdbEpisodeDto) : this.movieDetail.title;
+    return searchString.split(':').pop(); // change 'Star Wars: Andor S01E01' to 'Andor S01E01'
   }
 
   hasNotStartedDownload(pirateBayEntry: TorrentEntry): boolean {
