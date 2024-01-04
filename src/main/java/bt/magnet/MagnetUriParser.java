@@ -24,12 +24,7 @@ import org.slf4j.LoggerFactory;
 
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -41,12 +36,10 @@ public class MagnetUriParser {
     private static final String SCHEME = "magnet";
     private static final String INFOHASH_PREFIX = "urn:btih:";
     private static final String MULTIHASH_PREFIX = "urn:btmh:";
+    private final boolean lenient;
 
-    private static class UriParams {
-        private static final String TORRENT_ID = "xt";
-        private static final String DISPLAY_NAME = "dn";
-        private static final String TRACKER_URL = "tr";
-        private static final String PEER = "x.pe";
+    private MagnetUriParser(boolean lenient) {
+        this.lenient = lenient;
     }
 
     /**
@@ -71,12 +64,6 @@ public class MagnetUriParser {
      */
     public static MagnetUriParser lenientParser() {
         return new MagnetUriParser(true);
-    }
-
-    private final boolean lenient;
-
-    private MagnetUriParser(boolean lenient) {
-        this.lenient = lenient;
     }
 
     /**
@@ -146,6 +133,9 @@ public class MagnetUriParser {
         String[] params = uri.getSchemeSpecificPart().substring(1).split("&");
         for (String param : params) {
             String[] parts = param.split("=");
+            if (parts.length <= 1) {
+                continue;
+            }
             String name = parts[0];
             String value = parts[1];
             List<String> values = paramsMap.get(name);
@@ -194,5 +184,12 @@ public class MagnetUriParser {
         String hostname = parts[0];
         int port = Integer.valueOf(parts[1]);
         return new InetPeerAddress(hostname, port);
+    }
+
+    private static class UriParams {
+        private static final String TORRENT_ID = "xt";
+        private static final String DISPLAY_NAME = "dn";
+        private static final String TRACKER_URL = "tr";
+        private static final String PEER = "x.pe";
     }
 }
