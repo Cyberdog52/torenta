@@ -26,7 +26,7 @@ public class PirateBayHtmlAPI {
                 try {
                     torrentEntries.add(parsePiratebayEntry(row));
                 } catch (Exception e) {
-                   //  System.out.println("Could not parse element " + row.toString());
+                    //  System.out.println("Could not parse element " + row.toString());
                 }
             }
         }
@@ -43,7 +43,7 @@ public class PirateBayHtmlAPI {
                     .userAgent("Java 11 HttpClient Bot")
                     .timeout(5000)
                     .get();
-        } catch (Exception e ) {
+        } catch (Exception e) {
             return getDocumentWithRetries(query, retriesLeft - 1);
         }
     }
@@ -51,20 +51,22 @@ public class PirateBayHtmlAPI {
     private static TorrentEntry parsePiratebayEntry(Element element) {
         final TorrentSearchBuilder builder = new TorrentSearchBuilder();
 
-        //TODO: refactor some more
         Element td1 = element.children().select("td").first();
         ArrayList<Element> categories = td1.children().select("a");
-        builder.setCategory(categories.get(0).text())
-                .setSubCategory(categories.get(1).text());
+        builder.setCategory(categories.get(0).text());
 
         Element td2 = element.children().select("td").get(1);
         Element aTorrentName = td2.children().select("a").first();
-        Element torrentMagnet = td2.children().select("a").get(1);
-        builder.setName(aTorrentName.text())
-                .setLink(aTorrentName.attr("href"))
-                .setMagnetLink(torrentMagnet.attr("href"));
+        builder.setName(aTorrentName.text());
 
-        ArrayList<Element> icons = td2.children().select("img");
+        Element td3 = element.children().select("td").get(2);
+        builder.setUploadedTime(td3.text());
+
+        Element td4 = element.children().select("td").get(3);
+        Element magnetLink = td4.children().select("a").first();
+        builder.setMagnetLink(magnetLink.attr("href"));
+
+        ArrayList<Element> icons = td4.children().select("img");
         for (Element icon : icons) {
             String attribute = icon.attr("alt");
 
@@ -76,23 +78,18 @@ public class PirateBayHtmlAPI {
             }
         }
 
-        Element details = td2.select("font").first();
-        String[] uploadInfos = details.text().split(",");
+        Element td5 = element.children().select("td").get(4);
+        builder.setSize(td5.text());
 
-        builder.setUploadedTime(uploadInfos[0].substring(9))
-                .setSize(uploadInfos[1].substring(6))
-                .setUploader(uploadInfos[2].substring(9));
+        Element td6 = element.children().select("td").get(5);
+        builder.setNumberOfSeeders(Integer.parseInt(td6.text()));
 
-        Element td3 = element.children().select("td").get(2);
-        builder.setNumberOfSeeders(Integer.parseInt(td3.text()));
+        Element td7 = element.children().select("td").get(6);
+        builder.setNumberOfLeechers(Integer.parseInt(td7.text()));
 
-        try {
-            Element td4 = element.children().select("td").get(3);
-            builder.setNumberOfLeechers(Integer.parseInt(td4.text()));
-        }
-        catch (Exception e) {
-            e.printStackTrace();
-        }
+        Element td8 = element.children().select("td").get(7);
+        builder.setUploader(td8.text());
+
         return builder.createTorrentEntry();
     }
 }
