@@ -24,6 +24,19 @@ The enterprise version is recommended.
 First, you need to get an API key from [TMDB](https://developers.themoviedb.org/3/getting-started/introduction). Create an `application.properties` from the template and add the key. Do not check in the `application.properties` file.
 
 #### NodeJs
+This frontend depends on an Angular 6 toolchain and must be run with **Node.js 10-16**.
+
+```bash
+nvm use
+```
+
+If you do not have the required runtime installed yet:
+
+```bash
+nvm install 16
+nvm use 16
+```
+
 Install newest version of NodeJs from [here](https://nodejs.org/en/download/).
 Restart IntelliJ and execute the following code:
 ```
