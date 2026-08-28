@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "deny": [
+      "Read(src/main/resources/application.properties)",
+      "Read(.env)",
+      "Read(.env.*)"
+    ]
+  }
+}
