@@ -192,6 +192,10 @@ Add new functionality as a new feature slice following this pattern; do not crea
 - **Backend:** JUnit 5 with Mockito (see `src/test/java/**`). Add/adjust tests for new or changed
   service logic. Run: `./gradlew test` (Windows: `.\gradlew.bat test`).
 - **Frontend:** Karma + Jasmine (`*.spec.ts`). Run: `cd frontend; npm test`.
+- **End-to-end:** Playwright (`frontend/e2e/**/*.spec.js`), organized in feature folders. Run:
+  `cd frontend; npm run e2e`; this starts the backend and frontend and verifies the rendered
+  application and the Preferences API flow. Use `npm run e2e:ui` for the interactive Playwright
+  runner.
 - Generate tests for new functionality and bug fixes. Do not delete or weaken existing tests to
   make a build pass — fix the cause.
 
@@ -257,10 +261,13 @@ Add new functionality as a new feature slice following this pattern; do not crea
 
 # Frontend (from ./frontend)
 npm install                # install deps (Node 10-16, npm 6-8)
+npx playwright install chromium  # install the e2e browser once
 npm start                  # dev server http://localhost:4200 (proxies /api to :8080)
 npm run build              # production build
 npm test                   # Karma/Jasmine unit tests
 npm run lint               # tslint
+npm run e2e                # Playwright smoke test; starts backend + frontend
+npm run e2e:ui             # interactive Playwright test runner
 ```
 
 - Backend API base: `http://localhost:8080/`; Swagger UI: `http://localhost:8080/swagger-ui.html`.
