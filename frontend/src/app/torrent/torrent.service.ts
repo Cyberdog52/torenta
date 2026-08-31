@@ -20,8 +20,6 @@ export class TorrentService {
    *
    * Polling starts on first subscription and stops again once the last
    * subscriber goes away, so navigating away actually stops the traffic.
-   * The previous `setInterval` lived in a root provider whose `ngOnDestroy`
-   * never fires, so it polled forever.
    */
   readonly downloads$: Observable<DownloadDto[]> = timer(0, POLL_INTERVAL_MS).pipe(
     switchMap(() =>

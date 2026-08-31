@@ -5,10 +5,9 @@ import { debounce, Subject, timer } from 'rxjs';
 /**
  * Emits the input's value after the user stopped typing for `delay` ms.
  *
- * `debounce(() => timer(this.delay()))` re-reads the delay on every emission.
- * The previous implementation called `debounceTime(this.delay)` in the
- * constructor, before inputs were bound, so a custom `[delay]` was silently
- * ignored and it always used the default.
+ * `debounce(() => timer(this.delay()))` re-reads the delay on every emission,
+ * so a custom `[delay]` input is respected even though it isn't available yet
+ * when this class is constructed.
  */
 @Directive({
   selector: '[appDelayedKeyup]',

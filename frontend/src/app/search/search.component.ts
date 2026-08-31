@@ -42,8 +42,8 @@ export class SearchComponent {
   protected readonly movieSearch = this.searchService.searchMoviesResource(this.movieQuery);
 
   /**
-   * Sorted copies. The previous getters called `.sort()` on the response array
-   * directly from the template, mutating it on every change-detection pass.
+   * Sorted copies, computed with `toSorted` so the underlying resource value
+   * is never mutated by re-running this on every change-detection pass.
    */
   protected readonly seriesOverviews = computed(
     () =>

@@ -7,7 +7,7 @@ html {
   // needed to support both palettes.
   color-scheme: light dark;
 
-  // Replaces the removed Angular Material 6 Sass API
+  // Angular Material's Sass API for defining a theme
   // (`@import '~@angular/material/theming'`, `mat-palette`, `mat-color`).
   @include mat.theme(
     (
@@ -34,8 +34,7 @@ body {
 }
 
 // Constrains page content to a comfortable reading width and provides
-// consistent gutters at every viewport size. Nothing in the app had a
-// max-width before, so content stretched edge-to-edge on wide screens.
+// consistent gutters at every viewport size.
 .page {
   box-sizing: border-box;
   max-width: 1100px;
@@ -45,4 +44,11 @@ body {
   @media (min-width: 600px) {
     padding: 24px;
   }
+}
+
+// Opt-in wider container for routes with `data: { wide: true }` (see
+// `app.ts`/`app.routes.ts`) — e.g. /search, whose three result panels
+// benefit from extra horizontal room.
+.page--wide {
+  max-width: 1400px;
 }

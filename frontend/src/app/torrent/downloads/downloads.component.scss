@@ -1,8 +1,6 @@
 /*
- * Replaces the old `mat-grid-list` + `(window:resize)` column math, which
- * computed a fractional column count (`innerWidth / 600`). `minmax(600px, ...)`
- * forced a 600px-wide column even on phones, causing horizontal scrolling;
- * `min(600px, 100%)` caps it at the available width instead.
+ * `min(600px, 100%)` caps each column at 420px while still shrinking to fit
+ * on narrower viewports instead of forcing horizontal scrolling.
  */
 mat-card-content {
   display: grid;
