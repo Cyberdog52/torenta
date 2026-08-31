@@ -14,6 +14,7 @@ import java.nio.file.Paths;
 public class BtClientTest {
 
     @Test
+    @Ignore("Manual test, requires a valid magnet link")
     public void manual_btClient_downloadToUserDir() {
 
         Config config = new Config() {
