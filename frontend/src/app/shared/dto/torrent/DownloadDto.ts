@@ -1,5 +1,5 @@
-import {DownloadState} from "./DownloadState";
-import {DownloadRequestDto} from "./DownloadRequestDto";
+import {DownloadState} from './DownloadState';
+import {DownloadRequestDto} from './DownloadRequestDto';
 
 export interface DownloadDto {
   id: number;

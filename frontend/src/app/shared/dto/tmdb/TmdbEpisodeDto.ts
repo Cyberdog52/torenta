@@ -1,4 +1,4 @@
-import {TmdbCreatorDto} from "./TmdbCreatorDto";
+import {TmdbCreatorDto} from './TmdbCreatorDto';
 
 export interface TmdbEpisodeDto {
   air_date: string;

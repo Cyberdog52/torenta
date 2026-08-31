@@ -1,6 +1,6 @@
-import {TmdbGenreDto} from "./TmdbGenreDto";
-import {TmdbProductionCompanyDto} from "./TmdbProductionCompanyDto";
-import {TmdbSpokenLanguagesDto} from "./TmdbSpokenLanguagesDto";
+import {TmdbGenreDto} from './TmdbGenreDto';
+import {TmdbProductionCompanyDto} from './TmdbProductionCompanyDto';
+import {TmdbSpokenLanguagesDto} from './TmdbSpokenLanguagesDto';
 
 export interface TmdbMovieDetailDto {
   adult: boolean;

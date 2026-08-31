@@ -1,3 +1,3 @@
 export enum AirStatus {
-  AIRED = "AIRED", NOT_AIRED = "NOT_AIRED", STARTED = "STARTED"
+  AIRED = 'AIRED', NOT_AIRED = 'NOT_AIRED', STARTED = 'STARTED'
 }
