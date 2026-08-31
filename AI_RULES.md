@@ -100,7 +100,7 @@ indexing but are not guarantees. Do not assume in-repo files are inaccessible to
 
 - Spring Boot 4.1.1 (`spring-boot-starter-webmvc`, `-actuator`, `-cache`), Java 25.
 - Lombok, Jackson 3, Springdoc OpenAPI, Guice, jsoup, Apache HttpClient, Java 25 `java.net.http`.
-- Tests: JUnit 5 (`useJUnitPlatform`), EasyMock, spring-security-test.
+- Tests: JUnit 5 (`useJUnitPlatform`), Mockito, spring-security-test.
 
 ### Frontend stack
 
@@ -189,7 +189,7 @@ Add new functionality as a new feature slice following this pattern; do not crea
 
 ### 4.2 Testing strategy
 
-- **Backend:** JUnit 5 with EasyMock (see `src/test/java/**`). Add/adjust tests for new or changed
+- **Backend:** JUnit 5 with Mockito (see `src/test/java/**`). Add/adjust tests for new or changed
   service logic. Run: `./gradlew test` (Windows: `.\gradlew.bat test`).
 - **Frontend:** Karma + Jasmine (`*.spec.ts`). Run: `cd frontend; npm test`.
 - Generate tests for new functionality and bug fixes. Do not delete or weaken existing tests to

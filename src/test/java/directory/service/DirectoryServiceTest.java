@@ -4,13 +4,13 @@ import ch.andreskonrad.torenta.directory.dto.DirectoryDto;
 import ch.andreskonrad.torenta.directory.dto.FileDto;
 import ch.andreskonrad.torenta.directory.service.DirectoryService;
 import ch.andreskonrad.torenta.preference.dto.UserPreference;
-import ch.andreskonrad.torenta.preference.service.PreferenceServiceMock;
+import ch.andreskonrad.torenta.preference.service.PreferenceService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.io.TempDir;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -20,13 +20,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@SpringBootTest(classes = PreferenceServiceMock.class)
-@EnableConfigurationProperties
+@ExtendWith(MockitoExtension.class)
 public class DirectoryServiceTest {
 
-    @Autowired
-    private PreferenceServiceMock preferenceServiceMock;
+    @Mock
+    private PreferenceService preferenceService;
 
     private DirectoryService directoryService;
 
@@ -35,8 +36,10 @@ public class DirectoryServiceTest {
 
     @BeforeEach
     public void setUp() {
-        preferenceServiceMock.save(new UserPreference(rootFolder.toAbsolutePath().toString()));
-        directoryService = new DirectoryService(preferenceServiceMock);
+        when(preferenceService.loadPreferences())
+                .thenReturn(new UserPreference(rootFolder.toAbsolutePath().toString()));
+        directoryService = new DirectoryService(preferenceService);
+        verify(preferenceService).setDirectoryService(directoryService);
     }
 
     @Test
