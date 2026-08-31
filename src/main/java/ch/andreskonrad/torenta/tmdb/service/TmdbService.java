@@ -3,6 +3,9 @@ package ch.andreskonrad.torenta.tmdb.service;
 import ch.andreskonrad.torenta.CustomCacheConfig;
 import ch.andreskonrad.torenta.tmdb.dto.*;
 import tools.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -10,145 +13,121 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.net.URI;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
+import java.util.Locale;
 
 @Service
 @CacheConfig(cacheNames={CustomCacheConfig.TMDB_CACHE_NAME})
 public class TmdbService {
 
-    @Value("${ch.andreskonrad.torenta.tmdb.service.key}")
-    private String apiKey;
-    private final String host = "api.themoviedb.org";
-    private final String scheme = "https";
+    private static final Logger LOGGER = LoggerFactory.getLogger(TmdbService.class);
+    private static final String HOST = "api.themoviedb.org";
+    private static final String SCHEME = "https";
 
-    private static final RequestThrottler requestThrottler = new RequestThrottler(9, 1000);
+    private final String apiKey;
+    private final TmdbHttpTransport httpTransport;
+    private final ObjectMapper objectMapper;
 
+    @Autowired
+    public TmdbService(
+            @Value("${ch.andreskonrad.torenta.tmdb.service.key}") String apiKey,
+            TmdbHttpTransport httpTransport,
+            ObjectMapper objectMapper
+    ) {
+        this.apiKey = apiKey;
+        this.httpTransport = httpTransport;
+        this.objectMapper = objectMapper;
+    }
 
     @Cacheable
     public TmdbSeriesSearchResultDto searchSeries(String searchString) {
-        String jsonStringResponse = searchSeriesRequest(searchString);
-        try {
-            return new ObjectMapper().readValue(jsonStringResponse, TmdbSeriesSearchResultDto.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        return request(searchSeriesUri(searchString), TmdbSeriesSearchResultDto.class);
     }
 
     @Cacheable
     public TmdbMoviesSearchResultDto searchMovies(String searchString) {
-        String jsonStringResponse = searchMovieRequest(searchString);
-        try {
-            return new ObjectMapper().readValue(jsonStringResponse, TmdbMoviesSearchResultDto.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        return request(searchMovieUri(searchString), TmdbMoviesSearchResultDto.class);
     }
 
     @Cacheable
     public TmdbSeriesDetailDto getSeries(int id) {
-        String jsonStringResponse = detailSeriesRequest(id);
-        try {
-            return new ObjectMapper().readValue(jsonStringResponse, TmdbSeriesDetailDto.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        return request(detailSeriesUri(id), TmdbSeriesDetailDto.class);
     }
 
     @Cacheable
     public TmdbMovieDetailDto getMovie(int id) {
-        String jsonStringResponse = detailMovieRequest(id);
-        try {
-            return new ObjectMapper().readValue(jsonStringResponse, TmdbMovieDetailDto.class);
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+        return request(detailMovieUri(id), TmdbMovieDetailDto.class);
     }
 
     @Cacheable
     public TmdbEpisodeDto[] getEpisodes(int seriesId, int season_number) {
-        String jsonStringResponse = seasonRequest(seriesId, season_number);
-        try {
-            return new ObjectMapper()
-                    .readValue(jsonStringResponse, TmdbSeasonDto.class)
-                    .getEpisodes();
-        } catch (Throwable t) {
-            t.printStackTrace();
-            return new TmdbEpisodeDto[0];
-        }
+        TmdbSeasonDto season = request(seasonUri(seriesId, season_number), TmdbSeasonDto.class);
+        return season == null || season.getEpisodes() == null
+                ? new TmdbEpisodeDto[0]
+                : season.getEpisodes();
     }
 
-    private String detailSeriesRequest(int id) {
-        return httpGet(getDefaultComponentsBuilder()
-                .path("/3/tv/" + String.valueOf(id))
+    private URI detailSeriesUri(int id) {
+        return getDefaultComponentsBuilder()
+                .path("/3/tv/" + id)
                 .build()
                 .encode()
-                .toUri());
+                .toUri();
     }
 
-    private String detailMovieRequest(int id) {
-        return httpGet(getDefaultComponentsBuilder()
-                .path("/3/movie/" + String.valueOf(id))
+    private URI detailMovieUri(int id) {
+        return getDefaultComponentsBuilder()
+                .path("/3/movie/" + id)
                 .build()
                 .encode()
-                .toUri());
+                .toUri();
     }
 
-    private String searchSeriesRequest(String searchString) {
-        return httpGet(getDefaultComponentsBuilder()
+    private URI searchSeriesUri(String searchString) {
+        return getDefaultComponentsBuilder()
                 .path("/3/search/tv")
-                .queryParam("query", searchString.toLowerCase())
+                .queryParam("query", searchString.toLowerCase(Locale.ROOT))
                 .queryParam("page", "1")
                 .build()
                 .encode()
-                .toUri());
+                .toUri();
     }
 
-    private String searchMovieRequest(String searchString) {
-        return httpGet(getDefaultComponentsBuilder()
+    private URI searchMovieUri(String searchString) {
+        return getDefaultComponentsBuilder()
                 .path("/3/search/movie")
-                .queryParam("query", searchString.toLowerCase())
+                .queryParam("query", searchString.toLowerCase(Locale.ROOT))
                 .queryParam("page", "1")
                 .queryParam("include_adult", false)
                 .build()
                 .encode()
-                .toUri());
+                .toUri();
     }
 
     private UriComponentsBuilder getDefaultComponentsBuilder() {
         return UriComponentsBuilder.newInstance()
-                .scheme(scheme)
-                .host(host)
+                .scheme(SCHEME)
+                .host(HOST)
                 .queryParam("api_key", apiKey)
                 .queryParam("language", "en-US");
     }
 
-    private String httpGet(URI uri) {
-        HttpRequest request = HttpRequest.newBuilder()
-                .GET()
-                .uri(uri)
-                .setHeader("User-Agent", "Java 25 HttpClient Bot")
-                .build();
-
+    private <T> T request(URI uri, Class<T> responseType) {
         try {
-            requestThrottler.throttle();
-            return HttpClient.newHttpClient().send(request, HttpResponse.BodyHandlers.ofString()).body();
+            return objectMapper.readValue(httpTransport.get(uri), responseType);
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            LOGGER.warn("TMDB request was interrupted");
         } catch (Exception e) {
-            e.printStackTrace();
-            return null;
+            LOGGER.warn("TMDB request or response processing failed");
         }
+        return null;
     }
 
-    private String seasonRequest(int seriesId, int season_number) {
-        return httpGet(getDefaultComponentsBuilder()
-                .path("/3/tv/" + String.valueOf(seriesId) + "/season/" + String.valueOf(season_number))
+    private URI seasonUri(int seriesId, int season_number) {
+        return getDefaultComponentsBuilder()
+                .path("/3/tv/" + seriesId + "/season/" + season_number)
                 .build()
                 .encode()
-                .toUri());
+                .toUri();
     }
 }

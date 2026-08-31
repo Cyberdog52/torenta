@@ -17,17 +17,17 @@ public class Download {
     private final DownloadRequest downloadRequest;
     private final Path targetDirectory;
     private final BtClient client;
-    private final CompletableFuture torrentFuture;
-    private TorrentSessionState state;
-    private boolean isCancelled = false;
+    private volatile CompletableFuture<?> torrentFuture;
+    private volatile TorrentSessionState state;
+    private volatile boolean isCancelled = false;
     private final long startTimeInMs;
 
-    public Download(int id, DownloadRequest downloadRequest, Path targetDirectory, BtClient client, CompletableFuture torrentFuture) {
+    public Download(int id, DownloadRequest downloadRequest, Path targetDirectory, BtClient client, CompletableFuture<?> torrentFuture) {
         this.id = id;
         this.downloadRequest = downloadRequest;
         this.targetDirectory = targetDirectory;
         this.client = client;
-        this.torrentFuture = torrentFuture;
+        this.torrentFuture = Objects.requireNonNull(torrentFuture);
         this.startTimeInMs = System.currentTimeMillis();
     }
 
@@ -58,6 +58,13 @@ public class Download {
         this.state = state;
     }
 
+    void setTorrentFuture(CompletableFuture<?> torrentFuture) {
+        this.torrentFuture = Objects.requireNonNull(torrentFuture);
+        if (isCancelled) {
+            torrentFuture.cancel(true);
+        }
+    }
+
     public DownloadRequest getDownloadRequest() {
         return downloadRequest;
     }
@@ -73,7 +80,10 @@ public class Download {
     }
 
     private long getTotalBytes() {
-        return this.state.getChunksSizeInBytes() * this.state.getPiecesTotal();
+        TorrentSessionState currentState = state;
+        return currentState == null
+                ? 0
+                : currentState.getChunksSizeInBytes() * currentState.getPiecesTotal();
     }
 
     private DownloadState getDownloadState() {
@@ -83,18 +93,29 @@ public class Download {
     }
 
     private double getProgress() {
-        return ((double) state.getPiecesComplete()) / state.getPiecesTotal();
+        TorrentSessionState currentState = state;
+        if (currentState == null || currentState.getPiecesTotal() == 0) {
+            return 0;
+        }
+        return ((double) currentState.getPiecesComplete()) / currentState.getPiecesTotal();
     }
 
     private long getConnectedPeers() {
-        return this.state.getConnectedPeers() != null ? this.state.getConnectedPeers().size() : 0;
+        TorrentSessionState currentState = state;
+        return currentState != null && currentState.getConnectedPeers() != null
+                ? currentState.getConnectedPeers().size()
+                : 0;
     }
 
     private double getDownloadSpeedInBytesPerSecond() {
-        long amountOfChunksSavedInLastMinute = this.state.getSaveTimesOfChunks().stream()
+        TorrentSessionState currentState = state;
+        if (currentState == null) {
+            return 0;
+        }
+        long amountOfChunksSavedInLastMinute = currentState.getSaveTimesOfChunks().stream()
                 .filter(localDateTime -> localDateTime.isAfter(LocalDateTime.now().minusMinutes(1)))
                 .count();
-        long chunkSize = this.state.getChunksSizeInBytes();
+        long chunkSize = currentState.getChunksSizeInBytes();
         return amountOfChunksSavedInLastMinute * chunkSize / 60.0;
     }
 
