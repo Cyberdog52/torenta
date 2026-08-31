@@ -1,6 +1,6 @@
 <mat-card>
   <mat-card-header>
-    <mat-card-title>Preferences</mat-card-title>
+    <h1 mat-card-title>Preferences</h1>
   </mat-card-header>
   @if (userPreferences(); as preferences) {
     <mat-card-content>
@@ -20,7 +20,7 @@
     </mat-card-actions>
   } @else {
     <mat-card-content>
-      <p>Preferences could not be loaded</p>
+      <p role="alert">Preferences could not be loaded</p>
     </mat-card-content>
   }
 </mat-card>

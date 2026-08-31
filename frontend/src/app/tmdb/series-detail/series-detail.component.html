@@ -1,13 +1,17 @@
 @if (isLoading()) {
   <div class="loading">
-    <mat-progress-spinner mode="indeterminate" diameter="32" />
+    <mat-progress-spinner mode="indeterminate" diameter="32" aria-label="Loading series details" />
   </div>
 } @else if (seriesDetail(); as seriesDetail) {
   <div class="series-detail">
     <div class="foreground">
       <p class="meta-line">
-        <mat-icon>date_range</mat-icon>{{ seriesDetail.first_air_date }} <mat-icon>timer</mat-icon
-        >{{ runtime() }} min <mat-icon>star</mat-icon>{{ seriesDetail.vote_average }}
+        <mat-icon aria-hidden="true">date_range</mat-icon>
+        <span class="visually-hidden">First aired:</span>{{ seriesDetail.first_air_date }}
+        <mat-icon aria-hidden="true">timer</mat-icon>
+        <span class="visually-hidden">Episode runtime:</span>{{ runtime() }} min
+        <mat-icon aria-hidden="true">star</mat-icon>
+        <span class="visually-hidden">Rating:</span>{{ seriesDetail.vote_average }}
       </p>
       <mat-chip-set>
         @for (genre of seriesDetail.genres; track genre.id) {
@@ -17,12 +21,23 @@
       <p class="overview">{{ seriesDetail.overview }}</p>
       <div class="season-buttons">
         @for (tmdbSeasonDto of seriesDetail.seasons; track tmdbSeasonDto.id) {
-          <button matButton="elevated" class="chip-button" (click)="showSeason.set(tmdbSeasonDto)">
+          <button
+            matButton="elevated"
+            class="chip-button"
+            [attr.aria-pressed]="showSeason()?.id === tmdbSeasonDto.id"
+            (click)="showSeason.set(tmdbSeasonDto)"
+          >
             {{ seasonTitle(tmdbSeasonDto) }}
             @if (isPartiallyDownloaded(tmdbSeasonDto)) {
-              <mat-icon>done</mat-icon>
+              <ng-container>
+                <mat-icon aria-hidden="true">done</mat-icon>
+                <span class="visually-hidden">Downloaded</span>
+              </ng-container>
             } @else if (notAiredYet(tmdbSeasonDto)) {
-              <mat-icon>date_range</mat-icon>
+              <ng-container>
+                <mat-icon aria-hidden="true">date_range</mat-icon>
+                <span class="visually-hidden">Not yet aired</span>
+              </ng-container>
             }
           </button>
         }

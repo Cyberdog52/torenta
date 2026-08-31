@@ -1,0 +1,45 @@
+{
+  "checks": [
+    {
+      "name": "Body text",
+      "foreground": "#333333",
+      "background": "#ffffff",
+      "fontSize": 16,
+      "bold": false,
+      "isUiComponent": false,
+      "level": "AA"
+    },
+    {
+      "name": "Large heading",
+      "foreground": "#555555",
+      "background": "#ffffff",
+      "fontSize": 28,
+      "bold": false,
+      "isUiComponent": false,
+      "level": "AA"
+    },
+    {
+      "name": "Primary button text",
+      "foreground": "#ffffff",
+      "background": "#0057b8",
+      "fontSize": 16,
+      "bold": true,
+      "isUiComponent": false,
+      "level": "AA"
+    },
+    {
+      "name": "Input border (UI component)",
+      "foreground": "#767676",
+      "background": "#ffffff",
+      "isUiComponent": true,
+      "level": "AA"
+    },
+    {
+      "name": "Focus indicator outline",
+      "foreground": "#0057b8",
+      "background": "#ffffff",
+      "isUiComponent": true,
+      "level": "AA"
+    }
+  ]
+}

@@ -8,8 +8,9 @@ import { MatButtonModule } from '@angular/material/button';
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './page-not-found.component.scss',
   template: `
+    <h1>Page not found</h1>
+    <img src="404.jpg" alt="" aria-hidden="true" />
     <button matButton="elevated" routerLink="/">Return to base</button>
-    <img src="404.jpg" alt="Page not found" />
   `,
 })
 export class PageNotFoundComponent {}

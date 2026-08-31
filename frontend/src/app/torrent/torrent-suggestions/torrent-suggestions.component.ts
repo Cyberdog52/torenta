@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -28,6 +29,7 @@ import { safeValue } from '../../shared/resource';
 export class TorrentSuggestionsComponent {
   private readonly torrentService = inject(TorrentService);
   private readonly notificationService = inject(NotificationService);
+  private readonly router = inject(Router);
 
   readonly seriesDetail = input<TmdbSeriesDetailDto | null>(null);
   readonly tmdbEpisodeDto = input<TmdbEpisodeDto | null>(null);
@@ -91,6 +93,10 @@ export class TorrentSuggestionsComponent {
         this.notificationService.notify({
           content: `Started downloading ${getDownloadTitle(downloadRequest)}`,
           type: NotificationType.INFO,
+          action: {
+            label: 'Go to Downloads',
+            onClick: () => void this.router.navigate(['/downloads']),
+          },
         }),
       error: () =>
         this.notificationService.notify({

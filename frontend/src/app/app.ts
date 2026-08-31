@@ -1,7 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { filter, map } from 'rxjs';
+import { filter, map, skip, tap } from 'rxjs';
 import { ToolbarComponent } from './toolbar/toolbar.component';
 import { NotificationComponent } from './shared/notification/notification.component';
 
@@ -11,8 +11,9 @@ import { NotificationComponent } from './shared/notification/notification.compon
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './app.scss',
   template: `
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <app-toolbar />
-    <main class="page" [class.page--wide]="wide()">
+    <main id="main-content" tabindex="-1" class="page" [class.page--wide]="wide()">
       <router-outlet />
     </main>
     <app-notifications />
@@ -34,6 +35,21 @@ export class App {
     ),
     { initialValue: false },
   );
+
+  constructor() {
+    // Moves focus to the main content region on every client-side navigation
+    // (skipping the very first, initial load, where focus is already at the
+    // top of the document). Without this, keyboard/screen-reader users keep
+    // whatever focus they had before navigating — usually the toolbar link
+    // they just activated — and get no indication that new content loaded.
+    this.router.events
+      .pipe(
+        filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+        skip(1),
+        tap(() => document.getElementById('main-content')?.focus()),
+      )
+      .subscribe();
+  }
 }
 
 function isWideRoute(route: ActivatedRoute): boolean {
