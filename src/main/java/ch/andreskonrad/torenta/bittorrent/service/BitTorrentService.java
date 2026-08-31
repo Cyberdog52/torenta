@@ -1,7 +1,5 @@
 package ch.andreskonrad.torenta.bittorrent.service;
 
-import bt.Bt;
-import bt.data.file.FileSystemStorage;
 import bt.runtime.BtClient;
 import bt.runtime.Config;
 import bt.torrent.TorrentSessionState;
@@ -13,8 +11,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.nio.file.Path;
+import java.time.LocalDate;
+import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -23,29 +22,32 @@ import java.util.stream.Collectors;
 @Service
 public class BitTorrentService {
 
-    private final int SESSION_STATE_UPDATE_INTERVAL = 100; //in ms
-    private static List<Download> downloads = new ArrayList<>();
+    private static final int SESSION_STATE_UPDATE_INTERVAL = 100;
 
     private final DirectoryService directoryService;
+    private final BitTorrentClientFactory clientFactory;
+    private final List<Download> downloads = new ArrayList<>();
+
+    public BitTorrentService(DirectoryService directoryService) {
+        this(directoryService, new DefaultBitTorrentClientFactory());
+    }
 
     @Autowired
-    public BitTorrentService(DirectoryService directoryService) {
+    public BitTorrentService(DirectoryService directoryService, BitTorrentClientFactory clientFactory) {
         this.directoryService = directoryService;
+        this.clientFactory = clientFactory;
     }
 
     public synchronized void startDownload(DownloadRequest downloadRequest, Path targetDirectory) throws IllegalStateException {
         String magnetLink = downloadRequest.getTorrentEntry().getMagnetLink();
         int id = generateId(magnetLink);
 
-        BtClient client = Bt.client()
-                .config(getConfig())
-                .storage(new FileSystemStorage(targetDirectory))
-                .magnet(magnetLink.replace(" ", "%20"))
-                .autoLoadModules()
-                .stopWhenDownloaded()
-                .build();
+        BtClient client = clientFactory.create(
+                getConfig(),
+                targetDirectory,
+                magnetLink.replace(" ", "%20"));
 
-        CompletableFuture torrentFuture = client.startAsync(
+        CompletableFuture<?> torrentFuture = client.startAsync(
                 torrentSessionState -> processSessionState(torrentSessionState, id),
                 SESSION_STATE_UPDATE_INTERVAL);
         downloads.add(new Download(id, downloadRequest, targetDirectory, client, torrentFuture));
@@ -63,17 +65,22 @@ public class BitTorrentService {
     }
 
     private Integer getReleaseYear(TmdbMovieDetailDto movieDetailDto) {
-        if (movieDetailDto.getRelease_date() == null || !movieDetailDto.getRelease_date().contains("-")) {
+        String releaseDate = movieDetailDto.getRelease_date();
+        if (releaseDate == null) {
             return null;
         }
-        return Integer.valueOf(movieDetailDto.getRelease_date().split("-")[0]);
+        try {
+            return LocalDate.parse(releaseDate).getYear();
+        } catch (DateTimeParseException exception) {
+            return null;
+        }
     }
 
-    private static void processSessionState(TorrentSessionState state, int id) {
+    private void processSessionState(TorrentSessionState state, int id) {
         getDownload(id).setState(state);
     }
 
-    public static Download getDownload(int id) {
+    public Download getDownload(int id) {
         return downloads.stream()
                 .filter(download -> download.getId() == id)
                 .findFirst()

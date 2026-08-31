@@ -15,11 +15,16 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -99,6 +104,60 @@ public class DirectoryServiceTest {
     }
 
     @Test
+    public void getPaths_punctuationAndSeparatorsAreSanitizedAndContainedInRoot() {
+        Path seriesPath = directoryService.getPathForSeries("../Star: Trek/Discovery\\?");
+        Path moviePath = directoryService.getPathForMovie("../Movie/Name:?", null);
+        Path normalizedRoot = rootFolder.toAbsolutePath().normalize();
+
+        assertEquals("Star TrekDiscovery", seriesPath.getFileName().toString());
+        assertEquals("MovieName", moviePath.getFileName().toString());
+        assertTrue(seriesPath.toAbsolutePath().normalize().startsWith(normalizedRoot));
+        assertTrue(moviePath.toAbsolutePath().normalize().startsWith(normalizedRoot));
+    }
+
+    @Test
+    public void getPathForMovie_addsOnlyYearsAfterFirstFeatureFilm() {
+        assertEquals(
+                "Metropolis",
+                directoryService.getPathForMovie("Metropolis", null).getFileName().toString());
+        assertEquals(
+                "Metropolis",
+                directoryService.getPathForMovie("Metropolis", 1878).getFileName().toString());
+        assertEquals(
+                "Metropolis (1879)",
+                directoryService.getPathForMovie("Metropolis", 1879).getFileName().toString());
+    }
+
+    @Test
+    public void setup_repeatedCallsAreIdempotentAndPreserveContents() throws IOException {
+        Path existingMovie = Files.createDirectory(rootFolder.resolve("Movies").resolve("Existing"));
+
+        directoryService.setup();
+        directoryService.setup();
+
+        assertTrue(Files.isDirectory(rootFolder.resolve("Movies")));
+        assertTrue(Files.isDirectory(rootFolder.resolve("Series")));
+        assertTrue(Files.isDirectory(existingMovie));
+        verify(preferenceService, times(3)).loadPreferences();
+    }
+
+    @Test
+    public void setup_missingHierarchyDirectoriesAreRecreated() throws IOException {
+        Files.delete(rootFolder.resolve("Movies"));
+        Files.delete(rootFolder.resolve("Series"));
+
+        directoryService.setup();
+
+        assertTrue(Files.isDirectory(rootFolder.resolve("Movies")));
+        assertTrue(Files.isDirectory(rootFolder.resolve("Series")));
+    }
+
+    @Test
+    public void getSeriesDirectory_missingDirectoryReturnsNull() {
+        assertNull(directoryService.getSeriesDirectory("Missing"));
+    }
+
+    @Test
     public void getFileHierarchy_newSeries_episodeFound() throws IOException {
         Path seriesPath = rootFolder.resolve("Series");
         Path mandanlorianPath = Files.createDirectory(seriesPath.resolve("Mandalorian"));
@@ -125,5 +184,55 @@ public class DirectoryServiceTest {
         assertEquals(0, season.getDirectories().size());
         assertEquals(1, mandalorian.getDirectories().size());
         assertEquals(0, mandalorian.getFiles().size());
+    }
+
+    @Test
+    public void getFileHierarchy_multipleNestedEntriesAreReturned() throws IOException {
+        Path seriesPath = Files.createDirectory(rootFolder.resolve("Series").resolve("Mandalorian"));
+        Files.createFile(seriesPath.resolve("poster.jpg"));
+        Path seasonOne = Files.createDirectory(seriesPath.resolve("S01"));
+        Path seasonTwo = Files.createDirectory(seriesPath.resolve("S02"));
+        Files.createFile(seasonOne.resolve("episode-S01E01.mp4"));
+        Files.createFile(seasonOne.resolve("episode-S01E02.mp4"));
+        Path extras = Files.createDirectory(seasonTwo.resolve("Extras"));
+        Files.createFile(extras.resolve("trailer.mp4"));
+
+        DirectoryDto series = directoryService.getSeriesDirectory("Mandalorian");
+
+        assertNotNull(series);
+        assertEquals(Set.of("poster.jpg"), namesOfFiles(series));
+        assertEquals(Set.of("S01", "S02"), namesOfDirectories(series));
+
+        DirectoryDto firstSeason = directoryNamed(series, "S01");
+        assertEquals(Set.of("episode-S01E01.mp4", "episode-S01E02.mp4"), namesOfFiles(firstSeason));
+
+        DirectoryDto secondSeason = directoryNamed(series, "S02");
+        DirectoryDto extrasDirectory = directoryNamed(secondSeason, "Extras");
+        assertEquals(Set.of("trailer.mp4"), namesOfFiles(extrasDirectory));
+
+        List<DirectoryDto> hierarchy = List.of(series, firstSeason, secondSeason, extrasDirectory);
+        assertTrue(hierarchy.stream()
+                .map(DirectoryDto::getAbsolutePath)
+                .map(Path::of)
+                .allMatch(path -> path.normalize().startsWith(rootFolder.toAbsolutePath().normalize())));
+    }
+
+    private static DirectoryDto directoryNamed(DirectoryDto parent, String name) {
+        return parent.getDirectories().stream()
+                .filter(directory -> directory.getName().equals(name))
+                .findFirst()
+                .orElseThrow();
+    }
+
+    private static Set<String> namesOfDirectories(DirectoryDto directory) {
+        return directory.getDirectories().stream()
+                .map(DirectoryDto::getName)
+                .collect(Collectors.toSet());
+    }
+
+    private static Set<String> namesOfFiles(DirectoryDto directory) {
+        return directory.getFiles().stream()
+                .map(FileDto::getName)
+                .collect(Collectors.toSet());
     }
 }
