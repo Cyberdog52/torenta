@@ -81,6 +81,19 @@ class DownloadTest {
     }
 
     @Test
+    void setTorrentFuture_afterCancellationCancelsAttachedFuture() {
+        CompletableFuture<Void> pendingFuture = new CompletableFuture<>();
+        CompletableFuture<Void> torrentFuture = new CompletableFuture<>();
+        Download download = download(1, pendingFuture);
+
+        download.cancel();
+        download.setTorrentFuture(torrentFuture);
+
+        assertTrue(pendingFuture.isCancelled());
+        assertTrue(torrentFuture.isCancelled());
+    }
+
+    @Test
     void mapToDownloadDto_mapsNullConnectedPeersAsZero() {
         Download download = download(1, new CompletableFuture<>());
         TorrentSessionState state = state(1, 4, 120);
@@ -88,6 +101,19 @@ class DownloadTest {
         download.setState(state);
 
         assertEquals(0, download.mapToDownloadDto().getConnectedPeers());
+    }
+
+    @Test
+    void mapToDownloadDto_withoutSessionStateMapsZeroMetrics() {
+        Download download = download(1, new CompletableFuture<>());
+
+        DownloadDto dto = download.mapToDownloadDto();
+
+        assertEquals(DownloadState.STARTED, dto.getState());
+        assertEquals(0, dto.getProgress());
+        assertEquals(0, dto.getConnectedPeers());
+        assertEquals(0, dto.getTotalBytes());
+        assertEquals(0, dto.getDownloadSpeedInBytesPerSecond());
     }
 
     @Test
