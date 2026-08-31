@@ -11,7 +11,7 @@ change.
 ## Build
 
 Run `npm run build` to build the project. Build artifacts are written to `dist/`. Add the production
-flag with `npm run build -- --prod`.
+flag with `npm run build -- --prod`. CI runs the plain `npm run build`.
 
 ## Running unit tests
 
@@ -57,4 +57,4 @@ also generate directives, pipes, services, classes, guards, interfaces, enums, a
 ## Further help
 
 Run `npm run ng -- help` or consult the
-[Angular CLI documentation](https://github.com/angular/angular-cli/wiki).
+[Angular CLI 6 documentation](https://v6.angular.io/cli).

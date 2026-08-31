@@ -38,7 +38,7 @@ nvm use 16
 ```
 
 Do not use a newer unsupported Node.js release. If `nvm` is unavailable, install Node.js 16 from
-the [Node.js releases archive](https://nodejs.org/en/download/releases/).
+the [Node.js previous releases page](https://nodejs.org/en/about/previous-releases).
 
 Restart IntelliJ and execute the following commands:
 ```
