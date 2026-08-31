@@ -1,6 +1,5 @@
-import { inject, Injectable, Signal } from '@angular/core';
-import { HttpClient, httpResource } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Injectable, Signal } from '@angular/core';
+import { httpResource } from '@angular/common/http';
 import { TmdbSeriesDetailDto } from '../shared/dto/tmdb/TmdbSeriesDetailDto';
 import { TmdbEpisodeDto } from '../shared/dto/tmdb/TmdbEpisodeDto';
 import { TmdbMovieDetailDto } from '../shared/dto/tmdb/TmdbMovieDetailDto';
@@ -11,8 +10,6 @@ const BACKEND_URL = 'api/tmdb';
 
 @Injectable({ providedIn: 'root' })
 export class SearchService {
-  private readonly httpClient = inject(HttpClient);
-
   /** Reactive TV show search. Stays idle while the query is empty. */
   searchSeriesResource(query: Signal<string>) {
     return httpResource<TmdbSearchSeriesResultDto>(() => {
@@ -40,12 +37,6 @@ export class SearchService {
   episodesResource(seriesId: Signal<number>, seasonNumber: Signal<number>) {
     return httpResource<TmdbEpisodeDto[]>(
       () => `${BACKEND_URL}/tv/${seriesId()}/season/${seasonNumber()}`,
-    );
-  }
-
-  getEpisodes(seriesId: number, seasonNumber: number): Observable<TmdbEpisodeDto[]> {
-    return this.httpClient.get<TmdbEpisodeDto[]>(
-      `${BACKEND_URL}/tv/${seriesId}/season/${seasonNumber}`,
     );
   }
 }

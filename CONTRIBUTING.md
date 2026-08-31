@@ -12,8 +12,8 @@ pull-request workflow.
 | Tool    | Version                     | Notes                                             |
 |---------|-----------------------------|---------------------------------------------------|
 | JDK     | Java 25                     | `build.gradle` configures a Java 25 toolchain.    |
-| Node.js | 16 (range `>=10 <17`)       | Pinned in `.nvmrc`; run `nvm use`.                |
-| npm     | 6–8 (range `>=6 <9`)        | See `frontend/package.json` `engines`.            |
+| Node.js | 24 LTS (>= 24.15.0)         | Pinned in `.nvmrc`; run `nvm use`.                |
+| npm     | >= 10                       | See `frontend/package.json` `engines`.            |
 
 You do **not** need a local Gradle install — use the wrapper (`./gradlew`, `.\gradlew.bat`).
 
@@ -51,8 +51,8 @@ Swagger UI: <http://localhost:8080/swagger-ui.html>
 
 ```bash
 npm start            # dev server http://localhost:4200 (proxies /api to :8080)
-npm test             # Karma/Jasmine unit tests
-npm run lint         # tslint + codelyzer
+npm test             # Vitest unit tests
+npm run lint         # ESLint + angular-eslint, then Prettier format check
 npm run build        # production build
 npm run e2e          # Playwright; starts backend and frontend
 ```
@@ -60,7 +60,7 @@ npm run e2e          # Playwright; starts backend and frontend
 ## Pull-request checklist
 
 - [ ] `./gradlew test` passes and `cd frontend && npm test && npm run lint` pass locally.
-- [ ] New or changed behavior has tests (JUnit 5/Mockito backend, Karma/Jasmine frontend,
+- [ ] New or changed behavior has tests (JUnit 5/Mockito backend, Vitest frontend,
       Playwright end-to-end).
 - [ ] Backend DTO changes are mirrored in `frontend/src/app/shared/dto/**`, and OpenAPI
       annotations are updated.

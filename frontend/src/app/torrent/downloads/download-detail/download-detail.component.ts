@@ -61,9 +61,10 @@ export class DownloadDetailComponent {
       return 'Never';
     }
     const secondsLeft = (download.totalBytes * (1 - download.progress)) / bytesPerSecond;
-    const date = new Date(0);
-    date.setSeconds(secondsLeft);
-    return date.toISOString().slice(11, 19);
+    if (!Number.isFinite(secondsLeft) || secondsLeft < 0) {
+      return 'Unknown';
+    }
+    return formatDuration(secondsLeft);
   });
 
   protected readonly peers = computed(() => {
@@ -78,4 +79,20 @@ function backdropPathOf(downloadRequest: DownloadRequestDto): string | null {
     downloadRequest.movieDetail?.backdrop_path ??
     null
   );
+}
+
+/**
+ * Formats a duration in seconds as `hh:mm:ss`, growing to `d:hh:mm:ss` past 24
+ * hours instead of silently wrapping (the previous `Date#toISOString` hack
+ * threw the day count away, so a 30-hour ETA rendered as `06:00:00`).
+ */
+function formatDuration(totalSeconds: number): string {
+  const seconds = Math.floor(totalSeconds % 60);
+  const minutes = Math.floor(totalSeconds / 60) % 60;
+  const hours = Math.floor(totalSeconds / 3600) % 24;
+  const days = Math.floor(totalSeconds / 86_400);
+
+  const pad = (value: number) => String(value).padStart(2, '0');
+  const hhmmss = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  return days > 0 ? `${days}:${hhmmss}` : hhmmss;
 }

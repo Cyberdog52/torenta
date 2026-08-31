@@ -2,10 +2,9 @@ import {
   ChangeDetectionStrategy,
   Component,
   computed,
-  effect,
   inject,
   input,
-  signal,
+  linkedSignal,
 } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -32,7 +31,10 @@ export class SeasonComponent {
   readonly tmdbSeasonDto = input.required<TmdbSeasonDto>();
   readonly seriesDetail = input.required<TmdbSeriesDetailDto>();
 
-  protected readonly showEpisode = signal<TmdbEpisodeDto | null>(null);
+  protected readonly showEpisode = linkedSignal<TmdbSeasonDto, TmdbEpisodeDto | null>({
+    source: this.tmdbSeasonDto,
+    computation: () => null,
+  });
 
   /**
    * A season does not ship its episodes, so they are fetched separately.
@@ -48,14 +50,6 @@ export class SeasonComponent {
   private readonly series = this.libraryService.seriesInLibraryResource(
     computed(() => this.seriesDetail().name),
   );
-
-  constructor() {
-    // Reset the expanded episode whenever another season is selected.
-    effect(() => {
-      this.tmdbSeasonDto();
-      this.showEpisode.set(null);
-    });
-  }
 
   protected episodeButtonTitle(episode: TmdbEpisodeDto): string {
     return `E${String(episode.episode_number).padStart(2, '0')}`;

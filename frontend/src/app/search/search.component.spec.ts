@@ -23,31 +23,54 @@ describe('SearchComponent', () => {
   });
 
   it('sorts series results by popularity, descending', async () => {
-    const fixture = TestBed.createComponent(SearchComponent);
-    const component = fixture.componentInstance as unknown as {
-      seriesQuery: { set: (value: string) => void };
-      seriesOverviews: () => { id: number; popularity: number }[];
-    };
+    vi.useFakeTimers();
+    try {
+      const fixture = TestBed.createComponent(SearchComponent);
+      fixture.detectChanges();
 
-    component.seriesQuery.set('andor');
-    fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const seriesInput = compiled.querySelector<HTMLInputElement>(
+        '.search-card:nth-of-type(1) input[matInput]',
+      );
+      if (seriesInput == null) {
+        throw new Error('Series search input not found');
+      }
 
-    const httpTesting = TestBed.inject(HttpTestingController);
-    const request = httpTesting.expectOne((r) => r.url === 'api/tmdb/tv');
-    expect(request.request.params.get('search')).toBe('andor');
+      // Drive the search through the DOM, like a user typing, instead of
+      // reaching into the component's private signals.
+      seriesInput.value = 'andor';
+      seriesInput.dispatchEvent(new KeyboardEvent('keyup'));
 
-    const results = [
-      { id: 1, popularity: 5 },
-      { id: 2, popularity: 50 },
-      { id: 3, popularity: 20 },
-    ];
-    request.flush({ results });
-    await fixture.whenStable();
+      // DelayedKeyupDirective debounces by 300ms before emitting.
+      vi.advanceTimersByTime(300);
+      fixture.detectChanges();
 
-    expect(component.seriesOverviews().map((s) => s.id)).toEqual([2, 3, 1]);
-    // The source array must not be mutated by the sort.
-    expect(results.map((s) => s.id)).toEqual([1, 2, 3]);
+      const httpTesting = TestBed.inject(HttpTestingController);
+      const request = httpTesting.expectOne((r) => r.url === 'api/tmdb/tv');
+      expect(request.request.params.get('search')).toBe('andor');
 
-    httpTesting.verify();
+      const results = [
+        { id: 1, name: 'Show A', popularity: 5 },
+        { id: 2, name: 'Show B', popularity: 50 },
+        { id: 3, name: 'Show C', popularity: 20 },
+      ];
+      request.flush({ results });
+
+      vi.useRealTimers();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const names = Array.from(compiled.querySelectorAll('.result-name')).map((element) =>
+        element.textContent?.trim(),
+      );
+      expect(names).toEqual(['Show B', 'Show C', 'Show A']);
+
+      // The source array must not be mutated by the sort.
+      expect(results.map((s) => s.id)).toEqual([1, 2, 3]);
+
+      httpTesting.verify();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 });

@@ -56,9 +56,10 @@ export class TorrentSuggestionsComponent {
     if (seriesDetail) {
       const title = `${seriesDetail.name} ${getEpisodeString(this.tmdbEpisodeDto())}`;
       // 'Star Wars: Andor S01E01' -> 'Andor S01E01'
-      return title.split(':').pop();
+      return dropFranchisePrefix(title);
     }
-    return this.movieDetail()?.title.split(':').pop();
+    const movieTitle = this.movieDetail()?.title;
+    return movieTitle != null ? dropFranchisePrefix(movieTitle) : undefined;
   });
 
   private readonly suggestionsResource = this.torrentService.torrentSearchResource(this.query);
@@ -98,4 +99,15 @@ export class TorrentSuggestionsComponent {
         }),
     });
   }
+}
+
+/**
+ * Drops a leading franchise prefix, e.g. 'Star Wars: Andor S01E01' -> 'Andor S01E01'.
+ * Only splits on the *first* colon and trims the result, so titles with more
+ * than one colon (e.g. 'Marvel: Agents of S.H.I.E.L.D.: Season 1') keep
+ * everything after the franchise name instead of losing it to `.pop()`.
+ */
+function dropFranchisePrefix(title: string): string {
+  const separatorIndex = title.indexOf(':');
+  return (separatorIndex === -1 ? title : title.slice(separatorIndex + 1)).trim();
 }

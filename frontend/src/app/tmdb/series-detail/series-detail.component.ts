@@ -35,7 +35,7 @@ export class SeriesDetailComponent {
   protected readonly isLoading = this.series.isLoading;
 
   private readonly seriesDirectory = this.directoryService.seriesDirectoryResource(
-    computed(() => this.seriesDetail()?.name.replace(/[^a-zA-Z0-9.\- ]/, '')),
+    computed(() => this.seriesDetail()?.name.replace(/[^a-zA-Z0-9.\- ]/g, '')),
   );
 
   protected readonly showSeason = signal<TmdbSeasonDto | null>(null);

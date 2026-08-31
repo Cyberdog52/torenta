@@ -12,7 +12,7 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "lint": "prettier --check .",
+    "lint": "ng lint && prettier --check .",
     "format": "prettier --write .",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui"
@@ -33,10 +33,14 @@
     "@angular/build": "^22.1.6",
     "@angular/cli": "^22.1.6",
     "@angular/compiler-cli": "^22.1.4",
+    "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
+    "angular-eslint": "22.2.0",
+    "eslint": "^10.9.0",
     "jsdom": "^28.0.0",
     "prettier": "^3.8.1",
     "typescript": "~6.0.2",
+    "typescript-eslint": "8.67.0",
     "vitest": "^4.0.8"
   }
 }
