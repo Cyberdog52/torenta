@@ -1,4 +1,4 @@
-# Cursor indexing exclusions — see AI_RULES.md (authoritative). Not a security boundary.
+# Continue.dev indexing exclusions — see AI_RULES.md (authoritative). Not a security boundary.
 # Protected files: never index, embed, or use as AI context.
 
 # Spring config (may contain secrets)

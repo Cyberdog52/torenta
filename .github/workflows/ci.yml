@@ -36,6 +36,34 @@ jobs:
     - name: Build with Gradle Wrapper
       run: ./gradlew build
 
+  frontend:
+
+    name: Frontend (Angular 6 / Node 16)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    defaults:
+      run:
+        working-directory: frontend
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up Node 16
+      uses: actions/setup-node@v4
+      with:
+        node-version: '16'
+        cache: npm
+        cache-dependency-path: frontend/package-lock.json
+    - name: Install dependencies
+      run: npm ci
+    - name: Lint
+      run: npm run lint
+      continue-on-error: true
+    - name: Test
+      run: npm test -- --watch=false --browsers=ChromeHeadless
+    - name: Build
+      run: npm run build
+
     # NOTE: The Gradle Wrapper is the default and recommended way to run Gradle (https://docs.gradle.org/current/userguide/gradle_wrapper.html).
     # If your project does not have the Gradle Wrapper configured, you can use the following configuration to run Gradle with a specified version.
     #
