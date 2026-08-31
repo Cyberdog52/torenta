@@ -21,10 +21,20 @@
       <mat-accordion class="results">
         @for (seriesOverview of seriesOverviews(); track seriesOverview.id) {
           <mat-expansion-panel
+            class="result-panel"
+            [style.--media-backdrop-image]="
+              isPanelBackdropVisible(seriesOverview.id)
+                ? 'url(' + backdropUrl(seriesOverview.backdrop_path) + ')'
+                : null
+            "
             (opened)="setPanelOpen(seriesOverview.id, true)"
             (closed)="setPanelOpen(seriesOverview.id, false)"
           >
-            <mat-expansion-panel-header>
+            <mat-expansion-panel-header
+              class="result-header"
+              (focus)="setPanelFocused(seriesOverview.id, true)"
+              (blur)="setPanelFocused(seriesOverview.id, false)"
+            >
               <mat-panel-title class="result-title">
                 <img
                   class="poster"
@@ -70,10 +80,20 @@
       <mat-accordion class="results">
         @for (movieOverview of movieOverviews(); track movieOverview.id) {
           <mat-expansion-panel
+            class="result-panel"
+            [style.--media-backdrop-image]="
+              isPanelBackdropVisible(movieOverview.id)
+                ? 'url(' + backdropUrl(movieOverview.backdrop_path) + ')'
+                : null
+            "
             (opened)="setPanelOpen(movieOverview.id, true)"
             (closed)="setPanelOpen(movieOverview.id, false)"
           >
-            <mat-expansion-panel-header>
+            <mat-expansion-panel-header
+              class="result-header"
+              (focus)="setPanelFocused(movieOverview.id, true)"
+              (blur)="setPanelFocused(movieOverview.id, false)"
+            >
               <mat-panel-title class="result-title">
                 <img
                   class="poster"

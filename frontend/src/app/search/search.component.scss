@@ -1,3 +1,38 @@
+@use '../tmdb/media-detail-panel' as panel;
+
+.result-panel {
+  @include panel.panel;
+
+  &::before,
+  &::after {
+    inset: 0 0 auto auto;
+    width: 50%;
+    aspect-ratio: 16 / 9;
+  }
+
+  &:hover::before {
+    transform: none;
+  }
+
+  &::after {
+    background:
+      linear-gradient(to top, var(--mat-sys-surface-container-highest) 0%, transparent 25%),
+      linear-gradient(to right, var(--mat-sys-surface-container-highest) 0%, transparent 25%);
+  }
+}
+
+.result-header {
+  background: transparent !important;
+
+  // Material's own keyboard-focus indicator is a background state-layer,
+  // which the transparent override above hides. Restore a visible
+  // indicator so keyboard users can still see which header is focused.
+  &.cdk-keyboard-focused {
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: -2px;
+  }
+}
+
 .search-card {
   margin-bottom: 16px;
 
