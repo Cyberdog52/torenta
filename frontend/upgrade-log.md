@@ -67,7 +67,8 @@ it before final acceptance.
 | 3 | 7.2.16 | npm 6.13.4 on host Node 22.19.0 | Schematics reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | `77e65fd` |
 | 4 | 8.2.14 | npm 6.13.4 on host Node 22.19.0 | Browser migration reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | `ce194ca` |
 | 5 | 9.1.13 | npm 6.13.4 on host Node 22.19.0 | Ivy migration reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | `a27858f` |
-| 6 | 10.2.5 | npm 6.13.4 on host Node 22.19.0 | Compiler/config migrations reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | This phase commit |
+| 6 | 10.2.5 | npm 6.13.4 on host Node 22.19.0 | Compiler/config migrations reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | `f364010` |
+| 7 | 11.2.14 | npm 6.13.4 on host Node 22.19.0 | Router/build migrations reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | This phase commit |
 
 ## Angular 6 Baseline
 
@@ -168,5 +169,17 @@ Recorded on 2026-08-31 before dependency normalization:
 - Material 10 promotes the preferences placeholder to a floating label, so the
   characterization locator now uses the stable `name="downloadFolder"` input
   contract rather than placeholder semantics.
+- `npm ls --depth=0`, lint, three Karma tests, production Ivy AOT differential
+  builds, and all 12 characterization tests pass.
+
+## Angular 11 Checkpoint
+
+- Core is `11.2.14`, CLI/build tooling is `11.2.19`/`0.1102.19`,
+  Material/CDK is `11.2.13`, TypeScript is `4.1.6`, RxJS remains `6.6.7`,
+  and zone.js is `0.11.4`.
+- Official local migrations explicitly preserved legacy relative-link resolution,
+  removed the deprecated production `extractCss` option, and made style injection
+  explicit.
+- No additional ambient DTO or stricter typing failures were found.
 - `npm ls --depth=0`, lint, three Karma tests, production Ivy AOT differential
   builds, and all 12 characterization tests pass.

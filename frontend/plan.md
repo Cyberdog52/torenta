@@ -179,13 +179,13 @@ Runtime: Node `10.24.1`, npm `6.14.12`.
 
 Runtime: Node `10.24.1`, npm `6.14.12`.
 
-- [ ] Upgrade Angular core to `11.2.14`.
-- [ ] Upgrade Angular CLI to `11.2.19`.
-- [ ] Upgrade Material and CDK to `11.2.13`.
-- [ ] Upgrade TypeScript to `4.1.6`.
-- [ ] Pin RxJS to `6.6.7`.
-- [ ] Resolve remaining typing and ambient DTO issues required by this checkpoint.
-- [ ] Complete the standard major-upgrade procedure.
+- [x] Upgrade Angular core to `11.2.14`.
+- [x] Upgrade Angular CLI to `11.2.19`.
+- [x] Upgrade Material and CDK to `11.2.13`.
+- [x] Upgrade TypeScript to `4.1.6`.
+- [x] Pin RxJS to `6.6.7`.
+- [x] Resolve remaining typing and ambient DTO issues required by this checkpoint.
+- [x] Complete the standard major-upgrade procedure.
 
 ## Phase 8: Angular 12
 
