@@ -46,13 +46,31 @@ ng test
 
 ## Running end-to-end tests
 
-For end-to-end (e2e) testing, run:
+Install Playwright's bundled Chromium browser once:
 
 ```bash
-ng e2e
+npx playwright install chromium
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+The Playwright configuration starts the Spring Boot backend and Angular dev server automatically.
+Locally, it reuses either server if it is already running.
+
+Run the smoke test headlessly:
+
+```bash
+npm run e2e
+```
+
+Open Playwright's interactive UI to run, watch, and debug the test:
+
+```bash
+npm run e2e:ui
+```
+
+Both commands verify that the application renders and that the Preferences page loads its data from
+the backend through the frontend proxy.
+
+Tests are organized by feature under `e2e/`, for example `e2e/app/` and `e2e/preferences/`.
 
 ## Additional Resources
 

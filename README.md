@@ -43,6 +43,7 @@ Then install the dependencies:
 ```bash
 cd frontend
 npm install
+npx playwright install chromium
 ```
 
 ## Frontend stack
@@ -74,6 +75,27 @@ npm start
 
 Will start at http://localhost:4200/ and proxies `/api` to the backend on
 http://localhost:8080/ (see `frontend/proxy.conf.json`).
+
+#### Run End-to-End Test:
+
+The Playwright test starts the Spring Boot backend and Angular dev server automatically. If either
+server is already running locally, Playwright reuses it. Run these commands from `frontend/`.
+
+Headless mode is the default and is suitable for CI or a quick local check:
+
+```bash
+npm run e2e
+```
+
+UI mode opens Playwright's interactive test runner for running, watching, and debugging the test:
+
+```bash
+npm run e2e:ui
+```
+
+The suite verifies that Angular renders and loads preferences from the backend through the frontend
+proxy. Install the bundled Chromium browser first with `npx playwright install chromium` if it was
+not installed during setup.
 
 ## Documentation
 
