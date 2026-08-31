@@ -64,7 +64,8 @@ it before final acceptance.
 | 0 | 6.1.10 | Host audit: 22.19.0 / 10.9.3 | Decisions frozen; Docker 29.7.2 available | `1d5c8f8` |
 | 1 | 6.1.10 | Angular host: 22.19.0 / 10.9.3; Playwright target: Node 24 | 12 desktop/mobile characterization tests pass; legacy AOT defect recorded | `5585e72` |
 | 2 | 6.1.10 | npm 6.13.4 on host Node 22.19.0 | Exact dependencies and npm v1 lockfile; lint, 3 unit tests, AOT build, and 12 Playwright tests pass | `369f0fb` |
-| 3 | 7.2.16 | npm 6.13.4 on host Node 22.19.0 | Schematics reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | This phase commit |
+| 3 | 7.2.16 | npm 6.13.4 on host Node 22.19.0 | Schematics reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | `77e65fd` |
+| 4 | 8.2.14 | npm 6.13.4 on host Node 22.19.0 | Browser migration reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | This phase commit |
 
 ## Angular 6 Baseline
 
@@ -128,3 +129,13 @@ Recorded on 2026-08-31 before dependency normalization:
   modern ARM64 host; the application uses the separately pinned Dart Sass package,
   and clean installs are performed with lifecycle scripts disabled at historical
   checkpoints.
+
+## Angular 8 Checkpoint
+
+- Core is `8.2.14`, CLI/build tooling is `8.3.29`/`0.803.29`,
+  Material/CDK is `8.2.3`, TypeScript is `3.5.3`, and zone.js is `0.9.1`.
+- CLI schematics moved Browserslist configuration to the workspace root and
+  updated TypeScript library targets for differential loading.
+- `@angular/http` remains absent.
+- `npm ls --depth=0`, lint, three Karma tests, production AOT differential
+  builds, and all 12 characterization tests pass.

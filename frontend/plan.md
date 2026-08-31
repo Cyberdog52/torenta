@@ -142,13 +142,13 @@ Runtime: Node `8.17.0`, npm `6.13.4`.
 
 Runtime: Node `10.24.1`, npm `6.14.12`.
 
-- [ ] Upgrade Angular core to `8.2.14`.
-- [ ] Upgrade Angular CLI to `8.3.29`.
-- [ ] Upgrade Material and CDK to `8.2.3`.
-- [ ] Upgrade TypeScript to `3.5.3`.
-- [ ] Confirm `@angular/http` is absent.
-- [ ] Review CLI polyfill and browser-target migrations.
-- [ ] Complete the standard major-upgrade procedure.
+- [x] Upgrade Angular core to `8.2.14`.
+- [x] Upgrade Angular CLI to `8.3.29`.
+- [x] Upgrade Material and CDK to `8.2.3`.
+- [x] Upgrade TypeScript to `3.5.3`.
+- [x] Confirm `@angular/http` is absent.
+- [x] Review CLI polyfill and browser-target migrations.
+- [x] Complete the standard major-upgrade procedure.
 
 ## Phase 5: Angular 9
 
