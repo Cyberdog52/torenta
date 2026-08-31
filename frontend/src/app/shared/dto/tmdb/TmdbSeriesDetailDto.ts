@@ -1,9 +1,9 @@
-import {TmdbCreatorDto} from "./TmdbCreatorDto";
-import {TmdbEpisodeDto} from "./TmdbEpisodeDto";
-import {TmdbGenreDto} from "./TmdbGenreDto";
-import {TmdbNetworkDto} from "./TmdbNetworkDto";
-import {TmdbSeasonDto} from "./TmdbSeasonDto";
-import {TmdbProductionCompanyDto} from "./TmdbProductionCompanyDto";
+import {TmdbCreatorDto} from './TmdbCreatorDto';
+import {TmdbEpisodeDto} from './TmdbEpisodeDto';
+import {TmdbGenreDto} from './TmdbGenreDto';
+import {TmdbNetworkDto} from './TmdbNetworkDto';
+import {TmdbSeasonDto} from './TmdbSeasonDto';
+import {TmdbProductionCompanyDto} from './TmdbProductionCompanyDto';
 
 export interface TmdbSeriesDetailDto {
   backdrop_path: string;

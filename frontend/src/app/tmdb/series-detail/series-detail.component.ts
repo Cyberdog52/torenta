@@ -1,18 +1,18 @@
 import {Component, Input, OnInit} from '@angular/core';
-import {SearchService} from "../../search/search.service";
-import {TmdbSeriesDetailDto} from "../../shared/dto/tmdb/TmdbSeriesDetailDto";
-import {TmdbSeasonDto} from "../../shared/dto/tmdb/TmdbSeasonDto";
-import {DirectoryService} from "../../directory/directory.service";
-import {DirectoryDto} from "../../shared/dto/directory/DirectoryDto";
+import {SearchService} from '../../search/search.service';
+import {TmdbSeriesDetailDto} from '../../shared/dto/tmdb/TmdbSeriesDetailDto';
+import {TmdbSeasonDto} from '../../shared/dto/tmdb/TmdbSeasonDto';
+import {DirectoryService} from '../../directory/directory.service';
+import {DirectoryDto} from '../../shared/dto/directory/DirectoryDto';
 
 @Component({
-  selector: 'series-detail',
+  selector: 'app-series-detail',
   templateUrl: './series-detail.component.html',
   styleUrls: ['./series-detail.component.scss']
 })
 export class SeriesDetailComponent implements OnInit {
 
-  @Input() id : number;
+  @Input() id: number;
   public seriesDetail: TmdbSeriesDetailDto;
   public showSeason: TmdbSeasonDto;
   private seriesDirectory: DirectoryDto;
@@ -33,7 +33,7 @@ export class SeriesDetailComponent implements OnInit {
   }
 
   private getSeriesDirectory(): void {
-    const seriesName = this.seriesDetail.name.replace(/[^a-zA-Z0-9.\- ]/, "");
+    const seriesName = this.seriesDetail.name.replace(/[^a-zA-Z0-9.\- ]/, '');
     this.directoryService.getSeriesDirectory(seriesName).subscribe(seriesDirectory => {
       this.seriesDirectory = seriesDirectory;
     });
@@ -42,23 +42,23 @@ export class SeriesDetailComponent implements OnInit {
 
   getBackgroundImageFor(seriesDetail: TmdbSeriesDetailDto): string {
     if (seriesDetail.backdrop_path == null) {
-      return "../../assets/tvnotfound.png";
+      return '../../assets/tvnotfound.png';
     }
-    return "https://image.tmdb.org/t/p/original/" + seriesDetail.backdrop_path;
+    return 'https://image.tmdb.org/t/p/original/' + seriesDetail.backdrop_path;
   }
 
   getRuntime(): string {
     if (this.seriesDetail.episode_run_time.length > 0) {
       return this.seriesDetail.episode_run_time[0].toString();
     }
-    return "?"
+    return '?';
   }
 
   getSeasonTitle(season: TmdbSeasonDto): string {
     if (season.season_number < 10) {
-      return "S0" + season.season_number.toString();
+      return 'S0' + season.season_number.toString();
     }
-    return "S" + season.season_number.toString();
+    return 'S' + season.season_number.toString();
   }
 
   isPartiallyDownloaded(season: TmdbSeasonDto): boolean {
@@ -67,7 +67,7 @@ export class SeriesDetailComponent implements OnInit {
     }
 
     const seasonFolder = this.seriesDirectory.directories.find(directoryDto => {
-      return directoryDto.name == this.getSeasonTitle(season);
+      return directoryDto.name === this.getSeasonTitle(season);
     });
 
     return seasonFolder != null;
@@ -77,8 +77,8 @@ export class SeriesDetailComponent implements OnInit {
     if (season.air_date == null) {
       return true;
     }
-    let airDate = new Date(season.air_date);
-    let currentDate = new Date();
+    const airDate = new Date(season.air_date);
+    const currentDate = new Date();
     return airDate.valueOf() > currentDate.valueOf();
   }
 }
