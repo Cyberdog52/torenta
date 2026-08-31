@@ -3,11 +3,14 @@
     <mat-card-title>Downloads</mat-card-title>
   </mat-card-header>
   <mat-card-content>
+    <p class="visually-hidden" aria-live="polite">
+      {{ downloads().length }} download{{ downloads().length === 1 ? '' : 's' }}.
+    </p>
     @for (downloadDto of downloads(); track downloadDto.id) {
       <app-download-detail [downloadDto]="downloadDto" />
     } @empty {
       <div class="empty">
-        <mat-icon>inbox</mat-icon>
+        <mat-icon aria-hidden="true">inbox</mat-icon>
         <p class="empty-title">No downloads yet</p>
         <p class="empty-subtitle">Start one from the Search page and it will show up here.</p>
       </div>

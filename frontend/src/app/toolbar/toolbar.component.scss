@@ -17,6 +17,13 @@ mat-toolbar {
   gap: 8px;
 }
 
+.navigationButtonContainer nav {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 button {
   color: var(--mat-sys-on-surface);
 }

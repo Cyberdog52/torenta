@@ -132,6 +132,12 @@
   }
 }
 
+@media (prefers-reduced-motion: reduce) {
+  .state-started .progress-fill::after {
+    animation: none;
+  }
+}
+
 .state-finished {
   .status-chip {
     background: var(--mat-sys-tertiary-container);

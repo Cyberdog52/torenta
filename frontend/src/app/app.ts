@@ -11,8 +11,9 @@ import { NotificationComponent } from './shared/notification/notification.compon
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './app.scss',
   template: `
+    <a class="skip-link" href="#main-content">Skip to content</a>
     <app-toolbar />
-    <main class="page" [class.page--wide]="wide()">
+    <main id="main-content" class="page" [class.page--wide]="wide()">
       <router-outlet />
     </main>
     <app-notifications />

@@ -1,15 +1,24 @@
 <div class="season">
   <p class="meta-line">
-    <mat-icon>queue_play_next</mat-icon>{{ tmdbSeasonDto().name }} <mat-icon>date_range</mat-icon
-    >{{ tmdbSeasonDto().air_date }}
+    <mat-icon aria-hidden="true">queue_play_next</mat-icon>{{ tmdbSeasonDto().name }}
+    <mat-icon aria-hidden="true">date_range</mat-icon>
+    <span class="visually-hidden">Air date:</span>{{ tmdbSeasonDto().air_date }}
   </p>
   <p class="overview">{{ tmdbSeasonDto().overview }}</p>
   <div class="episode-buttons">
     @for (tmdbEpisodeDto of episodes(); track tmdbEpisodeDto.id) {
-      <button matButton="elevated" class="chip-button" (click)="showEpisode.set(tmdbEpisodeDto)">
+      <button
+        matButton="elevated"
+        class="chip-button"
+        [attr.aria-pressed]="isSelected(tmdbEpisodeDto)"
+        (click)="showEpisode.set(tmdbEpisodeDto)"
+      >
         {{ episodeButtonTitle(tmdbEpisodeDto) }}
         @if (episodeIcon(tmdbEpisodeDto); as icon) {
-          <mat-icon>{{ icon }}</mat-icon>
+          <ng-container>
+            <mat-icon aria-hidden="true">{{ icon }}</mat-icon>
+            <span class="visually-hidden">{{ episodeIconLabel(tmdbEpisodeDto) }}</span>
+          </ng-container>
         }
       </button>
     }

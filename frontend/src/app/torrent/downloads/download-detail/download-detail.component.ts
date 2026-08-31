@@ -85,6 +85,45 @@ export class DownloadDetailComponent {
     const connectedPeers = this.downloadDto().connectedPeers;
     return !connectedPeers ? 'No connections' : `${connectedPeers} sources`;
   });
+
+  /**
+   * Full status text for the progress bar's `aria-valuetext`, read on every
+   * focus/inspection of the bar (e.g. "42.3% downloaded, 00:12:30 remaining").
+   */
+  protected readonly progressValueText = computed(() => {
+    switch (this.downloadDto().state) {
+      case DownloadState.FINISHED:
+        return 'Finished';
+      case DownloadState.CANCELLED:
+        return 'Cancelled';
+      case DownloadState.STARTED:
+        return `${this.progressPercent().toFixed(1)}% downloaded, ${this.estimatedTimeFinished()} remaining`;
+      default:
+        return this.downloadDto().state;
+    }
+  });
+
+  /**
+   * Rounded-to-10% text for the per-card live region. Rounding (rather than
+   * the exact 1-second-polled percentage) means the string only actually
+   * changes a handful of times over a whole download, so screen readers
+   * announce meaningful milestones instead of being spammed every second.
+   */
+  protected readonly progressAnnouncement = computed(() => {
+    const download = this.downloadDto();
+    switch (download.state) {
+      case DownloadState.FINISHED:
+        return `${this.title()} finished downloading.`;
+      case DownloadState.CANCELLED:
+        return `${this.title()} download cancelled.`;
+      case DownloadState.STARTED: {
+        const roundedPercent = Math.floor(this.progressPercent() / 10) * 10;
+        return `${this.title()}: ${roundedPercent}% downloaded.`;
+      }
+      default:
+        return '';
+    }
+  });
 }
 
 function backdropPathOf(downloadRequest: DownloadRequestDto): string | null {

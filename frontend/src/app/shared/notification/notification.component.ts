@@ -14,14 +14,16 @@ const MAX_ERRORS = 10;
   imports: [MatButtonModule, MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    @for (error of errors(); track error) {
-      <p class="error">
-        {{ error.content }}
-        <button mat-icon-button type="button" aria-label="Dismiss error" (click)="dismiss(error)">
-          <mat-icon>close</mat-icon>
-        </button>
-      </p>
-    }
+    <div role="alert" aria-live="assertive" aria-atomic="true">
+      @for (error of errors(); track error) {
+        <p class="error">
+          {{ error.content }}
+          <button mat-icon-button type="button" aria-label="Dismiss error" (click)="dismiss(error)">
+            <mat-icon>close</mat-icon>
+          </button>
+        </p>
+      }
+    </div>
   `,
   styleUrl: './notification.component.scss',
 })
@@ -35,8 +37,13 @@ export class NotificationComponent {
     this.notificationService.notifications$.pipe(takeUntilDestroyed()).subscribe((notification) => {
       if (notification.type === NotificationType.ERROR) {
         this.errors.update((errors) => [...errors, notification].slice(-MAX_ERRORS));
-      } else {
-        this.snackBar.open(notification.content, undefined, { duration: 3000 });
+        return;
+      }
+      const snackBarRef = this.snackBar.open(notification.content, notification.action?.label, {
+        duration: 5000,
+      });
+      if (notification.action) {
+        snackBarRef.onAction().subscribe(() => notification.action?.onClick());
       }
     });
   }

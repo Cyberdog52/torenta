@@ -52,3 +52,37 @@ body {
 .page--wide {
   max-width: 1400px;
 }
+
+// Visually hides content while keeping it in the accessibility tree, for
+// status text that only screen reader / assistive-tech users need (loading
+// state, result counts, live progress updates already shown visually in
+// another form).
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+// Skip link: hidden until keyboard-focused, then pinned to the top so
+// keyboard/screen-reader users can bypass the toolbar and jump to content.
+.skip-link {
+  position: absolute;
+  top: -40px;
+  left: 8px;
+  z-index: 1000;
+  padding: 8px 16px;
+  background: var(--mat-sys-surface-container-highest);
+  color: var(--mat-sys-on-surface);
+  border-radius: 4px;
+  transition: top 0.15s ease;
+
+  &:focus {
+    top: 8px;
+  }
+}

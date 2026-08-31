@@ -82,6 +82,25 @@ export class SeasonComponent {
     }
   }
 
+  /** Text equivalent for `episodeIcon`, so status isn't conveyed by icon shape alone. */
+  protected episodeIconLabel(tmdbEpisodeDto: TmdbEpisodeDto): string | null {
+    if (SeasonComponent.notAiredYet(tmdbEpisodeDto)) {
+      return 'Not yet aired';
+    }
+    switch (this.downloadStatus(tmdbEpisodeDto)) {
+      case DownloadStatus.DOWNLOADED:
+        return 'Downloaded';
+      case DownloadStatus.DOWNLOADING:
+        return 'Downloading';
+      default:
+        return null;
+    }
+  }
+
+  protected isSelected(tmdbEpisodeDto: TmdbEpisodeDto): boolean {
+    return this.showEpisode()?.id === tmdbEpisodeDto.id;
+  }
+
   private static notAiredYet(episode: TmdbEpisodeDto): boolean {
     if (episode.air_date == null) {
       return true;

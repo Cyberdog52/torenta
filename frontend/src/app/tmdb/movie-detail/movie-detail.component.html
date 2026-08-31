@@ -1,20 +1,30 @@
 @if (isLoading()) {
   <div class="loading">
-    <mat-progress-spinner mode="indeterminate" diameter="32" />
+    <mat-progress-spinner mode="indeterminate" diameter="32" aria-label="Loading movie details" />
   </div>
 } @else if (movieDetail(); as movieDetail) {
   <div class="movie-detail">
     <div class="backdrop">
-      <img [src]="backdropUrl(movieDetail.backdrop_path)" alt="" loading="lazy" />
+      <img
+        [src]="backdropUrl(movieDetail.backdrop_path)"
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+      />
     </div>
     <div class="foreground">
       <p class="meta-line">
-        <mat-icon>date_range</mat-icon>{{ movieDetail.release_date }} <mat-icon>timer</mat-icon
-        >{{ movieDetail.runtime }} min <mat-icon>star</mat-icon>{{ movieDetail.vote_average }}
+        <mat-icon aria-hidden="true">date_range</mat-icon>
+        <span class="visually-hidden">Release date:</span>{{ movieDetail.release_date }}
+        <mat-icon aria-hidden="true">timer</mat-icon>
+        <span class="visually-hidden">Runtime:</span>{{ movieDetail.runtime }} min
+        <mat-icon aria-hidden="true">star</mat-icon>
+        <span class="visually-hidden">Rating:</span>{{ movieDetail.vote_average }}
       </p>
       @if (movieDirectory(); as movieDirectory) {
         <p class="meta-line">
-          <mat-icon>snippet_folder</mat-icon>{{ movieDirectory.absolutePath }}
+          <mat-icon aria-hidden="true">snippet_folder</mat-icon>
+          <span class="visually-hidden">Downloaded to:</span>{{ movieDirectory.absolutePath }}
         </p>
       }
       <mat-chip-set>
