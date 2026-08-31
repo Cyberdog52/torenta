@@ -27,6 +27,7 @@ You do **not** need a local Gradle install — use the wrapper (`./gradlew`, `.\
    cd frontend
    nvm use
    npm install
+   npx playwright install chromium
    ```
 
 ## Build, run & test
@@ -48,12 +49,14 @@ npm start            # dev server http://localhost:4200 (proxies /api to :8080)
 npm test             # Karma/Jasmine unit tests
 npm run lint         # tslint + codelyzer
 npm run build        # production build
+npm run e2e          # Playwright; starts backend and frontend
 ```
 
 ## Pull-request checklist
 
 - [ ] `./gradlew test` passes and `cd frontend && npm test && npm run lint` pass locally.
-- [ ] New or changed behavior has tests (JUnit 5/Mockito backend, Karma/Jasmine frontend).
+- [ ] New or changed behavior has tests (JUnit 5/Mockito backend, Karma/Jasmine frontend,
+      Playwright end-to-end).
 - [ ] Backend DTO changes are mirrored in `frontend/src/app/shared/dto/**`, and OpenAPI
       annotations are updated.
 - [ ] No secrets, credentials, or protected-file contents are added to any tracked file.
