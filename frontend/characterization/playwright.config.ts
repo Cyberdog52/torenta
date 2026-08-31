@@ -4,6 +4,7 @@ export default defineConfig({
   testDir: './tests',
   outputDir: '.artifacts/test-results',
   fullyParallel: true,
+  workers: 2,
   forbidOnly: true,
   retries: 0,
   reporter: [['line'], ['html', { outputFolder: '.artifacts/report', open: 'never' }]],

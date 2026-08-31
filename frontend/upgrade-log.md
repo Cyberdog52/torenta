@@ -66,7 +66,8 @@ it before final acceptance.
 | 2 | 6.1.10 | npm 6.13.4 on host Node 22.19.0 | Exact dependencies and npm v1 lockfile; lint, 3 unit tests, AOT build, and 12 Playwright tests pass | `369f0fb` |
 | 3 | 7.2.16 | npm 6.13.4 on host Node 22.19.0 | Schematics reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | `77e65fd` |
 | 4 | 8.2.14 | npm 6.13.4 on host Node 22.19.0 | Browser migration reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | `ce194ca` |
-| 5 | 9.1.13 | npm 6.13.4 on host Node 22.19.0 | Ivy migration reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | This phase commit |
+| 5 | 9.1.13 | npm 6.13.4 on host Node 22.19.0 | Ivy migration reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | `a27858f` |
+| 6 | 10.2.5 | npm 6.13.4 on host Node 22.19.0 | Compiler/config migrations reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | This phase commit |
 
 ## Angular 6 Baseline
 
@@ -154,3 +155,18 @@ Recorded on 2026-08-31 before dependency normalization:
   points, and deprecated `TestBed.get` calls now use `TestBed.inject`.
 - `npm ls --depth=0`, warning-free lint, three Karma tests, production Ivy AOT
   differential builds, and all 12 characterization tests pass.
+
+## Angular 10 Checkpoint
+
+- Core is `10.2.5`, CLI/build tooling is `10.2.4`/`0.1002.4`,
+  Material/CDK is `10.2.7`, TypeScript is `4.0.8`, and tslib is `2.0.3`.
+- Official local migrations renamed `browserslist` to `.browserslistrc`, updated
+  compiler targets, and aligned TSLint. The nonstandard `e2e/tsconfig.e2e.json`
+  target was updated manually because the schematic only checked
+  `e2e/tsconfig.json`.
+- Codelyzer `6.0.2` and TSLint `6.1.3` remove the Angular 10 peer mismatch.
+- Material 10 promotes the preferences placeholder to a floating label, so the
+  characterization locator now uses the stable `name="downloadFolder"` input
+  contract rather than placeholder semantics.
+- `npm ls --depth=0`, lint, three Karma tests, production Ivy AOT differential
+  builds, and all 12 characterization tests pass.

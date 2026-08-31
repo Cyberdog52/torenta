@@ -167,13 +167,13 @@ Runtime: Node `10.24.1`, npm `6.14.12`.
 
 Runtime: Node `10.24.1`, npm `6.14.12`.
 
-- [ ] Upgrade Angular core to `10.2.5`.
-- [ ] Upgrade Angular CLI to `10.2.4`.
-- [ ] Upgrade Material and CDK to `10.2.7`.
-- [ ] Upgrade TypeScript to `4.0.8`.
-- [ ] Resolve newly surfaced TypeScript and template type errors without weakening checks globally.
-- [ ] Inventory ambient DTO declarations that need explicit exports and imports.
-- [ ] Complete the standard major-upgrade procedure.
+- [x] Upgrade Angular core to `10.2.5`.
+- [x] Upgrade Angular CLI to `10.2.4`.
+- [x] Upgrade Material and CDK to `10.2.7`.
+- [x] Upgrade TypeScript to `4.0.8`.
+- [x] Resolve newly surfaced TypeScript and template type errors without weakening checks globally.
+- [x] Inventory ambient DTO declarations that need explicit exports and imports.
+- [x] Complete the standard major-upgrade procedure.
 
 ## Phase 7: Angular 11
 

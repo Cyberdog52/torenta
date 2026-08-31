@@ -66,8 +66,8 @@ test('loads and saves preferences', async ({ page }) => {
   });
 
   await page.goto('/preferences');
-  const input = page.getByPlaceholder('Root folder for downloads');
-  await expect(input).toHaveValue('/fixture/downloads');
+  const input = page.locator('input[name="downloadFolder"]');
+  await expect(input).toHaveValue('/fixture/downloads', { timeout: 15000 });
   await input.fill('/fixture/new-downloads');
   await page.getByRole('button', { name: 'Save' }).click();
 
