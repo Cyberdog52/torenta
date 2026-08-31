@@ -1,56 +1,50 @@
-mat-progress-spinner {
-  size: 10px;
-  align-self: center;
+@use '../media-detail-panel' as panel;
+
+.loading {
+  display: flex;
+  justify-content: center;
+  padding: 24px 0;
 }
 
-.seriesDetail {
-  min-height: 100px;
-  background: black;
-  background-size: 70%;
-  color: whitesmoke;
-  padding-left: 12pt;
-  padding-top: 8pt;
-  padding-bottom: 12pt;
-  overflow: hidden;
-  position: relative;
+.series-detail {
+  @include panel.panel;
 }
 
-.background-container {
-  position: absolute;
-  width: 70%;
-  right: 0;
-  top: 0;
-  overflow: hidden;
+.backdrop {
+  @include panel.backdrop;
+
+  img {
+    @include panel.backdrop-image;
+  }
 }
 
-.background-image {
-  width: 100%;
+.foreground {
+  @include panel.foreground;
 }
 
-.background-image-shadow {
-  background: transparent;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  box-shadow: inset 120pt -120pt 100pt 0pt black;
-}
-
-.foreground-container {
-  background: transparent;
-  z-index: 10;
+.meta-line {
+  @include panel.meta-line;
 }
 
 .overview {
-  text-shadow: 0.5pt 0.5pt black;
-  z-index: 20;
-  position: relative;
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
 }
 
-.seasonButton {
-  margin-right: 4pt;
-  margin-bottom: 4pt;
-  background-color: rgba(65, 65, 65, 0.4);
-  color: whitesmoke;
+.season-buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.chip-button {
+  @include panel.chip-button;
+
+  mat-icon {
+    margin-left: 6px;
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+    vertical-align: text-bottom;
+  }
 }

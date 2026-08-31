@@ -1,25 +1,19 @@
 <div class="season">
-  <p>
-    <mat-icon>queue_play_next</mat-icon> {{ tmdbSeasonDto().name }} • <mat-icon>date_range</mat-icon
+  <p class="meta-line">
+    <mat-icon>queue_play_next</mat-icon>{{ tmdbSeasonDto().name }} <mat-icon>date_range</mat-icon
     >{{ tmdbSeasonDto().air_date }}
   </p>
   <p class="overview">{{ tmdbSeasonDto().overview }}</p>
-  <p>
+  <div class="episode-buttons">
     @for (tmdbEpisodeDto of episodes(); track tmdbEpisodeDto.id) {
-      <span>
-        <button
-          matButton="elevated"
-          class="episodeButton"
-          (click)="showEpisode.set(tmdbEpisodeDto)"
-        >
-          {{ episodeButtonTitle(tmdbEpisodeDto) }}
-        </button>
+      <button matButton="elevated" class="chip-button" (click)="showEpisode.set(tmdbEpisodeDto)">
+        {{ episodeButtonTitle(tmdbEpisodeDto) }}
         @if (episodeIcon(tmdbEpisodeDto); as icon) {
-          <mat-icon class="topRightIcon">{{ icon }}</mat-icon>
+          <mat-icon>{{ icon }}</mat-icon>
         }
-      </span>
+      </button>
     }
-  </p>
+  </div>
   @if (showEpisode(); as episode) {
     <app-episode
       [tmdbEpisodeDto]="episode"

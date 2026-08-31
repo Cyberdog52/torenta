@@ -16,6 +16,7 @@ import { TmdbEpisodeDto } from '../../shared/dto/tmdb/TmdbEpisodeDto';
 import { TmdbSeriesDetailDto } from '../../shared/dto/tmdb/TmdbSeriesDetailDto';
 import { DownloadStatus } from '../../shared/dto/library/DownloadStatus';
 import { EpisodeComponent } from '../episode/episode.component';
+import { safeValue } from '../../shared/resource';
 
 @Component({
   selector: 'app-season',
@@ -42,7 +43,7 @@ export class SeasonComponent {
     computed(() => this.tmdbSeasonDto().season_number),
   );
 
-  protected readonly episodes = computed(() => this.episodesResource.value() ?? []);
+  protected readonly episodes = computed(() => safeValue(this.episodesResource) ?? []);
 
   private readonly series = this.libraryService.seriesInLibraryResource(
     computed(() => this.seriesDetail().name),
@@ -64,9 +65,9 @@ export class SeasonComponent {
     if (tmdbEpisodeDto == null) {
       return null;
     }
-    const season = this.series
-      .value()
-      ?.seasonList.find((s) => s.seasonNumber === tmdbEpisodeDto.season_number);
+    const season = safeValue(this.series)?.seasonList.find(
+      (s) => s.seasonNumber === tmdbEpisodeDto.season_number,
+    );
     const episode = season?.episodeList.find(
       (e) => e.episodeNumber === tmdbEpisodeDto.episode_number,
     );

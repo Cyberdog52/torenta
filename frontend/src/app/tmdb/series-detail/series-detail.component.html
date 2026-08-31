@@ -1,15 +1,16 @@
 @if (isLoading()) {
-  <mat-progress-spinner mode="indeterminate" />
+  <div class="loading">
+    <mat-progress-spinner mode="indeterminate" diameter="32" />
+  </div>
 } @else if (seriesDetail(); as seriesDetail) {
-  <div class="seriesDetail">
-    <div class="background-container">
-      <img class="background-image" [src]="backdropUrl(seriesDetail.backdrop_path)" alt="" />
-      <div class="background-image-shadow"></div>
+  <div class="series-detail">
+    <div class="backdrop">
+      <img [src]="backdropUrl(seriesDetail.backdrop_path)" alt="" loading="lazy" />
     </div>
-    <div class="foreground-container">
-      <p class="overview">
-        <mat-icon>date_range</mat-icon>{{ seriesDetail.first_air_date }} • <mat-icon>timer</mat-icon
-        >{{ runtime() }} • <mat-icon>star</mat-icon>{{ seriesDetail.vote_average }}
+    <div class="foreground">
+      <p class="meta-line">
+        <mat-icon>date_range</mat-icon>{{ seriesDetail.first_air_date }} <mat-icon>timer</mat-icon
+        >{{ runtime() }} min <mat-icon>star</mat-icon>{{ seriesDetail.vote_average }}
       </p>
       <mat-chip-set>
         @for (genre of seriesDetail.genres; track genre.id) {
@@ -17,25 +18,18 @@
         }
       </mat-chip-set>
       <p class="overview">{{ seriesDetail.overview }}</p>
-      <p>
+      <div class="season-buttons">
         @for (tmdbSeasonDto of seriesDetail.seasons; track tmdbSeasonDto.id) {
-          <span>
-            <button
-              matButton="elevated"
-              class="seasonButton"
-              (click)="showSeason.set(tmdbSeasonDto)"
-            >
-              {{ seasonTitle(tmdbSeasonDto) }}
-            </button>
+          <button matButton="elevated" class="chip-button" (click)="showSeason.set(tmdbSeasonDto)">
+            {{ seasonTitle(tmdbSeasonDto) }}
             @if (isPartiallyDownloaded(tmdbSeasonDto)) {
-              <mat-icon class="topRightIcon">done</mat-icon>
+              <mat-icon>done</mat-icon>
+            } @else if (notAiredYet(tmdbSeasonDto)) {
+              <mat-icon>date_range</mat-icon>
             }
-            @if (notAiredYet(tmdbSeasonDto)) {
-              <mat-icon class="topRightIcon">date_range</mat-icon>
-            }
-          </span>
+          </button>
         }
-      </p>
+      </div>
       @if (showSeason(); as season) {
         <app-season [tmdbSeasonDto]="season" [seriesDetail]="seriesDetail" />
       }

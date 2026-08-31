@@ -1,7 +1,11 @@
 @use '@angular/material' as mat;
 
 html {
-  color-scheme: light;
+  // The app follows the OS/browser color-scheme preference. `mat.theme`
+  // defaults to emitting every `--mat-sys-*` color as
+  // `light-dark($light-value, $dark-value)`, so this is the only switch
+  // needed to support both palettes.
+  color-scheme: light dark;
 
   // Replaces the removed Angular Material 6 Sass API
   // (`@import '~@angular/material/theming'`, `mat-palette`, `mat-color`).
@@ -25,11 +29,20 @@ body {
 body {
   margin: 0;
   font-family: Roboto, sans-serif;
+  background: var(--mat-sys-background);
+  color: var(--mat-sys-on-background);
 }
 
-.topRightIcon {
-  margin-left: -16pt;
-  margin-top: -8pt;
-  position: absolute;
-  z-index: 10;
+// Constrains page content to a comfortable reading width and provides
+// consistent gutters at every viewport size. Nothing in the app had a
+// max-width before, so content stretched edge-to-edge on wide screens.
+.page {
+  box-sizing: border-box;
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 16px;
+
+  @media (min-width: 600px) {
+    padding: 24px;
+  }
 }

@@ -1,23 +1,18 @@
-<div class="downloadDetail">
-  <div class="background-container">
-    <img class="background-image" [src]="backgroundImage()" alt="" />
-    <div class="background-image-shadow"></div>
+<div class="download-detail">
+  <div class="backdrop">
+    <img [src]="backgroundImage()" alt="" loading="lazy" />
   </div>
-  <div class="foreground-container">
-    <p class="download_title">{{ title() }}</p>
-    <p><mat-icon>link</mat-icon> {{ peers() }}</p>
-    <p><mat-icon>network_check</mat-icon> {{ speed() }}</p>
-    <p><mat-icon>timelapse</mat-icon> {{ estimatedTimeFinished() }}</p>
-    <div class="progress-percentage">
-      <mat-progress-bar
-        class="float-left"
-        mode="determinate"
-        [value]="downloadDto().progress * 100"
-      />
+  <div class="foreground">
+    <p class="title">{{ title() }}</p>
+    <p class="meta-line"><mat-icon>link</mat-icon>{{ peers() }}</p>
+    <p class="meta-line"><mat-icon>network_check</mat-icon>{{ speed() }}</p>
+    <p class="meta-line"><mat-icon>timelapse</mat-icon>{{ estimatedTimeFinished() }}</p>
+    <div class="progress">
+      <mat-progress-bar mode="determinate" [value]="downloadDto().progress * 100" />
       @if (isRunning()) {
-        <a class="float-left">{{ progressString() }}</a>
+        <span>{{ progressString() }}</span>
       } @else {
-        <mat-icon class="float-left">done_outline</mat-icon>
+        <mat-icon>done_outline</mat-icon>
       }
     </div>
   </div>

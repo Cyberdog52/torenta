@@ -1,12 +1,17 @@
+@use '../media-detail-panel' as panel;
+
 .episode {
-  padding-top: 4pt;
-  margin-right: 10pt;
-  padding-left: 12pt;
-  padding-bottom: 10pt;
-  border-radius: 10pt;
-  background-color: rgba(65, 65, 65, 0.4);
+  margin-top: 12px;
+  padding: 12px;
+  border-radius: 8px;
+  background: var(--mat-sys-surface-container-high);
+}
+
+.meta-line {
+  @include panel.meta-line;
 }
 
 .overview {
-  text-shadow: 0.5pt 0.5pt black;
+  margin: 8px 0 0;
+  color: var(--mat-sys-on-surface-variant);
 }

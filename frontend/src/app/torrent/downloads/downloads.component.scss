@@ -1,16 +1,17 @@
-mat-card {
-  background-color: rgb(40, 40, 40);
-  color: whitesmoke;
-}
-
 /*
  * Replaces the old `mat-grid-list` + `(window:resize)` column math, which
- * computed a fractional column count (`innerWidth / 600`).
+ * computed a fractional column count (`innerWidth / 600`). `minmax(600px, ...)`
+ * forced a 600px-wide column even on phones, causing horizontal scrolling;
+ * `min(600px, 100%)` caps it at the available width instead.
  */
 mat-card-content {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
-  gap: 8px;
+  grid-template-columns: repeat(auto-fill, minmax(min(420px, 100%), 1fr));
+  gap: 16px;
+}
+
+.empty {
+  color: var(--mat-sys-on-surface-variant);
 }
 
 app-download-detail {

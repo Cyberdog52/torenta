@@ -1,6 +1,9 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
 import { MatCardModule } from '@angular/material/card';
+import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { SearchService } from './search.service';
 import { DelayedKeyupDirective } from '../shared/delayed-keyup.directive';
@@ -8,12 +11,16 @@ import { SeriesDetailComponent } from '../tmdb/series-detail/series-detail.compo
 import { MovieDetailComponent } from '../tmdb/movie-detail/movie-detail.component';
 import { TorrentSuggestionsComponent } from '../torrent/torrent-suggestions/torrent-suggestions.component';
 import { posterUrl } from '../shared/tmdb-images';
+import { safeValue } from '../shared/resource';
 
 @Component({
   selector: 'app-search',
   imports: [
     MatCardModule,
+    MatFormFieldModule,
     MatInputModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
     MatExpansionModule,
     DelayedKeyupDirective,
     SeriesDetailComponent,
@@ -31,19 +38,21 @@ export class SearchComponent {
   protected readonly movieQuery = signal('');
   protected readonly torrentQuery = signal('');
 
-  private readonly seriesSearch = this.searchService.searchSeriesResource(this.seriesQuery);
-  private readonly movieSearch = this.searchService.searchMoviesResource(this.movieQuery);
+  protected readonly seriesSearch = this.searchService.searchSeriesResource(this.seriesQuery);
+  protected readonly movieSearch = this.searchService.searchMoviesResource(this.movieQuery);
 
   /**
    * Sorted copies. The previous getters called `.sort()` on the response array
    * directly from the template, mutating it on every change-detection pass.
    */
   protected readonly seriesOverviews = computed(
-    () => this.seriesSearch.value()?.results.toSorted((a, b) => b.popularity - a.popularity) ?? [],
+    () =>
+      safeValue(this.seriesSearch)?.results.toSorted((a, b) => b.popularity - a.popularity) ?? [],
   );
 
   protected readonly movieOverviews = computed(
-    () => this.movieSearch.value()?.results.toSorted((a, b) => b.popularity - a.popularity) ?? [],
+    () =>
+      safeValue(this.movieSearch)?.results.toSorted((a, b) => b.popularity - a.popularity) ?? [],
   );
 
   /**

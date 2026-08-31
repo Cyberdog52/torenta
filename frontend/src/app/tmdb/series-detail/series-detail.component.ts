@@ -8,6 +8,7 @@ import { DirectoryService } from '../../directory/directory.service';
 import { TmdbSeasonDto } from '../../shared/dto/tmdb/TmdbSeasonDto';
 import { SeasonComponent } from '../season/season.component';
 import { backdropUrl } from '../../shared/tmdb-images';
+import { safeValue } from '../../shared/resource';
 
 @Component({
   selector: 'app-series-detail',
@@ -51,7 +52,7 @@ export class SeriesDetailComponent {
   }
 
   protected isPartiallyDownloaded(season: TmdbSeasonDto): boolean {
-    const directories = this.seriesDirectory.value()?.directories;
+    const directories = safeValue(this.seriesDirectory)?.directories;
     return directories?.some((directory) => directory.name === this.seasonTitle(season)) ?? false;
   }
 

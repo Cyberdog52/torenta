@@ -1,14 +1,49 @@
-.icon_image {
-  width: 40px;
-  height: 40px;
-  padding-right: 40px;
-  align-self: center;
+.search-card {
+  margin-bottom: 16px;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
 }
 
-.series_title {
-  padding-top: 5px;
+.search-field {
+  width: 100%;
+  max-width: 420px;
 }
 
-mat-card {
-  margin-top: 12pt;
+.search-status {
+  display: flex;
+  justify-content: center;
+  padding: 16px 0;
+}
+
+.search-empty {
+  color: var(--mat-sys-on-surface-variant);
+  margin: 8px 0 0;
+}
+
+.results {
+  display: block;
+  margin-top: 8px;
+}
+
+.result-title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.poster {
+  width: 46px;
+  height: 69px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex: none;
+}
+
+.result-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }

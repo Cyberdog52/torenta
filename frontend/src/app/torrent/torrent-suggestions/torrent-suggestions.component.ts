@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, computed, inject, input } from '@an
 import { toSignal } from '@angular/core/rxjs-interop';
 import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { TorrentEntry } from '../../shared/dto/pirateBay/TorrentEntry';
 import { TorrentService } from '../torrent.service';
@@ -15,10 +16,11 @@ import { TmdbSeriesDetailDto } from '../../shared/dto/tmdb/TmdbSeriesDetailDto';
 import { TmdbMovieDetailDto } from '../../shared/dto/tmdb/TmdbMovieDetailDto';
 import { NotificationService } from '../../shared/notification/notification.service';
 import { NotificationType } from '../../shared/dto/notification/Notification';
+import { safeValue } from '../../shared/resource';
 
 @Component({
   selector: 'app-torrent-suggestions',
-  imports: [MatTableModule, MatButtonModule, MatProgressSpinnerModule],
+  imports: [MatTableModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './torrent-suggestions.component.scss',
   templateUrl: './torrent-suggestions.component.html',
@@ -61,7 +63,7 @@ export class TorrentSuggestionsComponent {
 
   private readonly suggestionsResource = this.torrentService.torrentSearchResource(this.query);
 
-  protected readonly suggestions = computed(() => this.suggestionsResource.value() ?? []);
+  protected readonly suggestions = computed(() => safeValue(this.suggestionsResource) ?? []);
   protected readonly isLoading = this.suggestionsResource.isLoading;
 
   /**

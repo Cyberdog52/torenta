@@ -1,6 +1,13 @@
 <mat-toolbar>
   <span>Torenta</span>
   <div class="navigationButtonContainer">
+    <button
+      matIconButton
+      [matTooltip]="themeLabel[themeService.current()]"
+      (click)="themeService.cycle()"
+    >
+      <mat-icon>{{ themeIcon[themeService.current()] }}</mat-icon>
+    </button>
     <button matButton="elevated" routerLink="/preferences" routerLinkActive="active">
       <mat-icon>settings</mat-icon>Preferences
     </button>

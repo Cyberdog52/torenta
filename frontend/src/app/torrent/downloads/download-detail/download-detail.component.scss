@@ -1,68 +1,44 @@
-.downloadDetail {
-  min-height: 200px;
-  background: black;
-  background-size: 70%;
-  color: whitesmoke;
-  padding-left: 12pt;
-  padding-top: 8pt;
-  overflow: hidden;
-  position: relative;
+@use '../../../tmdb/media-detail-panel' as panel;
+
+.download-detail {
+  @include panel.panel;
   height: 100%;
 }
 
-.background-container {
-  position: absolute;
-  width: 70%;
-  right: 0;
-  top: 0;
-  overflow: hidden;
+.backdrop {
+  @include panel.backdrop;
+
+  img {
+    @include panel.backdrop-image;
+  }
 }
 
-.background-image {
-  width: 100%;
+.foreground {
+  @include panel.foreground;
 }
 
-.background-image-shadow {
-  background: transparent;
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  box-shadow: inset 50pt -50pt 40pt 0pt black;
+.title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
 }
 
-.foreground-container {
-  background: transparent;
-  z-index: 10;
-  position: relative;
+.meta-line {
+  @include panel.meta-line;
 }
 
-mat-progress-bar {
-  width: 85%;
-  padding-left: 4pt;
-  margin-right: 4pt;
-  padding-top: 5px;
-}
+.progress {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: auto;
 
-.speed-info {
-  width: 33%;
-  float: left;
-}
+  mat-progress-bar {
+    flex: 1 1 auto;
+  }
 
-.float-left {
-  float: left;
-}
-
-.download_title {
-  font-size: large;
-}
-
-/*
- * Angular Material 6 class hooks (`.mat-progress-bar-fill::after`,
- * `.mat-progress-bar-buffer`) no longer exist in M3. Use the public tokens.
- */
-mat-progress-bar {
-  --mat-progress-bar-active-indicator-color: rgb(0, 65, 50);
-  --mat-progress-bar-track-color: whitesmoke;
+  // Angular Material 6 class hooks (`.mat-progress-bar-fill::after`,
+  // `.mat-progress-bar-buffer`) no longer exist in M3; use the public tokens.
+  --mat-progress-bar-active-indicator-color: var(--mat-sys-primary);
+  --mat-progress-bar-track-color: var(--mat-sys-surface-container-highest);
 }

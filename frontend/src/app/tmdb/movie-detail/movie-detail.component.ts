@@ -6,6 +6,7 @@ import { SearchService } from '../../search/search.service';
 import { DirectoryService } from '../../directory/directory.service';
 import { TorrentSuggestionsComponent } from '../../torrent/torrent-suggestions/torrent-suggestions.component';
 import { backdropUrl } from '../../shared/tmdb-images';
+import { safeValue } from '../../shared/resource';
 
 @Component({
   selector: 'app-movie-detail',
@@ -33,7 +34,7 @@ export class MovieDetailComponent {
     }),
   );
 
-  protected readonly movieDirectory = this.directory.value;
+  protected readonly movieDirectory = computed(() => safeValue(this.directory));
 
   protected readonly backdropUrl = backdropUrl;
 }

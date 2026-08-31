@@ -1,8 +1,7 @@
 mat-toolbar {
-  background-color: rgb(50, 50, 50);
-  color: whitesmoke;
+  background-color: var(--mat-sys-surface-container-highest);
+  color: var(--mat-sys-on-surface);
   position: sticky;
-  position: -webkit-sticky; /* For macOS/iOS Safari */
   top: 0; /* Sets the sticky toolbar to be on top */
   z-index: 1000; /* Ensure that your app's content doesn't overlap the toolbar */
 }
@@ -11,20 +10,22 @@ mat-toolbar {
   /* This fills the remaining space, by using flexbox.
      Every toolbar row uses a flexbox row layout. */
   flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
   justify-content: flex-end;
+  gap: 8px;
 }
 
 button {
-  background-color: rgba(0, 0, 0, 0.01);
-  color: whitesmoke;
-  margin-right: 12pt;
-  float: right;
+  color: var(--mat-sys-on-surface);
 }
 
 mat-icon {
-  margin-right: 8pt;
+  margin-right: 8px;
 }
 
 button.active {
-  background-color: rgba(255, 255, 255, 0.16);
+  background-color: var(--mat-sys-surface-container-highest);
+  outline: 1px solid var(--mat-sys-outline-variant);
 }

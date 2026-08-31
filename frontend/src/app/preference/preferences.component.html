@@ -1,8 +1,10 @@
 <mat-card>
-  <mat-card-title>Preferences</mat-card-title>
+  <mat-card-header>
+    <mat-card-title>Preferences</mat-card-title>
+  </mat-card-header>
   @if (userPreferences(); as preferences) {
     <mat-card-content>
-      <mat-form-field>
+      <mat-form-field appearance="outline">
         <mat-label>Root folder for downloads</mat-label>
         <input
           matInput
@@ -17,6 +19,8 @@
       <button matButton="elevated" (click)="savePreferences()">Save</button>
     </mat-card-actions>
   } @else {
-    <p>Preferences could not be loaded</p>
+    <mat-card-content>
+      <p>Preferences could not be loaded</p>
+    </mat-card-content>
   }
 </mat-card>

@@ -10,7 +10,9 @@ import { NotificationComponent } from './shared/notification/notification.compon
   styleUrl: './app.scss',
   template: `
     <app-toolbar />
-    <router-outlet />
+    <main class="page">
+      <router-outlet />
+    </main>
     <app-notifications />
   `,
 })
