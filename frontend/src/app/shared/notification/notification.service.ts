@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
-import {Observable, Subject} from "rxjs";
-import {Notification} from "../dto/notification/Notification";
+import {Observable, Subject} from 'rxjs';
+import {Notification} from '../dto/notification/Notification';
 
 @Injectable({
   providedIn: 'root'
@@ -14,7 +14,7 @@ export class NotificationService {
   }
 
   public addNotifications(notification: Notification) {
-    this.notifications.next(notification)
+    this.notifications.next(notification);
   }
 
 }

@@ -3,7 +3,7 @@
 ## Setup
 
 #### Java
-Install Java OpenJDK 13 from [here](https://jdk.java.net/13/). 
+Install Java OpenJDK 11 (the build targets Java 11 — see `sourceCompatibility` in `build.gradle`).
 Make sure it is also in the system's path, because gradlew will use the java version that is on the path.
 To see which java version is used, type the following in the terminal:
 
@@ -24,7 +24,7 @@ The enterprise version is recommended.
 First, you need to get an API key from [TMDB](https://developers.themoviedb.org/3/getting-started/introduction). Create an `application.properties` from the template and add the key. Do not check in the `application.properties` file.
 
 #### NodeJs
-This frontend depends on an Angular 6 toolchain and must be run with **Node.js 10-16**.
+This frontend depends on an Angular 6 toolchain and must be run with **Node.js 10-16** (pinned to 16 in `.nvmrc`).
 
 ```bash
 nvm use
@@ -62,6 +62,13 @@ npm start
 ```
 
 Will start at http://localhost:4200/
+
+## Documentation
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — setup, build/test commands, PR checklist
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — components, feature slices, request flow
+- [AI_RULES.md](AI_RULES.md) — authoritative security & development rules (AI and humans)
+- [SECURITY.md](SECURITY.md) — reporting vulnerabilities
 
 ## Development links
 
