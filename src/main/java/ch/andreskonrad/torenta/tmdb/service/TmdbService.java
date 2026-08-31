@@ -2,7 +2,7 @@ package ch.andreskonrad.torenta.tmdb.service;
 
 import ch.andreskonrad.torenta.CustomCacheConfig;
 import ch.andreskonrad.torenta.tmdb.dto.*;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
@@ -132,7 +132,7 @@ public class TmdbService {
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(uri)
-                .setHeader("User-Agent", "Java 11 HttpClient Bot")
+                .setHeader("User-Agent", "Java 25 HttpClient Bot")
                 .build();
 
         try {
