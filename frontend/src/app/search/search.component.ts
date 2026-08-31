@@ -1,5 +1,9 @@
 import {Component, OnInit} from '@angular/core';
 import {SearchService} from './search.service';
+import {TmdbSearchSeriesResultDto} from '../shared/dto/tmdb/TmdbSearchSeriesResultDto';
+import {TmdbSearchMoviesResultDto} from '../shared/dto/tmdb/TmdbSearchMoviesResultDto';
+import {TmdbSeriesOverviewDto} from '../shared/dto/tmdb/TmdbSeriesOverviewDto';
+import {TmdbMovieOverviewDto} from '../shared/dto/tmdb/TmdbMovieOverviewDto';
 
 @Component({
   selector: 'app-search',

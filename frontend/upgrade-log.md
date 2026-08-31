@@ -65,7 +65,8 @@ it before final acceptance.
 | 1 | 6.1.10 | Angular host: 22.19.0 / 10.9.3; Playwright target: Node 24 | 12 desktop/mobile characterization tests pass; legacy AOT defect recorded | `5585e72` |
 | 2 | 6.1.10 | npm 6.13.4 on host Node 22.19.0 | Exact dependencies and npm v1 lockfile; lint, 3 unit tests, AOT build, and 12 Playwright tests pass | `369f0fb` |
 | 3 | 7.2.16 | npm 6.13.4 on host Node 22.19.0 | Schematics reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | `77e65fd` |
-| 4 | 8.2.14 | npm 6.13.4 on host Node 22.19.0 | Browser migration reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | This phase commit |
+| 4 | 8.2.14 | npm 6.13.4 on host Node 22.19.0 | Browser migration reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | `ce194ca` |
+| 5 | 9.1.13 | npm 6.13.4 on host Node 22.19.0 | Ivy migration reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | This phase commit |
 
 ## Angular 6 Baseline
 
@@ -139,3 +140,17 @@ Recorded on 2026-08-31 before dependency normalization:
 - `@angular/http` remains absent.
 - `npm ls --depth=0`, lint, three Karma tests, production AOT differential
   builds, and all 12 characterization tests pass.
+
+## Angular 9 Checkpoint
+
+- Core is `9.1.13`, CLI/build tooling is `9.1.15`/`0.901.15`,
+  Material/CDK is `9.2.4`, TypeScript is `3.8.3`, and zone.js is `0.10.3`.
+- The archived updater attempted to bootstrap today's `latest` CLI even with an
+  exact local CLI. Official Angular 9 migrations were therefore invoked directly
+  from the exact installed core and CLI migration collections.
+- Ivy compilation exposed global ambient TMDB DTOs. The affected DTOs now use
+  explicit exports and imports without changing their API shapes.
+- All Material root-barrel imports were replaced with supported component entry
+  points, and deprecated `TestBed.get` calls now use `TestBed.inject`.
+- `npm ls --depth=0`, warning-free lint, three Karma tests, production Ivy AOT
+  differential builds, and all 12 characterization tests pass.

@@ -3,7 +3,7 @@ import {NotificationService} from './notification.service';
 import {Subject} from 'rxjs';
 import {Notification, NotificationType} from '../dto/notification/Notification';
 import {takeUntil} from 'rxjs/operators';
-import {MatSnackBar} from '@angular/material';
+import {MatSnackBar} from '@angular/material/snack-bar';
 
 
 @Component({

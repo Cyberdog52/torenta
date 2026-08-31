@@ -1,4 +1,4 @@
-interface TmdbSeriesOverviewDto {
+export interface TmdbSeriesOverviewDto {
   original_name: string;
   genre_ids: number[];
   name: string;

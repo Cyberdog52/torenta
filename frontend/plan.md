@@ -154,14 +154,14 @@ Runtime: Node `10.24.1`, npm `6.14.12`.
 
 Runtime: Node `10.24.1`, npm `6.14.12`.
 
-- [ ] Upgrade Angular core to `9.1.13`.
-- [ ] Upgrade Angular CLI to `9.1.15`.
-- [ ] Upgrade Material and CDK to `9.2.4`.
-- [ ] Upgrade TypeScript to `3.8.3`.
-- [ ] Validate Ivy compilation and runtime behavior.
-- [ ] Replace imports from the `@angular/material` root barrel with component entry points.
-- [ ] Replace deprecated `TestBed.get` calls.
-- [ ] Complete the standard major-upgrade procedure.
+- [x] Upgrade Angular core to `9.1.13`.
+- [x] Upgrade Angular CLI to `9.1.15`.
+- [x] Upgrade Material and CDK to `9.2.4`.
+- [x] Upgrade TypeScript to `3.8.3`.
+- [x] Validate Ivy compilation and runtime behavior.
+- [x] Replace imports from the `@angular/material` root barrel with component entry points.
+- [x] Replace deprecated `TestBed.get` calls.
+- [x] Complete the standard major-upgrade procedure.
 
 ## Phase 6: Angular 10
 

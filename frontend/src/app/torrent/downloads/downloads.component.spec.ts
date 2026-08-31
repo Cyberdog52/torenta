@@ -61,11 +61,11 @@ describe('DownloadsComponent', () => {
       ]
     });
 
-    const downloadComponent = TestBed.get(DownloadsComponent);
+    const downloadComponent = TestBed.inject(DownloadsComponent);
     expect(downloadComponent).toBeTruthy();
-    const notificationService = TestBed.get(NotificationService);
+    const notificationService = TestBed.inject(NotificationService);
     expect(notificationService).toBeTruthy();
-    const torrentService = TestBed.get(TorrentService);
+    const torrentService = TestBed.inject(TorrentService);
     expect(torrentService).toBeTruthy();
   });
 
@@ -78,7 +78,7 @@ describe('DownloadsComponent', () => {
       ]
     });
 
-    const downloadComponent: DownloadsComponent = TestBed.get(DownloadsComponent);
+    const downloadComponent: DownloadsComponent = TestBed.inject(DownloadsComponent);
     expect(downloadComponent.downloadDtos.length).toBe(0);
 
     downloadComponent.ngOnInit();
@@ -108,7 +108,7 @@ describe('DownloadsComponent', () => {
       ]
     });
 
-    const downloadComponent: DownloadsComponent = TestBed.get(DownloadsComponent);
+    const downloadComponent: DownloadsComponent = TestBed.inject(DownloadsComponent);
     downloadComponent.ngOnInit();
 
     torrentServiceMock.torrents.next([{

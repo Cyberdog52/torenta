@@ -1,4 +1,4 @@
-interface TmdbMovieOverviewDto {
+export interface TmdbMovieOverviewDto {
   overview: string;
   poster_path: string;
   adult: boolean;

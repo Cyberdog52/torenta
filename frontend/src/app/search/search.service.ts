@@ -4,6 +4,8 @@ import {Observable} from 'rxjs';
 import {TmdbSeriesDetailDto} from '../shared/dto/tmdb/TmdbSeriesDetailDto';
 import {TmdbEpisodeDto} from '../shared/dto/tmdb/TmdbEpisodeDto';
 import {TmdbMovieDetailDto} from '../shared/dto/tmdb/TmdbMovieDetailDto';
+import {TmdbSearchSeriesResultDto} from '../shared/dto/tmdb/TmdbSearchSeriesResultDto';
+import {TmdbSearchMoviesResultDto} from '../shared/dto/tmdb/TmdbSearchMoviesResultDto';
 
 @Injectable({
   providedIn: 'root'
