@@ -37,6 +37,7 @@ You do **not** need a local Gradle install — use the wrapper (`./gradlew`, `.\
 ./gradlew jacocoTestReport # application coverage report
 ./gradlew jacocoTestCoverageVerification # enforce application coverage thresholds
 ./gradlew bootRun    # run API at http://localhost:8080
+./gradlew createPortableArchive # build portable ZIP (runs npm ci for the frontend)
 ```
 
 Coverage reports and thresholds apply to `ch.andreskonrad.torenta/**`; the vendored `bt/**`

@@ -45,6 +45,15 @@ npm install
 npx playwright install chromium
 ```
 
+To build the portable application archive from the repository root:
+
+```bash
+./gradlew createPortableArchive
+```
+
+The Gradle task installs the locked frontend dependencies with `npm ci`, builds the Angular
+application, and writes the ZIP to `build/distributions/`.
+
 ## Frontend stack
 
 | | |
