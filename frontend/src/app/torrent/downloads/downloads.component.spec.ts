@@ -1,12 +1,12 @@
-import {TestBed} from "@angular/core/testing";
-import {DownloadsComponent} from "./downloads.component";
-import {TorrentService} from "../torrent.service";
-import {NotificationService} from "../../shared/notification/notification.service";
-import {DownloadRequestDto} from "../../shared/dto/torrent/DownloadRequestDto";
+import {TestBed} from '@angular/core/testing';
+import {DownloadsComponent} from './downloads.component';
+import {TorrentService} from '../torrent.service';
+import {NotificationService} from '../../shared/notification/notification.service';
+import {DownloadRequestDto} from '../../shared/dto/torrent/DownloadRequestDto';
 import {of, Subject} from 'rxjs';
-import {DownloadDto} from "../../shared/dto/torrent/DownloadDto";
-import {DownloadState} from "../../shared/dto/torrent/DownloadState";
-import {Notification} from "../../shared/dto/notification/Notification";
+import {DownloadDto} from '../../shared/dto/torrent/DownloadDto';
+import {DownloadState} from '../../shared/dto/torrent/DownloadState';
+import {Notification} from '../../shared/dto/notification/Notification';
 
 
 const torrentServiceMock = {
@@ -15,17 +15,17 @@ const torrentServiceMock = {
     return torrentServiceMock.torrents;
   },
   startTorrent: (downloadRequest: DownloadRequestDto) => {
-    return of(true)
+    return of(true);
   }
 };
 
 const notificationServiceMock = {
   notifications: [],
   getNotificationsObservable: () => {
-    return of(notificationServiceMock.notifications)
+    return of(notificationServiceMock.notifications);
   },
   addNotifications: (notification: Notification) => {
-    notificationServiceMock.notifications.push(notification)
+    notificationServiceMock.notifications.push(notification);
   }
 };
 
@@ -47,8 +47,8 @@ const mockDto = <DownloadDto>{
 
 describe('DownloadsComponent', () => {
 
-  beforeEach(() =>  {
-    notificationServiceMock.notifications = []
+  beforeEach(() => {
+    notificationServiceMock.notifications = [];
   });
 
 
