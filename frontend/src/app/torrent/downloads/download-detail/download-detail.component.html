@@ -16,7 +16,15 @@
       <p class="meta-line"><mat-icon>timelapse</mat-icon>{{ estimatedTimeFinished() }}</p>
     }
     <div class="progress">
-      <mat-progress-bar mode="determinate" [value]="downloadDto().progress * 100" />
+      <div
+        class="progress-track"
+        role="progressbar"
+        [attr.aria-valuenow]="progressPercent()"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <div class="progress-fill" [style.width.%]="progressPercent()"></div>
+      </div>
       @if (isRunning()) {
         <span>{{ progressString() }}</span>
       } @else {

@@ -66,19 +66,45 @@
   gap: 8px;
   margin-top: auto;
 
-  mat-progress-bar {
-    flex: 1 1 auto;
-    border-radius: 999px;
-    overflow: hidden;
+  span {
+    font-size: 0.8125rem;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
   }
+}
 
-  // Angular Material 6 class hooks (`.mat-progress-bar-fill::after`,
-  // `.mat-progress-bar-buffer`) no longer exist in M3; use the public tokens.
-  --mat-progress-bar-track-color: var(--mat-sys-surface-container-highest);
+// Custom pill progress bar. `mat-progress-bar`'s M3 fill is drawn as a
+// border on a zero-height element, which can't take a gradient or a
+// shimmer overlay — building the track/fill ourselves keeps full control.
+.progress-track {
+  position: relative;
+  flex: 1 1 auto;
+  height: 8px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: var(--mat-sys-surface-container-highest);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.progress-fill {
+  position: relative;
+  height: 100%;
+  border-radius: inherit;
+  overflow: hidden;
+  transition: width 0.6s ease;
+}
+
+@keyframes progress-shimmer {
+  from {
+    transform: translateX(-100%);
+  }
+  to {
+    transform: translateX(100%);
+  }
 }
 
 // Status colors are centralized here (keyed off the root modifier class set
-// from `stateClass()`) so the chip, the progress bar, and the "done" icon
+// from `stateClass()`) so the chip, the progress fill, and the "done" icon
 // all stay in sync with a download's actual state.
 .state-started {
   .status-chip {
@@ -86,8 +112,23 @@
     color: var(--mat-sys-on-primary-container);
   }
 
-  .progress {
-    --mat-progress-bar-active-indicator-color: var(--mat-sys-primary);
+  .progress-fill {
+    background: linear-gradient(90deg, var(--mat-sys-primary), var(--mat-sys-tertiary));
+
+    // A diagonal highlight sweeping across the fill, looping while the
+    // download is actively running.
+    &::after {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(
+        100deg,
+        transparent 30%,
+        rgba(255, 255, 255, 0.45) 50%,
+        transparent 70%
+      );
+      animation: progress-shimmer 1.6s linear infinite;
+    }
   }
 }
 
@@ -97,8 +138,8 @@
     color: var(--mat-sys-on-tertiary-container);
   }
 
-  .progress {
-    --mat-progress-bar-active-indicator-color: var(--mat-sys-tertiary);
+  .progress-fill {
+    background: var(--mat-sys-tertiary);
   }
 
   .progress-icon {
@@ -112,8 +153,9 @@
     color: var(--mat-sys-on-error-container);
   }
 
-  .progress {
-    --mat-progress-bar-active-indicator-color: var(--mat-sys-error);
+  .progress-fill {
+    background: var(--mat-sys-error);
+    opacity: 0.5;
   }
 
   .progress-icon {

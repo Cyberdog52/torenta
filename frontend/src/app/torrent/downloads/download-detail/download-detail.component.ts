@@ -1,6 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
-import { MatProgressBarModule } from '@angular/material/progress-bar';
 import { DownloadDto } from '../../../shared/dto/torrent/DownloadDto';
 import { DownloadState } from '../../../shared/dto/torrent/DownloadState';
 import {
@@ -20,7 +19,7 @@ const STATUS_META: Record<DownloadState, { label: string; icon: string }> = {
 
 @Component({
   selector: 'app-download-detail',
-  imports: [MatIconModule, MatProgressBarModule],
+  imports: [MatIconModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './download-detail.component.scss',
   templateUrl: './download-detail.component.html',
@@ -41,17 +40,19 @@ export class DownloadDetailComponent {
     backdropUrl(backdropPathOf(this.downloadDto().downloadRequest)),
   );
 
+  /** Drives the custom progress bar's fill width and its ARIA value. */
+  protected readonly progressPercent = computed(() => this.downloadDto().progress * 100);
+
   protected readonly progressString = computed(() => {
-    const download = this.downloadDto();
-    switch (download.state) {
+    switch (this.downloadDto().state) {
       case DownloadState.FINISHED:
         return 'Successfully downloaded';
       case DownloadState.CANCELLED:
         return 'Cancelled';
       case DownloadState.STARTED:
-        return `${(download.progress * 100).toFixed(1)} %`;
+        return `${this.progressPercent().toFixed(1)} %`;
       default:
-        return download.state;
+        return this.downloadDto().state;
     }
   });
 
@@ -64,9 +65,8 @@ export class DownloadDetailComponent {
   });
 
   /**
-   * Only meaningful while a download is actively running — the caller only
-   * reads this while `isRunning()` is true, so a finished/cancelled download
-   * no longer gets mislabeled with a leftover "Finished"/"Never" ETA.
+   * Only meaningful while a download is actively running; the template only
+   * reads this while `isRunning()` is true.
    */
   protected readonly estimatedTimeFinished = computed(() => {
     const download = this.downloadDto();
@@ -96,9 +96,8 @@ function backdropPathOf(downloadRequest: DownloadRequestDto): string | null {
 }
 
 /**
- * Formats a duration in seconds as `hh:mm:ss`, growing to `d:hh:mm:ss` past 24
- * hours instead of silently wrapping (the previous `Date#toISOString` hack
- * threw the day count away, so a 30-hour ETA rendered as `06:00:00`).
+ * Formats a duration in seconds as `hh:mm:ss`, growing to `d:hh:mm:ss` past
+ * 24 hours instead of silently wrapping the day count away.
  */
 function formatDuration(totalSeconds: number): string {
   const seconds = Math.floor(totalSeconds % 60);
