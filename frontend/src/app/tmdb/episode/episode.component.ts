@@ -1,33 +1,30 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {TmdbEpisodeDto} from '../../shared/dto/tmdb/TmdbEpisodeDto';
-import {TmdbSeriesDetailDto} from '../../shared/dto/tmdb/TmdbSeriesDetailDto';
-import {DownloadStatus} from '../../shared/dto/library/DownloadStatus';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { TmdbEpisodeDto } from '../../shared/dto/tmdb/TmdbEpisodeDto';
+import { TmdbSeriesDetailDto } from '../../shared/dto/tmdb/TmdbSeriesDetailDto';
+import { DownloadStatus } from '../../shared/dto/library/DownloadStatus';
+import { TorrentSuggestionsComponent } from '../../torrent/torrent-suggestions/torrent-suggestions.component';
 
 @Component({
   selector: 'app-episode',
+  imports: [MatIconModule, TorrentSuggestionsComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './episode.component.scss',
   templateUrl: './episode.component.html',
-  styleUrls: ['./episode.component.scss']
 })
-export class EpisodeComponent implements OnInit {
+export class EpisodeComponent {
+  readonly tmdbEpisodeDto = input.required<TmdbEpisodeDto>();
+  readonly seriesDetail = input.required<TmdbSeriesDetailDto>();
+  readonly downloadStatus = input<DownloadStatus | null>(null);
 
-  @Input() tmdbEpisodeDto: TmdbEpisodeDto;
-  @Input() seriesDetail: TmdbSeriesDetailDto;
-  @Input() downloadStatus: DownloadStatus;
-
-  constructor() { }
-
-  ngOnInit() {
-  }
-
-  getDownloadText(): string {
-    switch (this.downloadStatus) {
-      case DownloadStatus.DOWNLOADING: return 'Downloading';
-      case DownloadStatus.DOWNLOADED: return 'Downloaded';
-      default: return '';
+  protected readonly downloadText = computed(() => {
+    switch (this.downloadStatus()) {
+      case DownloadStatus.DOWNLOADING:
+        return 'Downloading';
+      case DownloadStatus.DOWNLOADED:
+        return 'Downloaded';
+      default:
+        return null;
     }
-  }
-
-  hasDownloadStatus() {
-    return this.downloadStatus != null;
-  }
+  });
 }

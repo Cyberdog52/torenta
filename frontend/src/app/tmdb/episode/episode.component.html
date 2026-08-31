@@ -1,16 +1,11 @@
 <div class="episode">
-  <p>
-    <mat-icon>queue_play_next</mat-icon> {{tmdbEpisodeDto.name }} •
-    <mat-icon>date_range</mat-icon>{{tmdbEpisodeDto.air_date}}
-
+  <p class="meta-line">
+    <mat-icon>queue_play_next</mat-icon>{{ tmdbEpisodeDto().name }} <mat-icon>date_range</mat-icon
+    >{{ tmdbEpisodeDto().air_date }}
   </p>
-  <p *ngIf="hasDownloadStatus()">
-    <mat-icon>archive</mat-icon> {{getDownloadText()}}
-  </p>
-  <p class="overview">
-    {{tmdbEpisodeDto.overview}}
-  </p>
-  <p>
-   <app-torrent-suggestions [tmdbEpisodeDto]="tmdbEpisodeDto" [seriesDetail]="seriesDetail"></app-torrent-suggestions>
-  </p>
+  @if (downloadText(); as downloadText) {
+    <p class="meta-line"><mat-icon>archive</mat-icon>{{ downloadText }}</p>
+  }
+  <p class="overview">{{ tmdbEpisodeDto().overview }}</p>
+  <app-torrent-suggestions [tmdbEpisodeDto]="tmdbEpisodeDto()" [seriesDetail]="seriesDetail()" />
 </div>

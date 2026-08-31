@@ -1,4 +1,4 @@
-interface TmdbSeriesOverviewDto {
+export interface TmdbSeriesOverviewDto {
   original_name: string;
   genre_ids: number[];
   name: string;
@@ -6,10 +6,10 @@ interface TmdbSeriesOverviewDto {
   origin_country: string[];
   vote_count: number;
   first_air_date: string;
-  backdrop_path: string;
+  backdrop_path: string | null;
   original_language: string;
   id: number;
   vote_average: number;
   overview: string;
-  poster_path: string;
+  poster_path: string | null;
 }

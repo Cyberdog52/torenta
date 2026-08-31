@@ -1,12 +1,12 @@
-import {TmdbCreatorDto} from './TmdbCreatorDto';
-import {TmdbEpisodeDto} from './TmdbEpisodeDto';
-import {TmdbGenreDto} from './TmdbGenreDto';
-import {TmdbNetworkDto} from './TmdbNetworkDto';
-import {TmdbSeasonDto} from './TmdbSeasonDto';
-import {TmdbProductionCompanyDto} from './TmdbProductionCompanyDto';
+import { TmdbCreatorDto } from './TmdbCreatorDto';
+import { TmdbEpisodeDto } from './TmdbEpisodeDto';
+import { TmdbGenreDto } from './TmdbGenreDto';
+import { TmdbNetworkDto } from './TmdbNetworkDto';
+import { TmdbSeasonDto } from './TmdbSeasonDto';
+import { TmdbProductionCompanyDto } from './TmdbProductionCompanyDto';
 
 export interface TmdbSeriesDetailDto {
-  backdrop_path: string;
+  backdrop_path: string | null;
   created_by: TmdbCreatorDto[];
   episode_run_time: number[];
   first_air_date: string;
@@ -27,7 +27,7 @@ export interface TmdbSeriesDetailDto {
   original_name: string;
   overview: string;
   popularity: number;
-  poster_path: string;
+  poster_path: string | null;
   production_companies: TmdbProductionCompanyDto[];
   seasons: TmdbSeasonDto[];
   status: string;

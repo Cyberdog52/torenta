@@ -1,43 +1,42 @@
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
-import {TmdbSeriesDetailDto} from '../shared/dto/tmdb/TmdbSeriesDetailDto';
-import {TmdbEpisodeDto} from '../shared/dto/tmdb/TmdbEpisodeDto';
-import {TmdbMovieDetailDto} from '../shared/dto/tmdb/TmdbMovieDetailDto';
+import { Injectable, Signal } from '@angular/core';
+import { httpResource } from '@angular/common/http';
+import { TmdbSeriesDetailDto } from '../shared/dto/tmdb/TmdbSeriesDetailDto';
+import { TmdbEpisodeDto } from '../shared/dto/tmdb/TmdbEpisodeDto';
+import { TmdbMovieDetailDto } from '../shared/dto/tmdb/TmdbMovieDetailDto';
+import { TmdbSearchSeriesResultDto } from '../shared/dto/tmdb/TmdbSearchSeriesResultDto';
+import { TmdbSearchMoviesResultDto } from '../shared/dto/tmdb/TmdbSearchMoviesResultDto';
 
-@Injectable({
-  providedIn: 'root'
-})
+const BACKEND_URL = 'api/tmdb';
+
+@Injectable({ providedIn: 'root' })
 export class SearchService {
-
-  private backendUrl = 'api/tmdb';
-
-  constructor(private httpClient: HttpClient) {
+  /** Reactive TV show search. Stays idle while the query is empty. */
+  searchSeriesResource(query: Signal<string>) {
+    return httpResource<TmdbSearchSeriesResultDto>(() => {
+      const search = query().trim();
+      return search ? { url: `${BACKEND_URL}/tv`, params: { search } } : undefined;
+    });
   }
 
-  public searchSeries(searchString: string): Observable<TmdbSearchSeriesResultDto> {
-    const url = `${this.backendUrl}/tv?search=${searchString}`;
-    return this.httpClient.get<TmdbSearchSeriesResultDto>(url);
+  /** Reactive movie search. Stays idle while the query is empty. */
+  searchMoviesResource(query: Signal<string>) {
+    return httpResource<TmdbSearchMoviesResultDto>(() => {
+      const search = query().trim();
+      return search ? { url: `${BACKEND_URL}/movie`, params: { search } } : undefined;
+    });
   }
 
-  public searchMovies(searchString: string): Observable<TmdbSearchMoviesResultDto> {
-    const url = `${this.backendUrl}/movie?search=${searchString}`;
-    return this.httpClient.get<TmdbSearchMoviesResultDto>(url);
+  seriesDetailResource(id: Signal<number>) {
+    return httpResource<TmdbSeriesDetailDto>(() => `${BACKEND_URL}/tv/${id()}`);
   }
 
-  public getTVShow(id: number): Observable<TmdbSeriesDetailDto> {
-    const url = `${this.backendUrl}/tv/${id}`;
-    return this.httpClient.get<TmdbSeriesDetailDto>(url);
+  movieDetailResource(id: Signal<number>) {
+    return httpResource<TmdbMovieDetailDto>(() => `${BACKEND_URL}/movie/${id()}`);
   }
 
-  public getMovie(id: number): Observable<TmdbMovieDetailDto> {
-    const url = `${this.backendUrl}/movie/${id}`;
-    return this.httpClient.get<TmdbMovieDetailDto>(url);
-  }
-
-
-  getEpisodes(seriesId: number, season_number: number): Observable<TmdbEpisodeDto[]> {
-    const url = `${this.backendUrl}/tv/${seriesId}/season/${season_number}`;
-    return this.httpClient.get<TmdbEpisodeDto[]>(url);
+  episodesResource(seriesId: Signal<number>, seasonNumber: Signal<number>) {
+    return httpResource<TmdbEpisodeDto[]>(
+      () => `${BACKEND_URL}/tv/${seriesId()}/season/${seasonNumber()}`,
+    );
   }
 }

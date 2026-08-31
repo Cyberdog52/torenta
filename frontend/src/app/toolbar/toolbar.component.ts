@@ -1,27 +1,37 @@
-import { Component, OnInit } from '@angular/core';
-import {Router} from '@angular/router';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { RouterLink, RouterLinkActive } from '@angular/router';
+import { MatToolbarModule } from '@angular/material/toolbar';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { ThemeService } from '../shared/theme.service';
 
 @Component({
   selector: 'app-toolbar',
+  imports: [
+    RouterLink,
+    RouterLinkActive,
+    MatToolbarModule,
+    MatButtonModule,
+    MatIconModule,
+    MatTooltipModule,
+  ],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './toolbar.component.scss',
   templateUrl: './toolbar.component.html',
-  styleUrls: ['./toolbar.component.scss']
 })
-export class ToolbarComponent implements OnInit {
+export class ToolbarComponent {
+  protected readonly themeService = inject(ThemeService);
 
-  constructor(private router: Router) { }
+  protected readonly themeIcon: Record<string, string> = {
+    system: 'brightness_auto',
+    light: 'light_mode',
+    dark: 'dark_mode',
+  };
 
-  ngOnInit() {
-  }
-
-  goToPreferences() {
-    this.router.navigateByUrl('preferences');
-  }
-
-  goToDownloads() {
-    this.router.navigateByUrl('downloads');
-  }
-
-  goToSearch() {
-    this.router.navigateByUrl('search');
-  }
+  protected readonly themeLabel: Record<string, string> = {
+    system: 'Theme: system',
+    light: 'Theme: light',
+    dark: 'Theme: dark',
+  };
 }

@@ -1,21 +1,24 @@
 <div class="season">
-  <p>
-    <mat-icon>queue_play_next</mat-icon> {{tmdbSeasonDto.name }} •
-    <mat-icon>date_range</mat-icon>{{tmdbSeasonDto.air_date}}
+  <p class="meta-line">
+    <mat-icon>queue_play_next</mat-icon>{{ tmdbSeasonDto().name }} <mat-icon>date_range</mat-icon
+    >{{ tmdbSeasonDto().air_date }}
   </p>
-  <p class="overview">
-    {{tmdbSeasonDto.overview}}
-  </p>
-  <p>
-    <span *ngFor="let tmdbEpisodeDto of episodes">
-      <button mat-raised-button class="episodeButton" (click)="showEpisode = tmdbEpisodeDto">
-        {{getEpisodeButtonTitle(tmdbEpisodeDto)}}
+  <p class="overview">{{ tmdbSeasonDto().overview }}</p>
+  <div class="episode-buttons">
+    @for (tmdbEpisodeDto of episodes(); track tmdbEpisodeDto.id) {
+      <button matButton="elevated" class="chip-button" (click)="showEpisode.set(tmdbEpisodeDto)">
+        {{ episodeButtonTitle(tmdbEpisodeDto) }}
+        @if (episodeIcon(tmdbEpisodeDto); as icon) {
+          <mat-icon>{{ icon }}</mat-icon>
+        }
       </button>
-      <mat-icon class="topRightIcon" *ngIf="getEpisodeIcon(tmdbEpisodeDto) != null">{{getEpisodeIcon(tmdbEpisodeDto)}}</mat-icon>
-    </span>
-
-  </p>
-  <app-episode [tmdbEpisodeDto]="showEpisode" [seriesDetail]="seriesDetail" [downloadStatus]="getDownloadStatus(showEpisode)" *ngIf="showEpisode"></app-episode>
+    }
+  </div>
+  @if (showEpisode(); as episode) {
+    <app-episode
+      [tmdbEpisodeDto]="episode"
+      [seriesDetail]="seriesDetail()"
+      [downloadStatus]="downloadStatus(episode)"
+    />
+  }
 </div>
-
-

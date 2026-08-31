@@ -1,20 +1,14 @@
-import {Injectable} from '@angular/core';
-import {Observable, Subject} from 'rxjs';
-import {Notification} from '../dto/notification/Notification';
+import { Injectable } from '@angular/core';
+import { Observable, Subject } from 'rxjs';
+import { Notification } from '../dto/notification/Notification';
 
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class NotificationService {
+  private readonly notifications = new Subject<Notification>();
 
-  private notifications: Subject<Notification> = new Subject<Notification>();
+  readonly notifications$: Observable<Notification> = this.notifications.asObservable();
 
-  public getNotificationsObservable(): Observable<Notification> {
-    return this.notifications.asObservable();
-  }
-
-  public addNotifications(notification: Notification) {
+  notify(notification: Notification): void {
     this.notifications.next(notification);
   }
-
 }

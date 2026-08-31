@@ -92,7 +92,8 @@ indexing but are not guarantees. Do not assume in-repo files are inaccessible to
 `torenta` is a media discovery and BitTorrent download manager.
 
 - **Backend:** Spring Boot 4.1.1 REST API, Java 25, built with Gradle 9.7.1.
-- **Frontend:** Angular 6 SPA (TypeScript), served separately, proxied to the backend.
+- **Frontend:** Angular 22 SPA (standalone components, signals, zoneless), served separately,
+  proxied to the backend.
 - **Purpose:** search TMDB for movies/series, find torrents (PirateBay HTML scraping), download
   via a vendored BitTorrent engine, and manage a local media library.
 
@@ -104,9 +105,11 @@ indexing but are not guarantees. Do not assume in-repo files are inaccessible to
 
 ### Frontend stack
 
-- Angular 6, TypeScript ~2.9, RxJS, Angular Material.
-- Node.js 10–16, npm 6–8 (see `frontend/package.json` `engines`).
-- Tests: Karma + Jasmine; lint: tslint + codelyzer.
+- Angular 22 (standalone components, signals, `httpResource`), TypeScript ~6.0, RxJS, Angular
+  Material 22 (Material 3 theming).
+- Node.js 24 LTS (>= 24.15.0), npm >= 10 (see `frontend/package.json` `engines`).
+- Tests: Vitest (`npm test`); lint: ESLint + angular-eslint (`npm run lint`, also checks
+  Prettier formatting).
 
 ### Repository layout
 
@@ -116,7 +119,7 @@ src/main/java/bt/**                               # VENDORED BitTorrent library 
 src/main/java/ch/andreskonrad/torenta/**          # Application code (feature-sliced)
 src/main/resources/**                             # Config (contains protected files)
 src/test/java/**                                  # JUnit 5 tests
-frontend/                                         # Angular 6 SPA
+frontend/                                         # Angular 22 SPA
 ```
 
 ---
@@ -183,16 +186,17 @@ Add new functionality as a new feature slice following this pattern; do not crea
 
 - **Java:** follow existing style — 4-space indent, constructor injection, `final` fields for
   injected collaborators, Lombok where already used. Match the surrounding file.
-- **TypeScript:** follow `frontend/tslint.json` + codelyzer; keep the existing 2-space style and
-  strong typing on `HttpClient` calls.
+- **TypeScript:** follow the `frontend/eslint.config.js` (ESLint + angular-eslint) and Prettier
+  rules; keep the existing 2-space style and strong typing on `HttpClient`/`httpResource` calls.
+  Prefer signals (`signal`, `computed`, `linkedSignal`) over manual `effect`-driven state resets.
 - Only add comments that clarify non-obvious intent; do not add narration comments.
 
 ### 4.2 Testing strategy
 
 - **Backend:** JUnit 5 with Mockito (see `src/test/java/**`). Add/adjust tests for new or changed
   service logic. Run: `./gradlew test` (Windows: `.\gradlew.bat test`).
-- **Frontend:** Karma + Jasmine (`*.spec.ts`). Run: `cd frontend; npm test`.
-- **End-to-end:** Playwright (`frontend/e2e/**/*.spec.js`), organized in feature folders. Run:
+- **Frontend:** Vitest (`*.spec.ts`). Run: `cd frontend; npm test`.
+- **End-to-end:** Playwright (`frontend/e2e/**/*.spec.ts`), organized in feature folders. Run:
   `cd frontend; npm run e2e`; this starts the backend and frontend and verifies the rendered
   application and the Preferences API flow. Use `npm run e2e:ui` for the interactive Playwright
   runner.
@@ -262,12 +266,13 @@ Add new functionality as a new feature slice following this pattern; do not crea
 ./gradlew bootRun          # run backend at http://localhost:8080
 
 # Frontend (from ./frontend)
-npm install                # install deps (Node 10-16, npm 6-8)
+npm install                # install deps (Node 24 LTS, npm >= 10)
 npx playwright install chromium  # install the e2e browser once
 npm start                  # dev server http://localhost:4200 (proxies /api to :8080)
 npm run build              # production build
-npm test                   # Karma/Jasmine unit tests
-npm run lint               # tslint
+npm test                   # Vitest unit tests
+npm run lint               # ESLint + angular-eslint, then Prettier format check
+npm run format             # apply Prettier formatting
 npm run e2e                # Playwright smoke test; starts backend + frontend
 npm run e2e:ui             # interactive Playwright test runner
 ```

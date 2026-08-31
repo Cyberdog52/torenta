@@ -1,0 +1,31 @@
+import { Routes } from '@angular/router';
+
+export const routes: Routes = [
+  {
+    path: 'search',
+    title: 'Torenta – Search',
+    // Search shows three side-by-side result panels, so it needs more room
+    // than the default reading-width page container (see `app.ts`).
+    data: { wide: true },
+    loadComponent: () => import('./search/search.component').then((m) => m.SearchComponent),
+  },
+  {
+    path: 'downloads',
+    title: 'Torenta – Downloads',
+    loadComponent: () =>
+      import('./torrent/downloads/downloads.component').then((m) => m.DownloadsComponent),
+  },
+  {
+    path: 'preferences',
+    title: 'Torenta – Preferences',
+    loadComponent: () =>
+      import('./preference/preferences.component').then((m) => m.PreferencesComponent),
+  },
+  { path: '', redirectTo: '/search', pathMatch: 'full' },
+  {
+    path: '**',
+    title: 'Torenta – Not found',
+    loadComponent: () =>
+      import('./page-not-found/page-not-found.component').then((m) => m.PageNotFoundComponent),
+  },
+];

@@ -1,8 +1,7 @@
-import {DirectoryDto} from '../directory/DirectoryDto';
-import {TmdbSeriesDetailDto} from '../tmdb/TmdbSeriesDetailDto';
-import {TmdbEpisodeDto} from '../tmdb/TmdbEpisodeDto';
-import {Season} from './Season';
-
+import { DirectoryDto } from '../directory/DirectoryDto';
+import { TmdbSeriesDetailDto } from '../tmdb/TmdbSeriesDetailDto';
+import { TmdbEpisodeDto } from '../tmdb/TmdbEpisodeDto';
+import { Season } from './Season';
 
 export interface Series {
   directoryDto: DirectoryDto;

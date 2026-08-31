@@ -1,20 +1,15 @@
-import { Component, OnInit } from '@angular/core';
-import {Router} from '@angular/router';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-page-not-found',
-  templateUrl: './page-not-found.component.html',
-  styleUrls: ['./page-not-found.component.scss']
+  imports: [RouterLink, MatButtonModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './page-not-found.component.scss',
+  template: `
+    <button matButton="elevated" routerLink="/">Return to base</button>
+    <img src="404.jpg" alt="Page not found" />
+  `,
 })
-export class PageNotFoundComponent implements OnInit {
-
-  constructor(private router: Router) { }
-
-  ngOnInit() {
-  }
-
-  returnToBase() {
-    this.router.navigateByUrl('');
-  }
-
-}
+export class PageNotFoundComponent {}

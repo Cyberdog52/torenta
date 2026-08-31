@@ -1,18 +1,35 @@
-<div class="downloadDetail">
-  <div class="background-container">
-    <img class="background-image" src="{{getBackgroundImageFor(downloadDto.downloadRequest)}}" />
-    <div class="background-image-shadow"></div>
+<div class="download-detail {{ stateClass() }}">
+  <div class="backdrop">
+    <img [src]="backgroundImage()" alt="" loading="lazy" />
   </div>
-  <div class="foreground-container">
-    <p class="download_title"> {{getDownloadTitle(downloadDto)}}</p>
-    <p><mat-icon>link</mat-icon> {{getPeers()}}</p>
-    <p><mat-icon>network_check</mat-icon> {{getSpeed()}}</p>
-    <p><mat-icon>timelapse</mat-icon> {{getEstimatedTimeFinished()}}</p>
-    <div class="progress-percentage">
-      <mat-progress-bar class="float-left" [mode]="determinate" [value]="downloadDto.progress * 100"></mat-progress-bar>
-      <a class="float-left" *ngIf="isRunning()">{{getProgressString(downloadDto)}}</a>
-      <mat-icon class="float-left" *ngIf="!isRunning()">done_outline</mat-icon>
+  <div class="foreground">
+    <div class="header-row">
+      <p class="title">{{ title() }}</p>
+      <span class="status-chip">
+        <mat-icon>{{ status().icon }}</mat-icon>
+        {{ status().label }}
+      </span>
+    </div>
+    <p class="meta-line"><mat-icon>link</mat-icon>{{ peers() }}</p>
+    @if (isRunning()) {
+      <p class="meta-line"><mat-icon>network_check</mat-icon>{{ speed() }}</p>
+      <p class="meta-line"><mat-icon>timelapse</mat-icon>{{ estimatedTimeFinished() }}</p>
+    }
+    <div class="progress">
+      <div
+        class="progress-track"
+        role="progressbar"
+        [attr.aria-valuenow]="progressPercent()"
+        aria-valuemin="0"
+        aria-valuemax="100"
+      >
+        <div class="progress-fill" [style.width.%]="progressPercent()"></div>
+      </div>
+      @if (isRunning()) {
+        <span>{{ progressString() }}</span>
+      } @else {
+        <mat-icon class="progress-icon">{{ status().icon }}</mat-icon>
+      }
     </div>
   </div>
 </div>
-

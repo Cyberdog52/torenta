@@ -1,32 +1,29 @@
-<div *ngIf="isLoading()">
-  <mat-progress-spinner mode="indeterminate">
-  </mat-progress-spinner>
-</div>
-<div *ngIf="!isLoading()" class="movieDetail">
-  <div class="background-container">
-    <img class="background-image" src="{{getBackgroundImageFor(movieDetail)}}" />
-    <div class="background-image-shadow"></div>
+@if (isLoading()) {
+  <div class="loading">
+    <mat-progress-spinner mode="indeterminate" diameter="32" />
   </div>
-  <div class="foreground-container">
-    <p class="overview">
-      <mat-icon>date_range</mat-icon>{{movieDetail.release_date}} •
-      <mat-icon>timer</mat-icon>{{movieDetail.runtime }} •
-      <mat-icon>star</mat-icon>{{movieDetail.vote_average}}
-    </p>
-    <p *ngIf="movieDirectory">
-      <mat-icon>snippet_folder</mat-icon> {{movieDirectory.absolutePath}}
-    </p>
-    <p>
-      <mat-chip-list>
-        <mat-chip *ngFor="let genre of movieDetail.genres">
-          {{genre.name}}
-        </mat-chip>
-      </mat-chip-list>
-    </p>
-    <p class="overview">{{movieDetail.overview}}</p>
-    <p>
-      <app-torrent-suggestions [movieDetail]="movieDetail"></app-torrent-suggestions>
-    </p>
-
+} @else if (movieDetail(); as movieDetail) {
+  <div class="movie-detail">
+    <div class="backdrop">
+      <img [src]="backdropUrl(movieDetail.backdrop_path)" alt="" loading="lazy" />
+    </div>
+    <div class="foreground">
+      <p class="meta-line">
+        <mat-icon>date_range</mat-icon>{{ movieDetail.release_date }} <mat-icon>timer</mat-icon
+        >{{ movieDetail.runtime }} min <mat-icon>star</mat-icon>{{ movieDetail.vote_average }}
+      </p>
+      @if (movieDirectory(); as movieDirectory) {
+        <p class="meta-line">
+          <mat-icon>snippet_folder</mat-icon>{{ movieDirectory.absolutePath }}
+        </p>
+      }
+      <mat-chip-set>
+        @for (genre of movieDetail.genres; track genre.id) {
+          <mat-chip>{{ genre.name }}</mat-chip>
+        }
+      </mat-chip-set>
+      <p class="overview">{{ movieDetail.overview }}</p>
+      <app-torrent-suggestions [movieDetail]="movieDetail" />
+    </div>
   </div>
-</div>
+}

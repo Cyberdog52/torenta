@@ -1,4 +1,4 @@
-import {FileDto} from './FileDto';
+import { FileDto } from './FileDto';
 
 export interface DirectoryDto {
   name: string;
