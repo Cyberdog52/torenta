@@ -131,12 +131,12 @@ npx @angular/cli@<exact-cli> update \
 
 Runtime: Node `8.17.0`, npm `6.13.4`.
 
-- [ ] Upgrade Angular core to `7.2.16`.
-- [ ] Upgrade Angular CLI to `7.3.10`.
-- [ ] Upgrade Material and CDK to `7.3.7`.
-- [ ] Upgrade TypeScript to `3.2.4`.
-- [ ] Apply and review CLI workspace migrations.
-- [ ] Complete the standard major-upgrade procedure.
+- [x] Upgrade Angular core to `7.2.16`.
+- [x] Upgrade Angular CLI to `7.3.10`.
+- [x] Upgrade Material and CDK to `7.3.7`.
+- [x] Upgrade TypeScript to `3.2.4`.
+- [x] Apply and review CLI workspace migrations.
+- [x] Complete the standard major-upgrade procedure.
 
 ## Phase 4: Angular 8
 

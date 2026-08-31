@@ -63,7 +63,8 @@ it before final acceptance.
 | --- | --- | --- | --- | --- |
 | 0 | 6.1.10 | Host audit: 22.19.0 / 10.9.3 | Decisions frozen; Docker 29.7.2 available | `1d5c8f8` |
 | 1 | 6.1.10 | Angular host: 22.19.0 / 10.9.3; Playwright target: Node 24 | 12 desktop/mobile characterization tests pass; legacy AOT defect recorded | `5585e72` |
-| 2 | 6.1.10 | npm 6.13.4 on host Node 22.19.0 | Exact dependencies and npm v1 lockfile; lint, 3 unit tests, AOT build, and 12 Playwright tests pass | This phase commit |
+| 2 | 6.1.10 | npm 6.13.4 on host Node 22.19.0 | Exact dependencies and npm v1 lockfile; lint, 3 unit tests, AOT build, and 12 Playwright tests pass | `369f0fb` |
+| 3 | 7.2.16 | npm 6.13.4 on host Node 22.19.0 | Schematics reviewed; exact tree, lint, 3 unit tests, AOT build, and 12 Playwright tests pass | This phase commit |
 
 ## Angular 6 Baseline
 
@@ -112,3 +113,18 @@ Recorded on 2026-08-31 before dependency normalization:
   under Node 22, and webpack commands used the temporary
   `NODE_OPTIONS=--openssl-legacy-provider` option. No production configuration
   was changed to retain that compatibility option.
+
+## Angular 7 Checkpoint
+
+- Core is `7.2.16`, CLI/build tooling is `7.3.10`/`0.13.10`,
+  Material/CDK is `7.3.7`, TypeScript is `3.2.4`, and RxJS is `6.6.7`.
+- CLI schematics removed obsolete reflect polyfill imports and enabled TypeScript
+  import helpers. Direct dependencies remain exact.
+- Codelyzer was aligned to `5.2.2`, and renamed metadata-property rules replaced
+  three removed legacy rule names so lint runs without configuration warnings.
+- `npm ls --depth=0`, lint, three Karma tests, production AOT build, and all 12
+  characterization tests pass.
+- The archived schematic's optional Node Sass installation cannot build on the
+  modern ARM64 host; the application uses the separately pinned Dart Sass package,
+  and clean installs are performed with lifecycle scripts disabled at historical
+  checkpoints.
