@@ -5,6 +5,7 @@ import bt.runtime.Config;
 import bt.torrent.TorrentSessionState;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadDto;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRequest;
+import ch.andreskonrad.torenta.bittorrent.dto.DownloadState;
 import ch.andreskonrad.torenta.directory.service.DirectoryService;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbMovieDetailDto;
@@ -33,6 +34,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -172,6 +174,48 @@ class BitTorrentServiceTest {
         callbackCaptor.getAllValues().get(1).accept(secondState);
 
         assertSame(secondState, service.getDownload(secondMagnet.hashCode()).getState());
+    }
+
+    @Test
+    void startDownload_registersDownloadBeforeSynchronousSessionCallback() {
+        TorrentSessionState initialState = state(1, 4);
+        doAnswer(invocation -> {
+            Consumer<TorrentSessionState> callback = invocation.getArgument(0);
+            callback.accept(initialState);
+            return future;
+        }).when(client).startAsync(any(), anyLong());
+
+        service.startDownload(request(MAGNET_LINK), Path.of("target"));
+
+        Download download = service.getDownload(MAGNET_LINK.hashCode());
+        assertNotNull(download);
+        assertSame(initialState, download.getState());
+    }
+
+    @Test
+    void getAllDownloadDtos_beforeFirstSessionCallbackReturnsZeroedStartedDownload() {
+        service.startDownload(request(MAGNET_LINK), Path.of("target"));
+
+        DownloadDto download = service.getAllDownloadDtos().iterator().next();
+
+        assertEquals(DownloadState.STARTED, download.getState());
+        assertEquals(0, download.getProgress());
+        assertEquals(0, download.getConnectedPeers());
+        assertEquals(0, download.getTotalBytes());
+        assertEquals(0, download.getDownloadSpeedInBytesPerSecond());
+    }
+
+    @Test
+    void startDownload_startFailureRemovesRegisteredDownload() {
+        doAnswer(invocation -> {
+            throw new IllegalStateException("start failed");
+        }).when(client).startAsync(any(), anyLong());
+
+        assertThrows(
+                IllegalStateException.class,
+                () -> service.startDownload(request(MAGNET_LINK), Path.of("target")));
+
+        assertNull(service.getDownload(MAGNET_LINK.hashCode()));
     }
 
     @Test
