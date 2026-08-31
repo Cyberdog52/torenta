@@ -91,15 +91,15 @@ indexing but are not guarantees. Do not assume in-repo files are inaccessible to
 
 `torenta` is a media discovery and BitTorrent download manager.
 
-- **Backend:** Spring Boot 2.2.1 REST API, Java 11, built with Gradle.
+- **Backend:** Spring Boot 4.1.1 REST API, Java 25, built with Gradle 9.7.1.
 - **Frontend:** Angular 6 SPA (TypeScript), served separately, proxied to the backend.
 - **Purpose:** search TMDB for movies/series, find torrents (PirateBay HTML scraping), download
   via a vendored BitTorrent engine, and manage a local media library.
 
 ### Backend stack
 
-- Spring Boot 2.2.1 (`spring-boot-starter-web`, `-actuator`, `-cache`), Java 11.
-- Lombok, Jackson, Springfox Swagger 2.9.2, Guice, jsoup, Apache HttpClient, Java 11 `java.net.http`.
+- Spring Boot 4.1.1 (`spring-boot-starter-webmvc`, `-actuator`, `-cache`), Java 25.
+- Lombok, Jackson 3, Springdoc OpenAPI, Guice, jsoup, Apache HttpClient, Java 25 `java.net.http`.
 - Tests: JUnit 5 (`useJUnitPlatform`), EasyMock, spring-security-test.
 
 ### Frontend stack
@@ -214,13 +214,16 @@ Add new functionality as a new feature slice following this pattern; do not crea
   (Spring, Jackson, jsoup, Apache HttpClient, Guice, Lombok on the backend; Angular/RxJS/Material on
   the frontend).
 - Adding or upgrading a dependency (`build.gradle` / `frontend/package.json`) requires explicit
-  user approval and a stated reason. Respect the pinned Java 11 / Angular 6 / Node 10–16 constraints;
+  user approval and a stated reason. Respect the pinned Java 25 / Angular 6 / Node 10–16 constraints;
   do not silently bump major versions.
 
 ### 4.6 Documentation
 
 - Update `README.md` and relevant docs when you change setup steps, run commands, endpoints, or
-  behavior. Update Swagger annotations/DTOs so `/swagger-ui.html` stays accurate.
+  behavior. Update OpenAPI annotations/DTOs so `/swagger-ui.html` stays accurate.
+- When changing Java, Gradle, Spring Boot, Node.js, or other platform versions, audit every
+  version-bearing surface: build files, wrappers, CI workflows, `.devcontainer/devcontainer.json`,
+  runtime images, and setup documentation.
 
 ---
 

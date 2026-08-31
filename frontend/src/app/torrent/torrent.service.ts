@@ -46,7 +46,7 @@ export class TorrentService implements OnDestroy {
   }
 
   public searchTorrent(searchString: string): Observable<TorrentEntry[]> {
-    const url = `api/torrent/?search=${searchString}`;
+    const url = `api/torrent?search=${searchString}`;
     return this.httpClient.get<TorrentEntry[]>(url);
   }
 }

@@ -2,7 +2,6 @@ package ch.andreskonrad.torenta.directory.controller;
 
 import ch.andreskonrad.torenta.directory.dto.DirectoryDto;
 import ch.andreskonrad.torenta.directory.service.DirectoryService;
-import io.swagger.models.parameters.QueryParameter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,5 +49,4 @@ public class DirectoryController {
         return new ResponseEntity<>(result, HttpStatus.OK);
     }
 }
-
 
