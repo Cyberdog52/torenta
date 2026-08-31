@@ -6,17 +6,47 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
+import org.springframework.stereotype.Component;
 import org.springframework.web.client.HttpServerErrorException;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.List;
 
 //originally found in https://github.com/anthony-salutari/Java-Pirate-Bay-Api
-public class PirateBayHtmlAPI {
+@Component
+@Primary
+public class PirateBayHtmlAPI implements TorrentProvider {
+
+    private static final int MAX_ATTEMPTS = 4;
+
+    private final DocumentFetcher documentFetcher;
+
+    public PirateBayHtmlAPI() {
+        this(uri -> Jsoup.connect(uri.toString())
+                .userAgent("Java 25 HttpClient Bot")
+                .timeout(5000)
+                .get());
+    }
+
+    PirateBayHtmlAPI(DocumentFetcher documentFetcher) {
+        this.documentFetcher = documentFetcher;
+    }
 
     public static ArrayList<TorrentEntry> search(TorrentQuery query) throws HttpServerErrorException {
+        return new PirateBayHtmlAPI().findEntries(query);
+    }
 
-        Document doc = getDocumentWithRetries(query, 3);
+    @Override
+    public List<TorrentEntry> find(TorrentQuery query) throws HttpServerErrorException {
+        return findEntries(query);
+    }
+
+    private ArrayList<TorrentEntry> findEntries(TorrentQuery query) throws HttpServerErrorException {
+        Document doc = getDocumentWithRetries(query, MAX_ATTEMPTS);
 
         Elements tableRows = doc.getElementsByTag("tr");
 
@@ -25,8 +55,8 @@ public class PirateBayHtmlAPI {
             if (!row.hasClass("header")) {
                 try {
                     torrentEntries.add(parsePiratebayEntry(row));
-                } catch (Exception e) {
-                    //  System.out.println("Could not parse element " + row.toString());
+                } catch (RuntimeException ignored) {
+                    // Malformed result rows do not invalidate the other search results.
                 }
             }
         }
@@ -34,21 +64,18 @@ public class PirateBayHtmlAPI {
         return torrentEntries;
     }
 
-    private static Document getDocumentWithRetries(TorrentQuery query, int retriesLeft) throws HttpServerErrorException {
-        if (retriesLeft < 0) {
-            throw new HttpServerErrorException(HttpStatus.BAD_GATEWAY, "Could not connect to piratebay");
+    private Document getDocumentWithRetries(TorrentQuery query, int maxAttempts) throws HttpServerErrorException {
+        URI uri = query.getPirateBayFrontendSearchURI();
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            try {
+                return documentFetcher.fetch(uri);
+            } catch (IOException ignored) {
+            }
         }
-        try {
-            return Jsoup.connect(query.getPirateBayFrontendSearchURI().toString())
-                    .userAgent("Java 25 HttpClient Bot")
-                    .timeout(5000)
-                    .get();
-        } catch (Exception e) {
-            return getDocumentWithRetries(query, retriesLeft - 1);
-        }
+        throw new HttpServerErrorException(HttpStatus.BAD_GATEWAY, "Could not connect to piratebay");
     }
 
-    private static TorrentEntry parsePiratebayEntry(Element element) {
+    private TorrentEntry parsePiratebayEntry(Element element) {
         final TorrentSearchBuilder builder = new TorrentSearchBuilder();
 
         Element td1 = element.children().select("td").first();
@@ -91,5 +118,10 @@ public class PirateBayHtmlAPI {
         builder.setUploader(td8.text());
 
         return builder.createTorrentEntry();
+    }
+
+    @FunctionalInterface
+    interface DocumentFetcher {
+        Document fetch(URI uri) throws IOException;
     }
 }

@@ -36,8 +36,13 @@ You do **not** need a local Gradle install — use the wrapper (`./gradlew`, `.\
 ```bash
 ./gradlew build      # compile + test           (Windows: .\gradlew.bat build)
 ./gradlew test       # JUnit 5 tests             (Windows: .\gradlew.bat test)
+./gradlew jacocoTestReport # application coverage report
+./gradlew jacocoTestCoverageVerification # enforce application coverage thresholds
 ./gradlew bootRun    # run API at http://localhost:8080
 ```
+
+Coverage reports and thresholds apply to `ch.andreskonrad.torenta/**`; the vendored `bt/**`
+implementation is excluded.
 
 Swagger UI: <http://localhost:8080/swagger-ui.html>
 
