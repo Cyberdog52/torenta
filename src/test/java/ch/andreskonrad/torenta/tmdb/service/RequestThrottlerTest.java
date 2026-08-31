@@ -1,53 +1,87 @@
 package ch.andreskonrad.torenta.tmdb.service;
 
 import org.junit.jupiter.api.Test;
-import org.springframework.util.StopWatch;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.util.ArrayList;
+import java.util.List;
 
-public class RequestThrottlerTest {
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
+class RequestThrottlerTest {
 
     @Test
-    public void requestThrottle_oneRequestsPerSecond_throttled() throws InterruptedException {
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
+    void throttle_underLimit_doesNotSleep() throws InterruptedException {
+        FakeTime fakeTime = new FakeTime();
+        RequestThrottler throttler = throttler(3, 100, fakeTime);
 
-        RequestThrottler requestThrottler = new RequestThrottler(1, 100);
-        requestThrottler.throttle();
-        requestThrottler.throttle();
-        requestThrottler.throttle();
+        throttler.throttle();
+        throttler.throttle();
 
-        stopWatch.stop();
-        assertTrue(stopWatch.getLastTaskTimeMillis() > 200);
+        assertEquals(List.of(), fakeTime.sleepDurations);
     }
 
     @Test
-    public void requestThrottle_threeRequestsPerSecond_notThrottled() throws InterruptedException {
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
+    void throttle_atLimit_doesNotSleep() throws InterruptedException {
+        FakeTime fakeTime = new FakeTime();
+        RequestThrottler throttler = throttler(3, 100, fakeTime);
 
-        RequestThrottler requestThrottler = new RequestThrottler(3, 100);
-        requestThrottler.throttle();
-        requestThrottler.throttle();
-        requestThrottler.throttle();
+        throttler.throttle();
+        throttler.throttle();
+        throttler.throttle();
 
-        stopWatch.stop();
-        assertTrue(stopWatch.getLastTaskTimeMillis() < 100);
+        assertEquals(List.of(), fakeTime.sleepDurations);
     }
 
     @Test
-    public void requestThrottle_waitToClear_notThrottled() throws InterruptedException {
-        RequestThrottler requestThrottler = new RequestThrottler(1, 100);
+    void throttle_overLimit_sleepsUntilWindowExpires() throws InterruptedException {
+        FakeTime fakeTime = new FakeTime();
+        RequestThrottler throttler = throttler(2, 100, fakeTime);
 
-        requestThrottler.throttle();
-        Thread.sleep(100);
+        throttler.throttle();
+        throttler.throttle();
+        throttler.throttle();
 
-        StopWatch stopWatch = new StopWatch();
-        stopWatch.start();
+        assertEquals(List.of(50L, 50L), fakeTime.sleepDurations);
+        assertEquals(100, fakeTime.currentTimeMillis());
+    }
 
-        requestThrottler.throttle();
+    @Test
+    void throttle_expiredWindow_doesNotSleep() throws InterruptedException {
+        FakeTime fakeTime = new FakeTime();
+        RequestThrottler throttler = throttler(1, 100, fakeTime);
 
-        stopWatch.stop();
-        assertTrue(stopWatch.getLastTaskTimeMillis() < 100);
+        throttler.throttle();
+        fakeTime.advance(100);
+        throttler.throttle();
+
+        assertEquals(List.of(), fakeTime.sleepDurations);
+    }
+
+    private RequestThrottler throttler(int maxRequests, int windowMillis, FakeTime fakeTime) {
+        return new RequestThrottler(
+                maxRequests,
+                windowMillis,
+                fakeTime::currentTimeMillis,
+                fakeTime::sleep
+        );
+    }
+
+    private static class FakeTime {
+
+        private final List<Long> sleepDurations = new ArrayList<>();
+        private long currentTimeMillis;
+
+        long currentTimeMillis() {
+            return currentTimeMillis;
+        }
+
+        void advance(long millis) {
+            currentTimeMillis += millis;
+        }
+
+        void sleep(long millis) {
+            sleepDurations.add(millis);
+            advance(millis);
+        }
     }
 }

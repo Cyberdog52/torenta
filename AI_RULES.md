@@ -254,6 +254,8 @@ Add new functionality as a new feature slice following this pattern; do not crea
 # Backend (Gradle wrapper)
 ./gradlew build            # compile + test the backend        (Windows: .\gradlew.bat build)
 ./gradlew test             # run JUnit 5 tests                  (Windows: .\gradlew.bat test)
+./gradlew jacocoTestReport # application coverage report
+./gradlew jacocoTestCoverageVerification # enforce application coverage thresholds
 ./gradlew bootRun          # run backend at http://localhost:8080
 
 # Frontend (from ./frontend)
@@ -268,6 +270,7 @@ npm run e2e:ui             # interactive Playwright test runner
 ```
 
 - Backend API base: `http://localhost:8080/`; Swagger UI: `http://localhost:8080/swagger-ui.html`.
+- Backend coverage includes `ch.andreskonrad.torenta/**` and excludes the vendored `bt/**` code.
 - Frontend dev server: `http://localhost:4200/`.
 
 ---
