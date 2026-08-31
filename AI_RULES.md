@@ -221,6 +221,9 @@ Add new functionality as a new feature slice following this pattern; do not crea
 
 - Update `README.md` and relevant docs when you change setup steps, run commands, endpoints, or
   behavior. Update OpenAPI annotations/DTOs so `/swagger-ui.html` stays accurate.
+- When changing Java, Gradle, Spring Boot, Node.js, or other platform versions, audit every
+  version-bearing surface: build files, wrappers, CI workflows, `.devcontainer/devcontainer.json`,
+  runtime images, and setup documentation.
 
 ---
 
