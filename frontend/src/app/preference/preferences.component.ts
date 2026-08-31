@@ -1,9 +1,9 @@
 import { Component, OnInit } from '@angular/core';
-import {UserPreference} from "../shared/dto/preference/UserPreference";
-import {PreferenceService} from "./preference.service";
+import {UserPreference} from '../shared/dto/preference/UserPreference';
+import {PreferenceService} from './preference.service';
 
 @Component({
-  selector: 'preferences',
+  selector: 'app-preferences',
   templateUrl: './preferences.component.html',
   styleUrls: ['./preferences.component.scss']
 })
@@ -29,7 +29,7 @@ export class PreferencesComponent implements OnInit {
 
   savePreferences() {
     this.preferenceService.save(this.userPreferences).subscribe(response => {
-      console.log("Preferences saved.");
+      console.log('Preferences saved.');
     });
   }
 }

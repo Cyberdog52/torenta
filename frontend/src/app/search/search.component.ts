@@ -1,8 +1,8 @@
 import {Component, OnInit} from '@angular/core';
-import {SearchService} from "./search.service";
+import {SearchService} from './search.service';
 
 @Component({
-  selector: 'search',
+  selector: 'app-search',
   templateUrl: './search.component.html',
   styleUrls: ['./search.component.scss']
 })
@@ -11,7 +11,7 @@ export class SearchComponent implements OnInit {
   constructor(private searchService: SearchService) { }
 
   public searchMovieString: string;
-  public searchSeriesString : string;
+  public searchSeriesString: string;
   public searchTorrentString: string;
   public delayedTorrentSearchString: string;
   public searchSeriesResult: TmdbSearchSeriesResultDto;
@@ -21,24 +21,24 @@ export class SearchComponent implements OnInit {
   ngOnInit() {
   }
 
-  public searchSeries() : void {
-    if (this.searchSeriesString == null || this.searchSeriesString.length == 0) {
+  public searchSeries(): void {
+    if (this.searchSeriesString == null || this.searchSeriesString.length === 0) {
       return;
     }
     this.searchService.searchSeries(this.searchSeriesString).subscribe(searchResult => {
       this.searchSeriesResult = searchResult;
       this.listOfOpenendPanels = [];
-    })
+    });
   }
 
-  public searchMovie() : void {
-    if (this.searchMovieString == null || this.searchMovieString.length == 0) {
+  public searchMovie(): void {
+    if (this.searchMovieString == null || this.searchMovieString.length === 0) {
       return;
     }
     this.searchService.searchMovies(this.searchMovieString).subscribe(searchResult => {
       this.searchMovieResult = searchResult;
       this.listOfOpenendPanels = [];
-    })
+    });
   }
 
   public getSeriesOverviews(): TmdbSeriesOverviewDto[] {
@@ -57,16 +57,16 @@ export class SearchComponent implements OnInit {
 
   getImageForSeries(seriesOverview: TmdbSeriesOverviewDto): string {
     if (seriesOverview.poster_path == null) {
-      return "../../assets/tvnotfound.png";
+      return '../../assets/tvnotfound.png';
     }
-    return "https://image.tmdb.org/t/p/w500/" + seriesOverview.poster_path;
+    return 'https://image.tmdb.org/t/p/w500/' + seriesOverview.poster_path;
   }
 
   getImageForMovie(tvOverview: TmdbMovieOverviewDto): string {
     if (tvOverview.poster_path == null) {
-      return "../../assets/tvnotfound.png";
+      return '../../assets/tvnotfound.png';
     }
-    return "https://image.tmdb.org/t/p/w500/" + tvOverview.poster_path;
+    return 'https://image.tmdb.org/t/p/w500/' + tvOverview.poster_path;
   }
 
   setPanelClosed(id: number) {
@@ -82,8 +82,8 @@ export class SearchComponent implements OnInit {
     }
     this.listOfOpenendPanels.push(id);
   }
-  //check if panel is open to make sure you do not load all the seriesDetail before they are opened
-  //would exceed maximum of requests per 10 seconds (40)
+  // check if panel is open to make sure you do not load all the seriesDetail before they are opened
+  // would exceed maximum of requests per 10 seconds (40)
 
   isPanelOpen(id: number): boolean {
     return this.listOfOpenendPanels.includes(id, 0);

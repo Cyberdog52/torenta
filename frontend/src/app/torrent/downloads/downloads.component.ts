@@ -1,12 +1,12 @@
 import {Component, OnInit} from '@angular/core';
-import {TorrentService} from "../torrent.service";
-import {DownloadDto} from "../../shared/dto/torrent/DownloadDto";
-import {NotificationService} from "../../shared/notification/notification.service";
-import {NotificationType} from "../../shared/dto/notification/Notification";
-import {DownloadRequestDto} from "../../shared/dto/torrent/DownloadRequestDto";
+import {TorrentService} from '../torrent.service';
+import {DownloadDto} from '../../shared/dto/torrent/DownloadDto';
+import {NotificationService} from '../../shared/notification/notification.service';
+import {NotificationType} from '../../shared/dto/notification/Notification';
+import {DownloadRequestDto} from '../../shared/dto/torrent/DownloadRequestDto';
 
 @Component({
-  selector: 'downloads',
+  selector: 'app-downloads',
   templateUrl: './downloads.component.html',
   styleUrls: ['./downloads.component.scss']
 })
@@ -27,11 +27,11 @@ export class DownloadsComponent implements OnInit {
   private updateDownloadDtos(): void {
     this.torrentService.getDownloadDtosObservable().subscribe(downloadDtos => {
       downloadDtos.forEach(updatedDto => {
-        if (updatedDto.state === "FINISHED" && this.stateChanged(this.downloadDtos, updatedDto)) {
+        if (updatedDto.state === 'FINISHED' && this.stateChanged(this.downloadDtos, updatedDto)) {
           this.notificationService.addNotifications({
             content: `${DownloadRequestDto.getDownloadTitle(updatedDto.downloadRequest)} successfully downloaded.`,
             type: NotificationType.INFO
-          })
+          });
         }
       });
       this.downloadDtos = downloadDtos;
@@ -39,9 +39,11 @@ export class DownloadsComponent implements OnInit {
   }
 
   private stateChanged(existingDownloadDtos, updatedDto) {
-    let existingDto = existingDownloadDtos.find(existing => existing.id == updatedDto.id);
-    if (existingDto == null || updatedDto == null) return false;
-    return existingDto.state != updatedDto.state;
+    const existingDto = existingDownloadDtos.find(existing => existing.id === updatedDto.id);
+    if (existingDto == null || updatedDto == null) {
+      return false;
+    }
+    return existingDto.state !== updatedDto.state;
   }
 
   downloadsLoaded() {
