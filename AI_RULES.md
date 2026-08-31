@@ -219,6 +219,9 @@ Add new functionality as a new feature slice following this pattern; do not crea
 
 ### 4.6 Documentation
 
+- After every code change, review all AI instruction entry points listed in section 7 and every
+  `README.md` in the repository. Update anything made inaccurate or incomplete by the change;
+  keep the AI instruction entry points as thin pointers rather than duplicating rules into them.
 - Update `README.md` and relevant docs when you change setup steps, run commands, endpoints, or
   behavior. Update OpenAPI annotations/DTOs so `/swagger-ui.html` stays accurate.
 - When changing Java, Gradle, Spring Boot, Node.js, or other platform versions, audit every

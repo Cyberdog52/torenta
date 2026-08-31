@@ -57,7 +57,8 @@ npm run build        # production build
 - [ ] Backend DTO changes are mirrored in `frontend/src/app/shared/dto/**`, and OpenAPI
       annotations are updated.
 - [ ] No secrets, credentials, or protected-file contents are added to any tracked file.
-- [ ] Docs (`README.md`, `AI_RULES.md §6`) updated if setup steps, commands, or endpoints changed.
+- [ ] All AI instruction entry points and repository `README.md` files reviewed after code changes;
+      anything made inaccurate or incomplete is updated (`AI_RULES.md §4.6`).
 - [ ] No unapproved dependency additions or major version bumps (see `AI_RULES.md §4.5`).
 - [ ] The vendored `src/main/java/bt/**` library is left unrefactored.
 
