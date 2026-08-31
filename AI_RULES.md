@@ -193,9 +193,9 @@ Add new functionality as a new feature slice following this pattern; do not crea
   service logic. Run: `./gradlew test` (Windows: `.\gradlew.bat test`).
 - **Frontend:** Karma + Jasmine (`*.spec.ts`). Run: `cd frontend; npm test`.
 - **End-to-end:** Playwright (`frontend/e2e/**/*.spec.js`), organized in feature folders. Run:
-  `cd frontend; npm run e2e`; this
-  starts the backend and frontend and verifies the rendered application and Preferences API flow.
-  Use `npm run e2e:ui` for the interactive Playwright runner.
+  `cd frontend; npm run e2e`; this starts the backend and frontend and verifies the rendered
+  application and the Preferences API flow. Use `npm run e2e:ui` for the interactive Playwright
+  runner.
 - Generate tests for new functionality and bug fixes. Do not delete or weaken existing tests to
   make a build pass — fix the cause.
 
@@ -223,6 +223,9 @@ Add new functionality as a new feature slice following this pattern; do not crea
 
 ### 4.6 Documentation
 
+- After every code change, review all AI instruction entry points listed in section 7 and every
+  `README.md` in the repository. Update anything made inaccurate or incomplete by the change;
+  keep the AI instruction entry points as thin pointers rather than duplicating rules into them.
 - Update `README.md` and relevant docs when you change setup steps, run commands, endpoints, or
   behavior. Update OpenAPI annotations/DTOs so `/swagger-ui.html` stays accurate.
 - When changing Java, Gradle, Spring Boot, Node.js, or other platform versions, audit every
@@ -254,6 +257,8 @@ Add new functionality as a new feature slice following this pattern; do not crea
 # Backend (Gradle wrapper)
 ./gradlew build            # compile + test the backend        (Windows: .\gradlew.bat build)
 ./gradlew test             # run JUnit 5 tests                  (Windows: .\gradlew.bat test)
+./gradlew jacocoTestReport # application coverage report
+./gradlew jacocoTestCoverageVerification # enforce application coverage thresholds
 ./gradlew bootRun          # run backend at http://localhost:8080
 
 # Frontend (from ./frontend)
@@ -268,6 +273,7 @@ npm run e2e:ui             # interactive Playwright test runner
 ```
 
 - Backend API base: `http://localhost:8080/`; Swagger UI: `http://localhost:8080/swagger-ui.html`.
+- Backend coverage includes `ch.andreskonrad.torenta/**` and excludes the vendored `bt/**` code.
 - Frontend dev server: `http://localhost:4200/`.
 
 ---

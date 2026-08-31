@@ -11,10 +11,16 @@ import ch.andreskonrad.torenta.tmdb.service.TmdbService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.Comparator;
 import java.util.HashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 public class LibraryService {
+
+    private static final Pattern SEASON_DIRECTORY_PATTERN =
+            Pattern.compile("^(?:S0*(\\d+)|Season\\s+0*(\\d+))$", Pattern.CASE_INSENSITIVE);
 
     private final DirectoryService directoryService;
     private final TmdbService tmdbService;
@@ -30,6 +36,9 @@ public class LibraryService {
 
     public Series getSeriesInLibrary(String seriesName) {
         DirectoryDto seriesDirectory = this.directoryService.getSeriesDirectory(seriesName);
+        if (seriesDirectory == null) {
+            throw new IllegalStateException("Series directory does not exist: " + seriesName);
+        }
 
         return getSeriesEntry(seriesDirectory);
     }
@@ -40,7 +49,9 @@ public class LibraryService {
         int seriesId = getId(tmdbSearchResultDto, seriesName);
 
         TmdbSeriesDetailDto seriesDetail = tmdbService.getSeries(seriesId);
-
+        if (seriesDetail == null) {
+            throw new IllegalStateException("TMDB series details are unavailable for: " + seriesName);
+        }
 
         HashMap<Integer, TmdbEpisodeDto[]> episodesBySeasonNumber = new HashMap<>();
         HashMap<Integer, DirectoryDto> seasonDirectoriesBySeasonNumber = new HashMap<>();
@@ -56,26 +67,39 @@ public class LibraryService {
     }
 
     private Integer getSeasonNumberForFolderName(String folderName) {
-        try {
-            return Integer.valueOf(folderName.replaceAll("[^\\d]", ""));
-        } catch (Exception e) {
-            e.printStackTrace();
+        if (folderName == null) {
             return -1;
         }
 
+        Matcher matcher = SEASON_DIRECTORY_PATTERN.matcher(folderName);
+        if (!matcher.matches()) {
+            return -1;
+        }
+
+        String seasonNumber = matcher.group(1) != null ? matcher.group(1) : matcher.group(2);
+        try {
+            return Integer.valueOf(seasonNumber);
+        } catch (NumberFormatException e) {
+            return -1;
+        }
     }
 
     private int getId(TmdbSeriesSearchResultDto tmdbSearchResultDto, String seriesName) {
+        if (tmdbSearchResultDto == null || tmdbSearchResultDto.getResults() == null
+                || tmdbSearchResultDto.getResults().isEmpty()) {
+            throw new IllegalStateException("No TMDB series found for: " + seriesName);
+        }
+
         switch (tmdbSearchResultDto.getResults().size()) {
-            case 0:
-                return -1;
             case 1:
                 return tmdbSearchResultDto.getResults().get(0).getId();
             default:
                 return tmdbSearchResultDto.getResults().stream()
                         .filter(seriesOverview -> seriesOverview.getName().equals(seriesName))
-                        .min((s1, s2) -> (int) s2.getPopularity() - (int) s1.getPopularity())
-                        .get().getId();
+                        .max(Comparator.comparingDouble(seriesOverview -> seriesOverview.getPopularity()))
+                        .orElseThrow(() -> new IllegalStateException(
+                                "No exact TMDB series match found for: " + seriesName))
+                        .getId();
         }
     }
 }

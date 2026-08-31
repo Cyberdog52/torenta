@@ -37,8 +37,13 @@ You do **not** need a local Gradle install — use the wrapper (`./gradlew`, `.\
 ```bash
 ./gradlew build      # compile + test           (Windows: .\gradlew.bat build)
 ./gradlew test       # JUnit 5 tests             (Windows: .\gradlew.bat test)
+./gradlew jacocoTestReport # application coverage report
+./gradlew jacocoTestCoverageVerification # enforce application coverage thresholds
 ./gradlew bootRun    # run API at http://localhost:8080
 ```
+
+Coverage reports and thresholds apply to `ch.andreskonrad.torenta/**`; the vendored `bt/**`
+implementation is excluded.
 
 Swagger UI: <http://localhost:8080/swagger-ui.html>
 
@@ -60,7 +65,9 @@ npm run e2e          # Playwright; starts backend and frontend
 - [ ] Backend DTO changes are mirrored in `frontend/src/app/shared/dto/**`, and OpenAPI
       annotations are updated.
 - [ ] No secrets, credentials, or protected-file contents are added to any tracked file.
-- [ ] Docs (`README.md`, `AI_RULES.md §6`) updated if setup steps, commands, or endpoints changed.
+- [ ] All AI instruction entry points and repository `README.md` files reviewed after code changes —
+      especially when setup steps, run commands, endpoints, or behavior changed — and anything made
+      inaccurate or incomplete is updated (`AI_RULES.md §4.6`).
 - [ ] No unapproved dependency additions or major version bumps (see `AI_RULES.md §4.5`).
 - [ ] The vendored `src/main/java/bt/**` library is left unrefactored.
 

@@ -7,7 +7,9 @@ import org.apache.http.client.utils.URIBuilder;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
 import java.time.Instant;
+import java.util.Locale;
 import java.util.Objects;
 
 public class PirateBayDto {
@@ -162,7 +164,7 @@ public class PirateBayDto {
         builder.setUploader(this.username);
         builder.setSize(getSizeString());
         builder.setUploadedTime(getPrettyTime());
-        builder.setUploaderIsVIP(this.status.equalsIgnoreCase("vip"));
+        builder.setUploaderIsVIP("vip".equalsIgnoreCase(this.status));
         builder.setMagnetLink(createMagnetURI().toString().replace("https://tpb.party/search/", ""));
         return builder.createTorrentEntry();
     }
@@ -179,8 +181,7 @@ public class PirateBayDto {
             }
             return uriBuilder.build();
         } catch (URISyntaxException e) {
-            e.printStackTrace();
-            return null;
+            throw new IllegalStateException("Could not create magnet URI", e);
         }
     }
 
@@ -195,12 +196,12 @@ public class PirateBayDto {
         double m = size/1048576.0;
         double g = size/1073741824.0;
         String sizeString;
-        DecimalFormat dec = new DecimalFormat(" 0.00");
-        if (g > 1) {
+        DecimalFormat dec = new DecimalFormat(" 0.00", DecimalFormatSymbols.getInstance(Locale.ROOT));
+        if (g >= 1) {
             sizeString = dec.format(g).concat(" GB");
-        } else if (m > 1) {
+        } else if (m >= 1) {
             sizeString = dec.format(m).concat(" MB");
-        } else if (k > 1) {
+        } else if (k >= 1) {
             sizeString = dec.format(k).concat(" KB");
         } else {
             sizeString = dec.format(size).concat(" Byte");

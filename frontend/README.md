@@ -4,13 +4,15 @@ This project was generated using [Angular CLI](https://github.com/angular/angula
 
 ## Development server
 
+## Development server
+
 To start a local development server, run:
 
 ```bash
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files. The development server proxies `/api` requests to the backend at <http://localhost:8080/> (see `proxy.conf.json`).
 
 ## Code scaffolding
 
@@ -43,6 +45,12 @@ To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use th
 ```bash
 ng test
 ```
+
+## Linting
+
+Run `npm run lint` to check the TypeScript code with [ESLint](https://eslint.org/) and
+[angular-eslint](https://github.com/angular-eslint/angular-eslint). Run `npm run format` to apply
+Prettier formatting.
 
 ## Running end-to-end tests
 
