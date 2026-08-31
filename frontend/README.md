@@ -20,7 +20,31 @@ Run `ng test` to execute the unit tests via [Karma](https://karma-runner.github.
 
 ## Running end-to-end tests
 
-Run `ng e2e` to execute the end-to-end tests via [Protractor](http://www.protractortest.org/).
+Install Playwright's bundled Chromium browser once:
+
+```bash
+npx playwright install chromium
+```
+
+The Playwright configuration starts the Spring Boot backend and Angular dev server automatically.
+Locally, it reuses either server if it is already running.
+
+Run the smoke test headlessly:
+
+```bash
+npm run e2e
+```
+
+Open Playwright's interactive UI to run, watch, and debug the test:
+
+```bash
+npm run e2e:ui
+```
+
+Both commands verify that the application renders and that the Preferences page loads its data from
+the backend through the frontend proxy.
+
+Tests are organized by feature under `e2e/`, for example `e2e/app/` and `e2e/preferences/`.
 
 ## Further help
 
