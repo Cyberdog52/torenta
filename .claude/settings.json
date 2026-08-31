@@ -2,8 +2,29 @@
   "permissions": {
     "deny": [
       "Read(src/main/resources/application.properties)",
+      "Read(src/main/resources/application-*.properties)",
+      "Read(src/main/resources/bitthief.properties)",
       "Read(.env)",
-      "Read(.env.*)"
+      "Read(.env.*)",
+      "Read(secrets/**)",
+      "Read(certificates/**)",
+      "Read(credentials/**)",
+      "Read(**/*.pem)",
+      "Read(**/*.key)",
+      "Read(**/*.p12)",
+      "Read(**/*.pfx)",
+      "Read(**/*.jks)",
+      "Read(**/*.keystore)",
+      "Read(**/*.crt)",
+      "Read(**/id_rsa)",
+      "Read(**/id_dsa)",
+      "Read(**/id_ecdsa)",
+      "Read(**/id_ed25519)"
+    ],
+    "allow": [
+      "Read(src/main/resources/application-template.properties)",
+      "Read(.env.template)",
+      "Read(.env.example)"
     ]
   }
 }
