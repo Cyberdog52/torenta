@@ -17,4 +17,5 @@ public class DownloadDto {
     private final long connectedPeers;
     private final long totalBytes;
     private final double downloadSpeedInBytesPerSecond;
+    private final String errorMessage;
 }

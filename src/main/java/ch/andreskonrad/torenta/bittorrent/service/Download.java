@@ -13,6 +13,8 @@ import java.util.concurrent.CompletableFuture;
 
 public class Download {
 
+    static final long PEER_DISCOVERY_TIMEOUT_IN_MS = 5 * 60 * 1000L;
+
     private final int id;
     private final DownloadRequest downloadRequest;
     private final Path targetDirectory;
@@ -20,15 +22,21 @@ public class Download {
     private volatile CompletableFuture<?> torrentFuture;
     private volatile TorrentSessionState state;
     private volatile boolean isCancelled = false;
+    private volatile String errorMessage;
+    private volatile boolean peersEverConnected = false;
     private final long startTimeInMs;
 
     public Download(int id, DownloadRequest downloadRequest, Path targetDirectory, BtClient client, CompletableFuture<?> torrentFuture) {
+        this(id, downloadRequest, targetDirectory, client, torrentFuture, System.currentTimeMillis());
+    }
+
+    Download(int id, DownloadRequest downloadRequest, Path targetDirectory, BtClient client, CompletableFuture<?> torrentFuture, long startTimeInMs) {
         this.id = id;
         this.downloadRequest = downloadRequest;
         this.targetDirectory = targetDirectory;
         this.client = client;
         this.torrentFuture = Objects.requireNonNull(torrentFuture);
-        this.startTimeInMs = System.currentTimeMillis();
+        this.startTimeInMs = startTimeInMs;
     }
 
     public int getId() {
@@ -56,6 +64,24 @@ public class Download {
 
     public void setState(TorrentSessionState state) {
         this.state = state;
+        if (state != null && state.getConnectedPeers() != null && !state.getConnectedPeers().isEmpty()) {
+            this.peersEverConnected = true;
+        }
+    }
+
+    public String getErrorMessage() {
+        return errorMessage;
+    }
+
+    public void fail(String errorMessage) {
+        this.errorMessage = errorMessage;
+    }
+
+    public boolean isComplete() {
+        TorrentSessionState currentState = state;
+        return currentState != null
+                && currentState.getPiecesTotal() > 0
+                && currentState.getPiecesComplete() >= currentState.getPiecesTotal();
     }
 
     void setTorrentFuture(CompletableFuture<?> torrentFuture) {
@@ -75,8 +101,23 @@ public class Download {
 
     public DownloadDto mapToDownloadDto() {
         double progress = getProgress();
-        DownloadState downloadState = getDownloadState();
-        return new DownloadDto(id, downloadState, progress, downloadRequest, this.startTimeInMs, this.getConnectedPeers(), this.getTotalBytes(), this.getDownloadSpeedInBytesPerSecond());
+        String effectiveErrorMessage = getEffectiveErrorMessage();
+        DownloadState downloadState = getDownloadState(effectiveErrorMessage);
+        return new DownloadDto(id, downloadState, progress, downloadRequest, this.startTimeInMs, this.getConnectedPeers(), this.getTotalBytes(), this.getDownloadSpeedInBytesPerSecond(), effectiveErrorMessage);
+    }
+
+    private String getEffectiveErrorMessage() {
+        if (errorMessage != null) {
+            return errorMessage;
+        }
+        if (isCancelled || isDone() || peersEverConnected) {
+            return null;
+        }
+        if (System.currentTimeMillis() - startTimeInMs <= PEER_DISCOVERY_TIMEOUT_IN_MS) {
+            return null;
+        }
+        return "No peers found within " + (PEER_DISCOVERY_TIMEOUT_IN_MS / 60_000)
+                + " minutes. The trackers of this torrent are unreachable or have no seeders.";
     }
 
     private long getTotalBytes() {
@@ -86,8 +127,9 @@ public class Download {
                 : currentState.getChunksSizeInBytes() * currentState.getPiecesTotal();
     }
 
-    private DownloadState getDownloadState() {
+    private DownloadState getDownloadState(String effectiveErrorMessage) {
         if (isCancelled) return DownloadState.CANCELLED;
+        if (effectiveErrorMessage != null) return DownloadState.FAILED;
         if (isDone()) return DownloadState.FINISHED;
         return DownloadState.STARTED;
     }
