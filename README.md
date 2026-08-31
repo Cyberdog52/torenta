@@ -37,8 +37,10 @@ nvm install 16
 nvm use 16
 ```
 
-Install newest version of NodeJs from [here](https://nodejs.org/en/download/).
-Restart IntelliJ and execute the following code:
+Do not use a newer unsupported Node.js release. If `nvm` is unavailable, install Node.js 16 from
+the [Node.js previous releases page](https://nodejs.org/en/about/previous-releases).
+
+Restart IntelliJ and execute the following commands:
 ```
 cd frontend
 npm install
