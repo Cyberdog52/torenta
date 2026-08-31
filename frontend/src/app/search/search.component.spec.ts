@@ -50,9 +50,9 @@ describe('SearchComponent', () => {
       expect(request.request.params.get('search')).toBe('andor');
 
       const results = [
-        { id: 1, name: 'Show A', popularity: 5 },
-        { id: 2, name: 'Show B', popularity: 50 },
-        { id: 3, name: 'Show C', popularity: 20 },
+        { id: 1, name: 'Show A', popularity: 5, backdrop_path: '/show-a.jpg' },
+        { id: 2, name: 'Show B', popularity: 50, backdrop_path: '/show-b.jpg' },
+        { id: 3, name: 'Show C', popularity: 20, backdrop_path: null },
       ];
       request.flush({ results });
 
@@ -65,9 +65,61 @@ describe('SearchComponent', () => {
       );
       expect(names).toEqual(['Show B', 'Show C', 'Show A']);
 
+      const backdrops = Array.from(compiled.querySelectorAll<HTMLElement>('.result-panel')).map(
+        (element) => element.style.getPropertyValue('--media-backdrop-image'),
+      );
+      expect(backdrops).toEqual(['', '', '']);
+
       // The source array must not be mutated by the sort.
       expect(results.map((s) => s.id)).toEqual([1, 2, 3]);
 
+      httpTesting.verify();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('does not set the movie backdrop while its result is collapsed', async () => {
+    vi.useFakeTimers();
+    try {
+      const fixture = TestBed.createComponent(SearchComponent);
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+
+      const input = compiled.querySelector<HTMLInputElement>(
+        '.search-card:nth-of-type(2) input[matInput]',
+      );
+      if (input == null) {
+        throw new Error('Movie search input not found');
+      }
+
+      input.value = 'arrival';
+      input.dispatchEvent(new KeyboardEvent('keyup'));
+      vi.advanceTimersByTime(300);
+      fixture.detectChanges();
+
+      const httpTesting = TestBed.inject(HttpTestingController);
+      httpTesting
+        .expectOne((request) => request.url === 'api/tmdb/movie')
+        .flush({
+          results: [
+            {
+              id: 4,
+              original_title: 'Arrival',
+              popularity: 80,
+              backdrop_path: '/arrival.jpg',
+            },
+          ],
+        });
+
+      vi.useRealTimers();
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      const panel = compiled.querySelector<HTMLElement>(
+        '.search-card:nth-of-type(2) .result-panel',
+      );
+      expect(panel?.style.getPropertyValue('--media-backdrop-image')).toBe('');
       httpTesting.verify();
     } finally {
       vi.useRealTimers();
