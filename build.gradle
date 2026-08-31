@@ -207,10 +207,25 @@ tasks.register('extractJRE') {
     }
 }
 
+def frontendDirectory = layout.projectDirectory.dir('frontend')
+
+tasks.register('installFrontend', Exec) {
+    workingDir frontendDirectory
+    inputs.files(
+        frontendDirectory.file('package.json'),
+        frontendDirectory.file('package-lock.json')
+    )
+    outputs.file(frontendDirectory.file('node_modules/.package-lock.json'))
+    def isWindows = System.getProperty('os.name').toLowerCase().contains('win')
+    commandLine isWindows ? 'npm.cmd' : 'npm', 'ci'
+}
+
 tasks.register('buildFrontend', Exec) {
-    workingDir layout.projectDirectory.dir('frontend')
+    dependsOn tasks.named('installFrontend')
+    workingDir frontendDirectory
     inputs.dir(layout.projectDirectory.dir('frontend/src'))
     inputs.file(layout.projectDirectory.file('frontend/package.json'))
+    inputs.file(layout.projectDirectory.file('frontend/package-lock.json'))
     outputs.dir(layout.projectDirectory.dir('frontend/dist/frontend/browser'))
     def isWindows = System.getProperty('os.name').toLowerCase().contains('win')
     if (isWindows) {

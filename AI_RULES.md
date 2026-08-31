@@ -254,6 +254,7 @@ Add new functionality as a new feature slice following this pattern; do not crea
 ./gradlew jacocoTestReport # application coverage report
 ./gradlew jacocoTestCoverageVerification # enforce application coverage thresholds
 ./gradlew bootRun          # run backend at http://localhost:8080
+./gradlew createPortableArchive # build portable ZIP; installs frontend deps with npm ci
 
 # Frontend (from ./frontend)
 npm install                # install deps (Node 24 LTS, npm >= 10)
