@@ -1,4 +1,4 @@
-const { test, expect } = require('@playwright/test');
+import { test, expect } from '@playwright/test';
 
 test('loads preferences from the backend', async ({ page }) => {
   const preferencesResponse = page.waitForResponse(

@@ -1,11 +1,11 @@
-const { defineConfig } = require('@playwright/test');
+import { defineConfig } from '@playwright/test';
 
 const backendCommand =
   process.platform === 'win32'
     ? '..\\gradlew.bat --project-dir .. bootRun'
     : '../gradlew --project-dir .. bootRun';
 
-module.exports = defineConfig({
+export default defineConfig({
   outputDir: './dist/playwright-test-results',
   testDir: './e2e',
   use: {

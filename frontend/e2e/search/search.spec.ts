@@ -1,7 +1,7 @@
-const { test, expect } = require('@playwright/test');
+import { test, expect } from '@playwright/test';
 
 test('shows search results and renders series detail without crashing', async ({ page }) => {
-  const pageErrors = [];
+  const pageErrors: Error[] = [];
   page.on('pageerror', (error) => pageErrors.push(error));
 
   await page.goto('/search');

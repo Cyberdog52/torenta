@@ -35,6 +35,7 @@
     "@angular/compiler-cli": "^22.1.4",
     "@eslint/js": "^10.0.1",
     "@playwright/test": "^1.62.1",
+    "@types/node": "^26.4.0",
     "angular-eslint": "22.2.0",
     "eslint": "^10.9.0",
     "jsdom": "^28.0.0",

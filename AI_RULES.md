@@ -196,7 +196,7 @@ Add new functionality as a new feature slice following this pattern; do not crea
 - **Backend:** JUnit 5 with Mockito (see `src/test/java/**`). Add/adjust tests for new or changed
   service logic. Run: `./gradlew test` (Windows: `.\gradlew.bat test`).
 - **Frontend:** Vitest (`*.spec.ts`). Run: `cd frontend; npm test`.
-- **End-to-end:** Playwright (`frontend/e2e/**/*.spec.js`), organized in feature folders. Run:
+- **End-to-end:** Playwright (`frontend/e2e/**/*.spec.ts`), organized in feature folders. Run:
   `cd frontend; npm run e2e`; this starts the backend and frontend and verifies the rendered
   application and the Preferences API flow. Use `npm run e2e:ui` for the interactive Playwright
   runner.
