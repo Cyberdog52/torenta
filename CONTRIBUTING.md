@@ -11,7 +11,7 @@ pull-request workflow.
 
 | Tool    | Version                     | Notes                                             |
 |---------|-----------------------------|---------------------------------------------------|
-| JDK     | Java 11                     | `build.gradle` sets `sourceCompatibility = '11'`. |
+| JDK     | Java 25                     | `build.gradle` configures a Java 25 toolchain.    |
 | Node.js | 16 (range `>=10 <17`)       | Pinned in `.nvmrc`; run `nvm use`.                |
 | npm     | 6–8 (range `>=6 <9`)        | See `frontend/package.json` `engines`.            |
 
@@ -54,14 +54,14 @@ npm run build        # production build
 
 - [ ] `./gradlew test` passes and `cd frontend && npm test && npm run lint` pass locally.
 - [ ] New or changed behavior has tests (JUnit 5/EasyMock backend, Karma/Jasmine frontend).
-- [ ] Backend DTO changes are mirrored in `frontend/src/app/shared/dto/**`, and Swagger
+- [ ] Backend DTO changes are mirrored in `frontend/src/app/shared/dto/**`, and OpenAPI
       annotations are updated.
 - [ ] No secrets, credentials, or protected-file contents are added to any tracked file.
 - [ ] Docs (`README.md`, `AI_RULES.md §6`) updated if setup steps, commands, or endpoints changed.
 - [ ] No unapproved dependency additions or major version bumps (see `AI_RULES.md §4.5`).
 - [ ] The vendored `src/main/java/bt/**` library is left unrefactored.
 
-CI (`.github/workflows/gradle.yml`) runs the same backend and frontend checks on every PR.
+CI (`.github/workflows/ci.yml`) runs the same backend and frontend checks on every PR.
 
 ## Reporting security issues
 

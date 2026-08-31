@@ -2,8 +2,8 @@ package ch.andreskonrad.torenta.torrent.api;
 
 import ch.andreskonrad.torenta.torrent.dto.TorrentEntry;
 import ch.andreskonrad.torenta.torrent.service.TorrentSearchException;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.ObjectMapper;
 
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -28,7 +28,7 @@ public class TorrentParseAPI {
             return pirateBayDtoList.stream()
                     .map(PirateBayDto::toTorrentEntry)
                     .collect(Collectors.toList());
-        } catch (JsonProcessingException e) {
+        } catch (JacksonException e) {
             e.printStackTrace();
             return new ArrayList<>();
         }
@@ -39,7 +39,7 @@ public class TorrentParseAPI {
         HttpRequest request = HttpRequest.newBuilder()
                 .GET()
                 .uri(uri)
-                .setHeader("User-Agent", "Java 11 HttpClient Bot")
+                .setHeader("User-Agent", "Java 25 HttpClient Bot")
                 .build();
 
         try {

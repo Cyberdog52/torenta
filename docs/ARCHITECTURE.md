@@ -8,8 +8,8 @@ architecture **rules**; this file describes the runtime **structure and data flo
 
 ```
 ┌─────────────────────────┐        HTTP (/api/**, dev proxy)        ┌───────────────────────────┐
-│  Angular 6 SPA          │  ─────────────────────────────────▶     │  Spring Boot 2.2 REST API │
-│  frontend/ (:4200)      │                                         │  Java 11 (:8080)          │
+│  Angular 6 SPA          │  ─────────────────────────────────▶     │  Spring Boot 4.1 REST API │
+│  frontend/ (:4200)      │                                         │  Java 25 (:8080)          │
 │  Material, RxJS,        │  ◀─────────────────────────────────     │                           │
 │  shared/dto mirrors     │            JSON DTOs                    │                           │
 └─────────────────────────┘                                         └─────────────┬─────────────┘
@@ -35,8 +35,8 @@ Root package `ch.andreskonrad.torenta`. Each feature is a vertical slice
 | `directory`  | Browse local directories/files                                        | `DirectoryService`                               |
 | `preference` | Persist user preferences                                             | `PreferenceService`, `UserPreference`            |
 
-Cross-cutting config lives at the package root: `TorentaApplication` (entry point),
-`CustomCacheConfig` + `CacheCustomizer` (Spring Cache), `SwaggerConfig` (Springfox).
+Cross-cutting config lives at the package root: `TorentaApplication` (entry point) and
+`CustomCacheConfig` + `CacheCustomizer` (Spring Cache). Springdoc auto-configures OpenAPI.
 
 ## Vendored library
 

@@ -1,16 +1,13 @@
 package ch.andreskonrad.torenta.preference.service;
 
 import ch.andreskonrad.torenta.preference.dto.UserPreference;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
-@RunWith(SpringRunner.class)
 @SpringBootTest(classes = PreferenceServiceMock.class)
 @EnableConfigurationProperties
 public class PreferenceServiceTest {
