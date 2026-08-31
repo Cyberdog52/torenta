@@ -4,14 +4,6 @@
   </div>
 } @else if (seriesDetail(); as seriesDetail) {
   <div class="series-detail">
-    <div class="backdrop">
-      <img
-        [src]="backdropUrl(seriesDetail.backdrop_path)"
-        alt=""
-        aria-hidden="true"
-        loading="lazy"
-      />
-    </div>
     <div class="foreground">
       <p class="meta-line">
         <mat-icon aria-hidden="true">date_range</mat-icon>

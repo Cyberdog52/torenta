@@ -4,14 +4,6 @@
   </div>
 } @else if (movieDetail(); as movieDetail) {
   <div class="movie-detail">
-    <div class="backdrop">
-      <img
-        [src]="backdropUrl(movieDetail.backdrop_path)"
-        alt=""
-        aria-hidden="true"
-        loading="lazy"
-      />
-    </div>
     <div class="foreground">
       <p class="meta-line">
         <mat-icon aria-hidden="true">date_range</mat-icon>
