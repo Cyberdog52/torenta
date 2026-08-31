@@ -1,48 +1,46 @@
-<div *ngIf="isLoading()">
-  <mat-progress-spinner mode="indeterminate">
-  </mat-progress-spinner>
-</div>
-<div *ngIf="!isLoading()">
-  <mat-list *ngIf="suggestions.length > 0">
-    <table mat-table [dataSource]="suggestions" class="mat-elevation-z8">
+@if (isLoading()) {
+  <mat-progress-spinner mode="indeterminate" />
+} @else if (suggestions().length > 0) {
+  <table mat-table [dataSource]="suggestions()" class="mat-elevation-z8">
+    <ng-container matColumnDef="size">
+      <th mat-header-cell *matHeaderCellDef>Size</th>
+      <td mat-cell *matCellDef="let element">{{ element.size }}</td>
+    </ng-container>
 
-      <ng-container matColumnDef="size">
-        <th mat-header-cell *matHeaderCellDef> Size </th>
-        <td mat-cell *matCellDef="let element"> {{element.size}} </td>
-      </ng-container>
+    <ng-container matColumnDef="name">
+      <th mat-header-cell *matHeaderCellDef>Name</th>
+      <td mat-cell *matCellDef="let element">{{ element.name }}</td>
+    </ng-container>
 
-      <ng-container matColumnDef="name">
-        <th mat-header-cell *matHeaderCellDef> Name </th>
-        <td mat-cell *matCellDef="let element"> {{element.name}} </td>
-      </ng-container>
+    <ng-container matColumnDef="seeders">
+      <th mat-header-cell *matHeaderCellDef>Seeders</th>
+      <td mat-cell *matCellDef="let element">{{ element.numberOfSeeders }}</td>
+    </ng-container>
 
-      <ng-container matColumnDef="seeders">
-        <th mat-header-cell *matHeaderCellDef> Seeders </th>
-        <td mat-cell *matCellDef="let element"> {{element.numberOfSeeders}} </td>
-      </ng-container>
+    <ng-container matColumnDef="time">
+      <th mat-header-cell *matHeaderCellDef>Uploaded at</th>
+      <td mat-cell *matCellDef="let element">{{ element.uploadedTime }}</td>
+    </ng-container>
 
-      <ng-container matColumnDef="time">
-        <th mat-header-cell *matHeaderCellDef> Uploaded at </th>
-        <td mat-cell *matCellDef="let element"> {{element.uploadedTime}} </td>
-      </ng-container>
+    <ng-container matColumnDef="trusted">
+      <th mat-header-cell *matHeaderCellDef>Trusted</th>
+      <td mat-cell *matCellDef="let element">{{ element.uploaderIsVIP }}</td>
+    </ng-container>
 
-      <ng-container matColumnDef="trusted">
-        <th mat-header-cell *matHeaderCellDef> Trusted </th>
-        <td mat-cell *matCellDef="let element"> {{element.uploaderIsVIP}} </td>
-      </ng-container>
+    <ng-container matColumnDef="startDownload">
+      <th mat-header-cell *matHeaderCellDef>Download</th>
+      <td mat-cell *matCellDef="let element">
+        @if (hasStartedDownload(element)) {
+          <p>Downloading ...</p>
+        } @else {
+          <button matButton="elevated" (click)="startDownload(element)">Download</button>
+        }
+      </td>
+    </ng-container>
 
-      <ng-container matColumnDef="startDownload">
-        <th mat-header-cell *matHeaderCellDef> Download </th>
-        <td mat-cell *matCellDef="let element">
-          <p *ngIf="hasFullyDownloaded(element)">Complete</p>
-          <p *ngIf="hasStartedDownload(element)">Downloading ...</p>
-          <button *ngIf="hasNotStartedDownload(element)" mat-raised-button (click)="startDownload(element)">Download</button>
-        </td>
-      </ng-container>
-
-      <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-      <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-    </table>
-  </mat-list>
-  <p *ngIf="suggestions.length == 0"> No torrents found.</p>
-</div>
+    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
+    <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+  </table>
+} @else {
+  <p>No torrents found.</p>
+}

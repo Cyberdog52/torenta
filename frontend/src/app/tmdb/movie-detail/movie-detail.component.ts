@@ -1,48 +1,39 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {SearchService} from "../../search/search.service";
-import {DirectoryService} from "../../directory/directory.service";
-import {TmdbMovieDetailDto} from "../../shared/dto/tmdb/TmdbMovieDetailDto";
-import {DirectoryDto} from "../../shared/dto/directory/DirectoryDto";
+import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatChipsModule } from '@angular/material/chips';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { SearchService } from '../../search/search.service';
+import { DirectoryService } from '../../directory/directory.service';
+import { TorrentSuggestionsComponent } from '../../torrent/torrent-suggestions/torrent-suggestions.component';
+import { backdropUrl } from '../../shared/tmdb-images';
 
 @Component({
-  selector: 'movie-detail',
+  selector: 'app-movie-detail',
+  imports: [MatIconModule, MatChipsModule, MatProgressSpinnerModule, TorrentSuggestionsComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './movie-detail.component.scss',
   templateUrl: './movie-detail.component.html',
-  styleUrls: ['./movie-detail.component.scss']
 })
-export class MovieDetailComponent implements OnInit {
+export class MovieDetailComponent {
+  private readonly searchService = inject(SearchService);
+  private readonly directoryService = inject(DirectoryService);
 
-  @Input() id : number;
-  movieDetail: TmdbMovieDetailDto;
-  movieDirectory: DirectoryDto;
+  readonly id = input.required<number>();
 
-  constructor(private searchService: SearchService,
-              private directoryService: DirectoryService) { }
+  private readonly movie = this.searchService.movieDetailResource(this.id);
 
-  ngOnInit() {
-    this.searchService.getMovie(this.id).subscribe(movieDetail => {
-      this.movieDetail = movieDetail;
-      this.getMovieDirectory();
-    });
+  protected readonly movieDetail = this.movie.value;
+  protected readonly isLoading = this.movie.isLoading;
 
-  }
+  private readonly directory = this.directoryService.movieDirectoryResource(
+    computed(() => this.movieDetail()?.title.replace(/[^a-zA-Z0-9.\- ]/, '')),
+    computed(() => {
+      const releaseDate = this.movieDetail()?.release_date;
+      return releaseDate ? Number(releaseDate.split('-')[0]) : undefined;
+    }),
+  );
 
-  public isLoading(): boolean {
-    return this.movieDetail == null;
-  }
+  protected readonly movieDirectory = this.directory.value;
 
-  private getMovieDirectory(): void {
-    const movieTitle = this.movieDetail.title.replace(/[^a-zA-Z0-9.\- ]/, "");
-    const releaseYear = +this.movieDetail.release_date.split("-")[0];
-    this.directoryService.getMovieDirectory(movieTitle, releaseYear).subscribe(movieDirectory => {
-      this.movieDirectory = movieDirectory;
-    });
-  }
-
-
-  getBackgroundImageFor(movieDetail: TmdbMovieDetailDto): string {
-    if (movieDetail.backdrop_path == null) {
-      return "../../assets/tvnotfound.png";
-    }
-    return "https://image.tmdb.org/t/p/original/" + movieDetail.backdrop_path;
-  }
+  protected readonly backdropUrl = backdropUrl;
 }

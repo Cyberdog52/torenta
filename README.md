@@ -24,7 +24,8 @@ The enterprise version is recommended.
 First, you need to get an API key from [TMDB](https://developers.themoviedb.org/3/getting-started/introduction). Create an `application.properties` from the template and add the key. Do not check in the `application.properties` file.
 
 #### NodeJs
-This frontend depends on an Angular 6 toolchain and must be run with **Node.js 10-16**.
+The frontend runs on **Angular 22** and requires **Node.js 24 LTS** (>= 24.15.0).
+The repository pins the version in `.nvmrc`:
 
 ```bash
 nvm use
@@ -33,16 +34,26 @@ nvm use
 If you do not have the required runtime installed yet:
 
 ```bash
-nvm install 16
-nvm use 16
+nvm install 24
+nvm use 24
 ```
 
-Install newest version of NodeJs from [here](https://nodejs.org/en/download/).
-Restart IntelliJ and execute the following code:
-```
+Then install the dependencies:
+
+```bash
 cd frontend
 npm install
 ```
+
+## Frontend stack
+
+| | |
+|---|---|
+| Angular | 22 (standalone, signals, zoneless) |
+| Angular Material | 22 (Material 3 theming) |
+| TypeScript | 6.0 |
+| RxJS | 7.8.2 |
+| Unit tests | Vitest (`npm test`) |
 
 ## Run
 
@@ -61,7 +72,8 @@ cd frontend
 npm start
 ```
 
-Will start at http://localhost:4200/
+Will start at http://localhost:4200/ and proxies `/api` to the backend on
+http://localhost:8080/ (see `frontend/proxy.conf.json`).
 
 ## Development links
 

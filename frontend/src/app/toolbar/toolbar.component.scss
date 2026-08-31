@@ -1,5 +1,5 @@
 mat-toolbar {
-  background-color: rgb(50,50,50);
+  background-color: rgb(50, 50, 50);
   color: whitesmoke;
   position: sticky;
   position: -webkit-sticky; /* For macOS/iOS Safari */
@@ -23,4 +23,8 @@ button {
 
 mat-icon {
   margin-right: 8pt;
+}
+
+button.active {
+  background-color: rgba(255, 255, 255, 0.16);
 }

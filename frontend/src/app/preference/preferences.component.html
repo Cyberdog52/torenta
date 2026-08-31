@@ -1,17 +1,22 @@
 <mat-card>
   <mat-card-title>Preferences</mat-card-title>
-  <div *ngIf="preferencesLoaded()">
+  @if (userPreferences(); as preferences) {
     <mat-card-content>
       <mat-form-field>
-        <input matInput name="downloadFolder" type="text" placeholder="Root folder for downloads"  [(ngModel)]="userPreferences.downloadDirectoryPath">
+        <mat-label>Root folder for downloads</mat-label>
+        <input
+          matInput
+          name="downloadFolder"
+          type="text"
+          [ngModel]="preferences.downloadDirectoryPath"
+          (ngModelChange)="setDownloadDirectoryPath($event)"
+        />
       </mat-form-field>
     </mat-card-content>
     <mat-card-actions>
-      <button mat-raised-button (click)="savePreferences()">Save</button>
+      <button matButton="elevated" (click)="savePreferences()">Save</button>
     </mat-card-actions>
-  </div>
-  <div *ngIf="!preferencesLoaded()">
+  } @else {
     <p>Preferences could not be loaded</p>
-  </div>
-
+  }
 </mat-card>

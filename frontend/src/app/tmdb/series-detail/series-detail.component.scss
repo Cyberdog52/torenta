@@ -13,7 +13,6 @@ mat-progress-spinner {
   padding-bottom: 12pt;
   overflow: hidden;
   position: relative;
-
 }
 
 .background-container {
@@ -30,11 +29,11 @@ mat-progress-spinner {
 
 .background-image-shadow {
   background: transparent;
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   box-shadow: inset 120pt -120pt 100pt 0pt black;
 }
 
@@ -42,9 +41,6 @@ mat-progress-spinner {
   background: transparent;
   z-index: 10;
 }
-
-
-
 
 .overview {
   text-shadow: 0.5pt 0.5pt black;
@@ -55,8 +51,6 @@ mat-progress-spinner {
 .seasonButton {
   margin-right: 4pt;
   margin-bottom: 4pt;
-  background-color: rgba(65,65,65,0.4);
+  background-color: rgba(65, 65, 65, 0.4);
   color: whitesmoke;
 }
-
-

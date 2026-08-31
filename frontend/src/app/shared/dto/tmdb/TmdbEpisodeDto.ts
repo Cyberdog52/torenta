@@ -1,7 +1,7 @@
-import {TmdbCreatorDto} from "./TmdbCreatorDto";
+import { TmdbCreatorDto } from './TmdbCreatorDto';
 
 export interface TmdbEpisodeDto {
-  air_date: string;
+  air_date: string | null;
   episode_number: number;
   id: number;
   name: string;
@@ -9,7 +9,7 @@ export interface TmdbEpisodeDto {
   production_code: string;
   season_number: number;
   show_id: number;
-  still_path?: any;
+  still_path: string | null;
   vote_average: number;
   vote_count: number;
   crew: TmdbCreatorDto[];

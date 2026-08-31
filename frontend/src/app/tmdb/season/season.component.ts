@@ -1,114 +1,96 @@
-import {Component, Input, OnChanges, OnInit} from '@angular/core';
-import {TmdbSeasonDto} from "../../shared/dto/tmdb/TmdbSeasonDto";
-import {SearchService} from "../../search/search.service";
-import {TmdbEpisodeDto} from "../../shared/dto/tmdb/TmdbEpisodeDto";
-import {TmdbSeriesDetailDto} from "../../shared/dto/tmdb/TmdbSeriesDetailDto";
-import {LibraryService} from "../../library/library.service";
-import {Series} from "../../shared/dto/library/Series";
-import {DownloadStatus} from "../../shared/dto/library/DownloadStatus";
-import {Episode} from "../../shared/dto/library/Episode";
-import {Season} from "../../shared/dto/library/Season";
+import {
+  ChangeDetectionStrategy,
+  Component,
+  computed,
+  effect,
+  inject,
+  input,
+  signal,
+} from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { MatButtonModule } from '@angular/material/button';
+import { SearchService } from '../../search/search.service';
+import { LibraryService } from '../../library/library.service';
+import { TmdbSeasonDto } from '../../shared/dto/tmdb/TmdbSeasonDto';
+import { TmdbEpisodeDto } from '../../shared/dto/tmdb/TmdbEpisodeDto';
+import { TmdbSeriesDetailDto } from '../../shared/dto/tmdb/TmdbSeriesDetailDto';
+import { DownloadStatus } from '../../shared/dto/library/DownloadStatus';
+import { EpisodeComponent } from '../episode/episode.component';
 
 @Component({
-  selector: 'season',
+  selector: 'app-season',
+  imports: [MatIconModule, MatButtonModule, EpisodeComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './season.component.scss',
   templateUrl: './season.component.html',
-  styleUrls: ['./season.component.scss']
 })
-export class SeasonComponent implements OnInit, OnChanges {
+export class SeasonComponent {
+  private readonly searchService = inject(SearchService);
+  private readonly libraryService = inject(LibraryService);
 
-  @Input() tmdbSeasonDto : TmdbSeasonDto;
-  @Input() seriesDetail: TmdbSeriesDetailDto;
-  public showEpisode: TmdbEpisodeDto;
+  readonly tmdbSeasonDto = input.required<TmdbSeasonDto>();
+  readonly seriesDetail = input.required<TmdbSeriesDetailDto>();
 
-  public episodes: TmdbEpisodeDto[];
-  private series: Series;
+  protected readonly showEpisode = signal<TmdbEpisodeDto | null>(null);
 
-  constructor(private searchService: SearchService,
-              private libraryService: LibraryService) { }
+  /**
+   * A season does not ship its episodes, so they are fetched separately.
+   * The resource re-requests automatically when the selected season changes.
+   */
+  private readonly episodesResource = this.searchService.episodesResource(
+    computed(() => this.seriesDetail().id),
+    computed(() => this.tmdbSeasonDto().season_number),
+  );
 
-  ngOnInit() {
-    this.getEpisodes();
-    this.getSeriesInLibrary();
-  }
+  protected readonly episodes = computed(() => this.episodesResource.value() ?? []);
 
-  ngOnChanges() {
-    this.showEpisode = null;
-    this.episodes = null;
-    this.getEpisodes();
-  }
+  private readonly series = this.libraryService.seriesInLibraryResource(
+    computed(() => this.seriesDetail().name),
+  );
 
-  //get episodes because season does not automatically come with all episodes
-  private getEpisodes() {
-    this.searchService.getEpisodes(this.seriesDetail.id, this.tmdbSeasonDto.season_number).subscribe(episodes => {
-      this.episodes = episodes;
+  constructor() {
+    // Reset the expanded episode whenever another season is selected.
+    effect(() => {
+      this.tmdbSeasonDto();
+      this.showEpisode.set(null);
     });
   }
 
-  getEpisodeButtonTitle(episode: TmdbEpisodeDto): string {
-    if (episode.episode_number < 10) {
-      return "E0" + episode.episode_number.toString();
-    }
-    return "E" + episode.episode_number.toString();
+  protected episodeButtonTitle(episode: TmdbEpisodeDto): string {
+    return `E${String(episode.episode_number).padStart(2, '0')}`;
   }
 
-
-
-  private getSeriesInLibrary(): void {
-    this.libraryService.getSeriesInLibrary(this.seriesDetail.name).subscribe(series => {
-      this.series = series;
-    });
-  }
-
-  public isAlreadyDownloaded(episode: TmdbEpisodeDto): boolean {
-    return this.getDownloadStatus(episode) == DownloadStatus.DOWNLOADED;
-  }
-  private getSeason(episode: TmdbEpisodeDto): Season {
-    if (this.series == null) {
+  protected downloadStatus(tmdbEpisodeDto: TmdbEpisodeDto | null): DownloadStatus | null {
+    if (tmdbEpisodeDto == null) {
       return null;
     }
-    return this.series.seasonList.find(season => {
-      return season.seasonNumber === episode.season_number;
-    });
+    const season = this.series
+      .value()
+      ?.seasonList.find((s) => s.seasonNumber === tmdbEpisodeDto.season_number);
+    const episode = season?.episodeList.find(
+      (e) => e.episodeNumber === tmdbEpisodeDto.episode_number,
+    );
+    return episode?.downloadStatus ?? null;
   }
 
-  public getEpisode(tmdbEpisodeDto: TmdbEpisodeDto): Episode {
-    const season = this.getSeason(tmdbEpisodeDto);
-    if (season == null) {
-      return null;
+  protected episodeIcon(tmdbEpisodeDto: TmdbEpisodeDto): string | null {
+    if (SeasonComponent.notAiredYet(tmdbEpisodeDto)) {
+      return 'date_range';
     }
-    return season.episodeList.find(episode => {
-      return episode.episodeNumber == tmdbEpisodeDto.episode_number;
-    });
+    switch (this.downloadStatus(tmdbEpisodeDto)) {
+      case DownloadStatus.DOWNLOADED:
+        return 'done';
+      case DownloadStatus.DOWNLOADING:
+        return 'arrow_downward';
+      default:
+        return null;
+    }
   }
 
-  static notAiredYet(episode: TmdbEpisodeDto): boolean {
+  private static notAiredYet(episode: TmdbEpisodeDto): boolean {
     if (episode.air_date == null) {
       return true;
     }
-    let airDate = new Date(episode.air_date);
-    let currentDate = new Date();
-    return airDate.valueOf() > currentDate.valueOf();
-  }
-
-  getDownloadStatus(tmdbEpisodeDto: TmdbEpisodeDto): DownloadStatus {
-    const episode = this.getEpisode(tmdbEpisodeDto);
-    if (episode == null) {
-      return null;
-    }
-
-    return episode.downloadStatus;
-  }
-
-
-  getEpisodeIcon(tmdbEpisodeDto: TmdbEpisodeDto): string {
-    if (SeasonComponent.notAiredYet(tmdbEpisodeDto)) {
-      return "date_range";
-    }
-
-    switch (this.getDownloadStatus(tmdbEpisodeDto)) {
-      case DownloadStatus.DOWNLOADED: return "done";
-      case DownloadStatus.DOWNLOADING: return "arrow_downward";
-      default: return null;
-    }
+    return new Date(episode.air_date).valueOf() > Date.now();
   }
 }

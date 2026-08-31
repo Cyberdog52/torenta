@@ -1,10 +1,10 @@
-import {TmdbGenreDto} from "./TmdbGenreDto";
-import {TmdbProductionCompanyDto} from "./TmdbProductionCompanyDto";
-import {TmdbSpokenLanguagesDto} from "./TmdbSpokenLanguagesDto";
+import { TmdbGenreDto } from './TmdbGenreDto';
+import { TmdbProductionCompanyDto } from './TmdbProductionCompanyDto';
+import { TmdbSpokenLanguagesDto } from './TmdbSpokenLanguagesDto';
 
 export interface TmdbMovieDetailDto {
   adult: boolean;
-  backdrop_path: string;
+  backdrop_path: string | null;
   budget: number;
   genres: TmdbGenreDto[];
   homepage: string;
@@ -14,7 +14,7 @@ export interface TmdbMovieDetailDto {
   original_title: string;
   overview: string;
   popularity: number;
-  poster_path: string;
+  poster_path: string | null;
   production_companies: TmdbProductionCompanyDto[];
   release_date: string;
   revenue: number;

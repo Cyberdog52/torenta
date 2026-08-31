@@ -3,9 +3,17 @@ mat-card {
   color: whitesmoke;
 }
 
-download-detail {
-  width: 100%;
-  height: 100%;
-  padding-top: 8px;
-  padding-left: 4px;
+/*
+ * Replaces the old `mat-grid-list` + `(window:resize)` column math, which
+ * computed a fractional column count (`innerWidth / 600`).
+ */
+mat-card-content {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(600px, 1fr));
+  gap: 8px;
+}
+
+app-download-detail {
+  display: block;
+  min-height: 240px;
 }

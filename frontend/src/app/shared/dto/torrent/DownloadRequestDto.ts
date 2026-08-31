@@ -1,39 +1,30 @@
-import {TmdbEpisodeDto} from "../tmdb/TmdbEpisodeDto";
-import {TorrentEntry} from "../pirateBay/TorrentEntry";
-import {TmdbSeriesDetailDto} from "../tmdb/TmdbSeriesDetailDto";
-import {TmdbMovieDetailDto} from "../tmdb/TmdbMovieDetailDto";
+import { TmdbEpisodeDto } from '../tmdb/TmdbEpisodeDto';
+import { TorrentEntry } from '../pirateBay/TorrentEntry';
+import { TmdbSeriesDetailDto } from '../tmdb/TmdbSeriesDetailDto';
+import { TmdbMovieDetailDto } from '../tmdb/TmdbMovieDetailDto';
 
-export class DownloadRequestDto {
-  tmdbEpisode: TmdbEpisodeDto;
-  seriesDetail: TmdbSeriesDetailDto;
+export interface DownloadRequestDto {
+  tmdbEpisode: TmdbEpisodeDto | null;
+  seriesDetail: TmdbSeriesDetailDto | null;
   torrentEntry: TorrentEntry;
-  movieDetail: TmdbMovieDetailDto;
+  movieDetail: TmdbMovieDetailDto | null;
+}
 
-  static getEpisodeString(tmdbEpisode: TmdbEpisodeDto): string {
-    if (tmdbEpisode == null) {
-      return "";
-    }
-    let episodeStr = "S";
-    if (tmdbEpisode.season_number < 10) {
-      episodeStr += "0";
-    }
-    episodeStr += tmdbEpisode.season_number.toString();
-    episodeStr += "E";
-    if (tmdbEpisode.episode_number < 10) {
-      episodeStr += "0";
-    }
-    episodeStr += tmdbEpisode.episode_number.toString();
-    return episodeStr;
+export function getEpisodeString(tmdbEpisode: TmdbEpisodeDto | null): string {
+  if (tmdbEpisode == null) {
+    return '';
   }
+  const season = String(tmdbEpisode.season_number).padStart(2, '0');
+  const episode = String(tmdbEpisode.episode_number).padStart(2, '0');
+  return `S${season}E${episode}`;
+}
 
-  static getDownloadTitle(downloadRequest: DownloadRequestDto) {
-    if (downloadRequest.seriesDetail != null) {
-      const episodeString = DownloadRequestDto.getEpisodeString(downloadRequest.tmdbEpisode)
-      return downloadRequest.seriesDetail.name + " " + episodeString;
-    } else if (downloadRequest.movieDetail != null){
-      return downloadRequest.movieDetail.original_title;
-    } else {
-      return downloadRequest.torrentEntry.name;
-    }
+export function getDownloadTitle(downloadRequest: DownloadRequestDto): string {
+  if (downloadRequest.seriesDetail != null) {
+    return `${downloadRequest.seriesDetail.name} ${getEpisodeString(downloadRequest.tmdbEpisode)}`;
   }
+  if (downloadRequest.movieDetail != null) {
+    return downloadRequest.movieDetail.original_title;
+  }
+  return downloadRequest.torrentEntry.name;
 }

@@ -1,62 +1,46 @@
-import {Component, OnInit} from '@angular/core';
-import {TorrentService} from "../torrent.service";
-import {DownloadDto} from "../../shared/dto/torrent/DownloadDto";
-import {NotificationService} from "../../shared/notification/notification.service";
-import {NotificationType} from "../../shared/dto/notification/Notification";
-import {DownloadRequestDto} from "../../shared/dto/torrent/DownloadRequestDto";
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { MatCardModule } from '@angular/material/card';
+import { TorrentService } from '../torrent.service';
+import { DownloadDto } from '../../shared/dto/torrent/DownloadDto';
+import { DownloadState } from '../../shared/dto/torrent/DownloadState';
+import { NotificationService } from '../../shared/notification/notification.service';
+import { NotificationType } from '../../shared/dto/notification/Notification';
+import { getDownloadTitle } from '../../shared/dto/torrent/DownloadRequestDto';
+import { DownloadDetailComponent } from './download-detail/download-detail.component';
 
 @Component({
-  selector: 'downloads',
+  selector: 'app-downloads',
+  imports: [MatCardModule, DownloadDetailComponent],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './downloads.component.scss',
   templateUrl: './downloads.component.html',
-  styleUrls: ['./downloads.component.scss']
 })
-export class DownloadsComponent implements OnInit {
+export class DownloadsComponent {
+  private readonly torrentService = inject(TorrentService);
+  private readonly notificationService = inject(NotificationService);
 
-  downloadDtos: DownloadDto[] = [];
-  numberOfColumns: number;
+  protected readonly downloads = signal<DownloadDto[]>([]);
 
-  constructor(private torrentService: TorrentService, private notificationService: NotificationService) {
-  }
-
-  ngOnInit() {
-    this.updateDownloadDtos();
-    this.numberOfColumns = this.computeNumberOfColumns(window.innerWidth);
-  }
-
-
-  private updateDownloadDtos(): void {
-    this.torrentService.getDownloadDtosObservable().subscribe(downloadDtos => {
-      downloadDtos.forEach(updatedDto => {
-        if (updatedDto.state === "FINISHED" && this.stateChanged(this.downloadDtos, updatedDto)) {
-          this.notificationService.addNotifications({
-            content: `${DownloadRequestDto.getDownloadTitle(updatedDto.downloadRequest)} successfully downloaded.`,
-            type: NotificationType.INFO
-          })
-        }
-      });
-      this.downloadDtos = downloadDtos;
+  constructor() {
+    this.torrentService.downloads$.pipe(takeUntilDestroyed()).subscribe((downloads) => {
+      this.notifyNewlyFinished(this.downloads(), downloads);
+      this.downloads.set(downloads);
     });
   }
 
-  private stateChanged(existingDownloadDtos, updatedDto) {
-    let existingDto = existingDownloadDtos.find(existing => existing.id == updatedDto.id);
-    if (existingDto == null || updatedDto == null) return false;
-    return existingDto.state != updatedDto.state;
+  private notifyNewlyFinished(previous: DownloadDto[], current: DownloadDto[]): void {
+    for (const download of current) {
+      if (download.state !== DownloadState.FINISHED) {
+        continue;
+      }
+      const before = previous.find((existing) => existing.id === download.id);
+      if (before != null && before.state !== download.state) {
+        this.notificationService.notify({
+          content: `${getDownloadTitle(download.downloadRequest)} successfully downloaded.`,
+          type: NotificationType.INFO,
+        });
+      }
+    }
   }
-
-  downloadsLoaded() {
-    return this.downloadDtos != null;
-  }
-
-  handleSize(event) {
-    this.numberOfColumns = this.computeNumberOfColumns(event.target.innerWidth);
-  }
-
-  private computeNumberOfColumns(windowWidth: number): number {
-    return windowWidth / 600;
-  }
-
-
-
-
 }

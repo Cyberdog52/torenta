@@ -1,18 +1,31 @@
-@import '~@angular/material/theming';
+@use '@angular/material' as mat;
 
-html, body { height: 100%; }
-body { margin: 0; font-family: 'Roboto', sans-serif; }
+html {
+  color-scheme: light;
 
+  // Replaces the removed Angular Material 6 Sass API
+  // (`@import '~@angular/material/theming'`, `mat-palette`, `mat-color`).
+  @include mat.theme(
+    (
+      color: (
+        primary: mat.$azure-palette,
+        tertiary: mat.$blue-palette,
+      ),
+      typography: Roboto,
+      density: 0,
+    )
+  );
+}
 
-// Copy the palettes from your selected theme (usually theme.scss).
-$app-primary: mat-palette($mat-grey);
-$app-accent:  mat-palette($mat-light-blue);
-$app-warn:    mat-palette($mat-pink);
+html,
+body {
+  height: 100%;
+}
 
-// Create your Sass color vars (will be available in all the project)
-$primary: mat-color($app-primary);
-$accent: mat-color($app-accent);
-$warn: mat-color($app-warn);
+body {
+  margin: 0;
+  font-family: Roboto, sans-serif;
+}
 
 .topRightIcon {
   margin-left: -16pt;

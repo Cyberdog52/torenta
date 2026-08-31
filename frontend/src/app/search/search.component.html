@@ -1,63 +1,65 @@
 <mat-card>
-  <mat-card-title>
-    Search TV Show
-  </mat-card-title>
+  <mat-card-title>Search TV Show</mat-card-title>
   <mat-card-content>
-    <input matInput placeholder="TV Show" [(ngModel)]="searchSeriesString" (delayedKeyup)="searchSeries()">
+    <input matInput placeholder="TV Show" (appDelayedKeyup)="seriesQuery.set($event)" />
   </mat-card-content>
   <mat-card-footer>
-    <mat-accordion *ngIf="searchSeriesResult">
-      <mat-expansion-panel *ngFor="let seriesOverview of getSeriesOverviews()" (opened)="setPanelOpen(seriesOverview.id)"
-                           (closed)="setPanelClosed(seriesOverview.id)">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <img class="icon_image" src="{{getImageForSeries(seriesOverview)}}"/>
-            <h4 class="series_title">{{seriesOverview.name}}</h4>
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <div *ngIf="isPanelOpen(seriesOverview.id)">
-          <series-detail [id]="seriesOverview.id"></series-detail>
-        </div>
-      </mat-expansion-panel>
+    <mat-accordion>
+      @for (seriesOverview of seriesOverviews(); track seriesOverview.id) {
+        <mat-expansion-panel
+          (opened)="setPanelOpen(seriesOverview.id, true)"
+          (closed)="setPanelOpen(seriesOverview.id, false)"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <img class="icon_image" [src]="posterUrl(seriesOverview.poster_path)" alt="" />
+              <h4 class="series_title">{{ seriesOverview.name }}</h4>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          @if (isPanelOpen(seriesOverview.id)) {
+            <app-series-detail [id]="seriesOverview.id" />
+          }
+        </mat-expansion-panel>
+      }
     </mat-accordion>
   </mat-card-footer>
 </mat-card>
 
 <mat-card>
-  <mat-card-title>
-    Search Movie
-  </mat-card-title>
+  <mat-card-title>Search Movie</mat-card-title>
   <mat-card-content>
-    <input matInput placeholder="Movie" [(ngModel)]="searchMovieString" (delayedKeyup)="searchMovie()">
+    <input matInput placeholder="Movie" (appDelayedKeyup)="movieQuery.set($event)" />
   </mat-card-content>
   <mat-card-footer>
-    <mat-accordion *ngIf="searchMovieResult">
-      <mat-expansion-panel *ngFor="let movieOverview of getMovieOverviews()" (opened)="setPanelOpen(movieOverview.id)"
-                           (closed)="setPanelClosed(movieOverview.id)">
-        <mat-expansion-panel-header>
-          <mat-panel-title>
-            <img class="icon_image" src="{{getImageForMovie(movieOverview)}}"/>
-            <h4 class="series_title">{{movieOverview.original_title}}</h4>
-          </mat-panel-title>
-        </mat-expansion-panel-header>
-        <div *ngIf="isPanelOpen(movieOverview.id)">
-          <movie-detail [id]="movieOverview.id"></movie-detail>
-        </div>
-      </mat-expansion-panel>
+    <mat-accordion>
+      @for (movieOverview of movieOverviews(); track movieOverview.id) {
+        <mat-expansion-panel
+          (opened)="setPanelOpen(movieOverview.id, true)"
+          (closed)="setPanelOpen(movieOverview.id, false)"
+        >
+          <mat-expansion-panel-header>
+            <mat-panel-title>
+              <img class="icon_image" [src]="posterUrl(movieOverview.poster_path)" alt="" />
+              <h4 class="series_title">{{ movieOverview.original_title }}</h4>
+            </mat-panel-title>
+          </mat-expansion-panel-header>
+          @if (isPanelOpen(movieOverview.id)) {
+            <app-movie-detail [id]="movieOverview.id" />
+          }
+        </mat-expansion-panel>
+      }
     </mat-accordion>
   </mat-card-footer>
 </mat-card>
 
 <mat-card>
-  <mat-card-title>
-    Search Torrents
-  </mat-card-title>
+  <mat-card-title>Search Torrents</mat-card-title>
   <mat-card-content>
-    <input matInput placeholder="TorrentSearch" [(ngModel)]="searchTorrentString"
-           (delayedKeyup)="searchTorrent()">
+    <input matInput placeholder="TorrentSearch" (appDelayedKeyup)="torrentQuery.set($event)" />
   </mat-card-content>
-  <mat-card-footer *ngIf="delayedTorrentSearchString != null && delayedTorrentSearchString.length > 0">
-    <torrent-suggestions [searchString]="delayedTorrentSearchString" ></torrent-suggestions>
-  </mat-card-footer>
+  @if (torrentQuery().length > 0) {
+    <mat-card-footer>
+      <app-torrent-suggestions [searchString]="torrentQuery()" />
+    </mat-card-footer>
+  }
 </mat-card>
-

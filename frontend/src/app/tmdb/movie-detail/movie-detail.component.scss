@@ -13,7 +13,6 @@ mat-progress-spinner {
   padding-bottom: 12pt;
   overflow: hidden;
   position: relative;
-
 }
 
 .background-container {
@@ -31,11 +30,11 @@ mat-progress-spinner {
 
 .background-image-shadow {
   background: transparent;
-  position:absolute;
-  top:0;
-  left:0;
-  width:100%;
-  height:100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
   box-shadow: inset 120pt -120pt 100pt 0pt black;
 }
 
@@ -44,7 +43,7 @@ mat-progress-spinner {
   z-index: 10;
 }
 
-torrent-suggestions {
+app-torrent-suggestions {
   z-index: 15;
 }
 
@@ -53,5 +52,3 @@ torrent-suggestions {
   z-index: 20;
   position: relative;
 }
-
-

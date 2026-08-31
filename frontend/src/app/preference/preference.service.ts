@@ -1,25 +1,19 @@
-import {Injectable} from "@angular/core";
-import {HttpClient} from "@angular/common/http";
-import {Observable} from "rxjs";
-import {UserPreference} from "../shared/dto/preference/UserPreference";
+import { inject, Injectable } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
+import { Observable } from 'rxjs';
+import { UserPreference } from '../shared/dto/preference/UserPreference';
 
-@Injectable({
-  providedIn: 'root'
-})
+const BACKEND_URL = 'api/preference';
+
+@Injectable({ providedIn: 'root' })
 export class PreferenceService {
+  private readonly httpClient = inject(HttpClient);
 
-  private backendUrl = "api/preference";
-
-  constructor(private httpClient: HttpClient) {
+  save(preferences: UserPreference): Observable<void> {
+    return this.httpClient.post<void>(BACKEND_URL, preferences);
   }
 
-  public save(preferences: UserPreference): Observable<any> {
-    let url = `${this.backendUrl}`;
-    return this.httpClient.post<any>(url, preferences);
-  }
-
-  public load(): Observable<UserPreference> {
-    let url = `${this.backendUrl}`;
-    return this.httpClient.get<UserPreference>(url);
+  load(): Observable<UserPreference> {
+    return this.httpClient.get<UserPreference>(BACKEND_URL);
   }
 }
