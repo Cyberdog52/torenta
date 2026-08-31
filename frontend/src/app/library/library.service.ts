@@ -1,20 +1,15 @@
-import {Injectable} from '@angular/core';
-import {HttpClient} from '@angular/common/http';
-import {Observable} from 'rxjs';
-import {Series} from '../shared/dto/library/Series';
+import { Injectable, Signal } from '@angular/core';
+import { httpResource } from '@angular/common/http';
+import { Series } from '../shared/dto/library/Series';
 
-@Injectable({
-  providedIn: 'root'
-})
+const BACKEND_URL = 'api/library';
+
+@Injectable({ providedIn: 'root' })
 export class LibraryService {
-
-  private backendUrl = 'api/library';
-
-  constructor(private httpClient: HttpClient) {
-  }
-
-  public getSeriesInLibrary(name: string): Observable<Series> {
-    const url = `${this.backendUrl}/tv/${name}`;
-    return this.httpClient.get<Series>(url);
+  seriesInLibraryResource(name: Signal<string | undefined>) {
+    return httpResource<Series>(() => {
+      const seriesName = name();
+      return seriesName ? `${BACKEND_URL}/tv/${encodeURIComponent(seriesName)}` : undefined;
+    });
   }
 }

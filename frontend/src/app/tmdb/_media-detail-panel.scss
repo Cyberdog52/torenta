@@ -1,0 +1,97 @@
+// Shared styling for the "media detail" panels (series, movie, and download
+// tiles). All three show a full-bleed backdrop image with a gradient fade
+// into the theme's surface color, and a foreground column of metadata
+// sitting on top.
+@mixin panel {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: var(--mat-sys-surface-container-highest);
+  color: var(--mat-sys-on-surface);
+  isolation: isolate; // establishes a stacking context for the z-indexed children below
+
+  // A container query (keyed off this panel's own rendered width) rather
+  // than a viewport media query, so a ~420px-wide download tile stays
+  // single-column even on a wide desktop viewport instead of squeezing its
+  // text into a sliver next to a 320px image column.
+  container-type: inline-size;
+
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+
+  @container (min-width: 560px) {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+  }
+
+  // A subtle "Ken Burns" zoom on the backdrop image when hovering the card,
+  // clipped by `overflow: hidden` above.
+  &:hover .backdrop img {
+    transform: scale(1.06);
+  }
+}
+
+@mixin backdrop {
+  position: relative;
+  order: -1;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+
+  // Only the backdrop opts out of the grid's default item stretch — it
+  // keeps its own aspect ratio instead of being forced to match whatever
+  // height the (often much taller) foreground column ends up with. Without
+  // this, `object-fit: cover` on the image below had to crop/zoom hard to
+  // fill that mismatched box.
+  @container (min-width: 560px) {
+    order: 1;
+    align-self: start;
+  }
+}
+
+@mixin backdrop-image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.5s ease;
+
+  // Fades the backdrop into the panel's surface color instead of a
+  // hand-tuned black inset shadow, so it works in both light and dark mode.
+  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
+
+  @container (min-width: 560px) {
+    mask-image: linear-gradient(to right, transparent 0%, black 35%);
+  }
+}
+
+@mixin foreground {
+  position: relative;
+  z-index: 1;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  min-width: 0;
+}
+
+@mixin meta-line {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex-wrap: wrap;
+  margin: 0;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    margin-left: 8px;
+
+    &:first-child {
+      margin-left: 0;
+    }
+  }
+}
+
+@mixin chip-button {
+  background-color: var(--mat-sys-surface-container-high);
+  color: var(--mat-sys-on-surface);
+}

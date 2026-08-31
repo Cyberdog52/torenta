@@ -1,84 +1,111 @@
-import {Component, Input, OnInit} from '@angular/core';
-import {DownloadDto} from '../../../shared/dto/torrent/DownloadDto';
-import {DownloadState} from '../../../shared/dto/torrent/DownloadState';
-import {DownloadRequestDto} from '../../../shared/dto/torrent/DownloadRequestDto';
+import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { MatIconModule } from '@angular/material/icon';
+import { DownloadDto } from '../../../shared/dto/torrent/DownloadDto';
+import { DownloadState } from '../../../shared/dto/torrent/DownloadState';
+import {
+  DownloadRequestDto,
+  getDownloadTitle,
+} from '../../../shared/dto/torrent/DownloadRequestDto';
+import { backdropUrl } from '../../../shared/tmdb-images';
+
+const BYTES_PER_SECOND_IN_MBIT = 125_000;
+
+/** Label + icon shown on the status chip and the progress row for each state. */
+const STATUS_META: Record<DownloadState, { label: string; icon: string }> = {
+  [DownloadState.STARTED]: { label: 'Downloading', icon: 'downloading' },
+  [DownloadState.FINISHED]: { label: 'Finished', icon: 'check_circle' },
+  [DownloadState.CANCELLED]: { label: 'Cancelled', icon: 'cancel' },
+};
 
 @Component({
   selector: 'app-download-detail',
+  imports: [MatIconModule],
+  changeDetection: ChangeDetectionStrategy.OnPush,
+  styleUrl: './download-detail.component.scss',
   templateUrl: './download-detail.component.html',
-  styleUrls: ['./download-detail.component.scss']
 })
-export class DownloadDetailComponent implements OnInit {
+export class DownloadDetailComponent {
+  readonly downloadDto = input.required<DownloadDto>();
 
-  @Input()
-  downloadDto: DownloadDto;
+  protected readonly isRunning = computed(() => this.downloadDto().state === DownloadState.STARTED);
 
-  constructor() { }
+  /** CSS modifier class driving the state-dependent colors in the stylesheet. */
+  protected readonly stateClass = computed(() => `state-${this.downloadDto().state.toLowerCase()}`);
 
-  ngOnInit() {
-  }
+  protected readonly status = computed(() => STATUS_META[this.downloadDto().state]);
 
-  getProgressString(downloadDto: DownloadDto): string {
-    if (downloadDto.state === DownloadState.FINISHED) {
-      return 'Successfully downloaded';
+  protected readonly title = computed(() => getDownloadTitle(this.downloadDto().downloadRequest));
+
+  protected readonly backgroundImage = computed(() =>
+    backdropUrl(backdropPathOf(this.downloadDto().downloadRequest)),
+  );
+
+  /** Drives the custom progress bar's fill width and its ARIA value. */
+  protected readonly progressPercent = computed(() => this.downloadDto().progress * 100);
+
+  protected readonly progressString = computed(() => {
+    switch (this.downloadDto().state) {
+      case DownloadState.FINISHED:
+        return 'Successfully downloaded';
+      case DownloadState.CANCELLED:
+        return 'Cancelled';
+      case DownloadState.STARTED:
+        return `${this.progressPercent().toFixed(1)} %`;
+      default:
+        return this.downloadDto().state;
     }
-    if (downloadDto.state === DownloadState.CANCELLED) {
-      return 'Cancelled';
-    }
-    if (downloadDto.state === DownloadState.STARTED) {
-      return (downloadDto.progress * 100).toFixed(1).toString() + ' %';
-    }
-    return downloadDto.state;
-  }
+  });
 
-  getDownloadTitle(downloadDto: DownloadDto) {
-    return DownloadRequestDto.getDownloadTitle(downloadDto.downloadRequest);
-  }
-
-  getBackgroundImageFor(downloadRequest: DownloadRequestDto): string {
-    if (downloadRequest.seriesDetail != null && downloadRequest.seriesDetail.backdrop_path != null) {
-      return 'https://image.tmdb.org/t/p/original/' + downloadRequest.seriesDetail.backdrop_path;
-    } else if (downloadRequest.movieDetail != null && downloadRequest.movieDetail.backdrop_path != null) {
-      return 'https://image.tmdb.org/t/p/original/' + downloadRequest.movieDetail.backdrop_path;
-    } else {
-      return '../../assets/tvnotfound.png';
-    }
-  }
-
-  getSpeed(): string {
-    if (!this.isRunning()) {
+  protected readonly speed = computed(() => {
+    const bytesPerSecond = this.downloadDto().downloadSpeedInBytesPerSecond;
+    if (!this.isRunning() || bytesPerSecond == null || bytesPerSecond < 0.1) {
       return '0 Mbps';
     }
-    if (this.downloadDto.downloadSpeedInBytesPerSecond == null || this.downloadDto.downloadSpeedInBytesPerSecond < 0.1) {
-      return '0 Mbps';
-    }
-    const mbitsperSecond = this.downloadDto.downloadSpeedInBytesPerSecond / 125000.0;
-    return mbitsperSecond.toFixed(2) + ' Mbps';
-  }
+    return `${(bytesPerSecond / BYTES_PER_SECOND_IN_MBIT).toFixed(2)} Mbps`;
+  });
 
-  getEstimatedTimeFinished(): string {
-    if (!this.isRunning()) {
-      return 'Finished';
-    }
-    if (this.downloadDto.downloadSpeedInBytesPerSecond == null || this.downloadDto.downloadSpeedInBytesPerSecond < 0.1) {
+  /**
+   * Only meaningful while a download is actively running; the template only
+   * reads this while `isRunning()` is true.
+   */
+  protected readonly estimatedTimeFinished = computed(() => {
+    const download = this.downloadDto();
+    const bytesPerSecond = download.downloadSpeedInBytesPerSecond;
+    if (bytesPerSecond == null || bytesPerSecond < 0.1) {
       return 'Never';
     }
-    const bytesLeft = this.downloadDto.totalBytes * (1 - this.downloadDto.progress);
-    const secondsLeft = bytesLeft / this.downloadDto.downloadSpeedInBytesPerSecond;
-
-    const date = new Date(0);
-    date.setSeconds(secondsLeft);
-    return date.toISOString().substr(11, 8);
-  }
-
-  isRunning(): boolean {
-    return this.downloadDto.state === DownloadState.STARTED;
-  }
-
-  getPeers() {
-    if (this.downloadDto.connectedPeers == null || this.downloadDto.connectedPeers === 0) {
-      return 'No connections';
+    const secondsLeft = (download.totalBytes * (1 - download.progress)) / bytesPerSecond;
+    if (!Number.isFinite(secondsLeft) || secondsLeft < 0) {
+      return 'Unknown';
     }
-    return this.downloadDto.connectedPeers + ' sources';
-  }
+    return formatDuration(secondsLeft);
+  });
+
+  protected readonly peers = computed(() => {
+    const connectedPeers = this.downloadDto().connectedPeers;
+    return !connectedPeers ? 'No connections' : `${connectedPeers} sources`;
+  });
+}
+
+function backdropPathOf(downloadRequest: DownloadRequestDto): string | null {
+  return (
+    downloadRequest.seriesDetail?.backdrop_path ??
+    downloadRequest.movieDetail?.backdrop_path ??
+    null
+  );
+}
+
+/**
+ * Formats a duration in seconds as `hh:mm:ss`, growing to `d:hh:mm:ss` past
+ * 24 hours instead of silently wrapping the day count away.
+ */
+function formatDuration(totalSeconds: number): string {
+  const seconds = Math.floor(totalSeconds % 60);
+  const minutes = Math.floor(totalSeconds / 60) % 60;
+  const hours = Math.floor(totalSeconds / 3600) % 24;
+  const days = Math.floor(totalSeconds / 86_400);
+
+  const pad = (value: number) => String(value).padStart(2, '0');
+  const hhmmss = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
+  return days > 0 ? `${days}:${hhmmss}` : hhmmss;
 }

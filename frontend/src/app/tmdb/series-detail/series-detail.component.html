@@ -1,36 +1,38 @@
-<div *ngIf="isLoading()">
-  <mat-progress-spinner mode="indeterminate">
-  </mat-progress-spinner>
-</div>
-<div *ngIf="!isLoading()" class="seriesDetail">
-  <div class="background-container">
-    <img class="background-image" src="{{getBackgroundImageFor(seriesDetail)}}" />
-    <div class="background-image-shadow"></div>
+@if (isLoading()) {
+  <div class="loading">
+    <mat-progress-spinner mode="indeterminate" diameter="32" />
   </div>
-  <div class="foreground-container">
-    <p class="overview">
-      <mat-icon>date_range</mat-icon>{{seriesDetail.first_air_date}} •
-      <mat-icon>timer</mat-icon>{{getRuntime() }} •
-      <mat-icon>star</mat-icon>{{seriesDetail.vote_average}}
-    </p>
-    <p>
-      <mat-chip-list>
-        <mat-chip *ngFor="let genre of seriesDetail.genres">
-          {{genre.name}}
-        </mat-chip>
-      </mat-chip-list>
-    </p>
-    <p class="overview">{{seriesDetail.overview}}</p>
-    <p>
-    <span *ngFor="let tmdbSeasonDto of seriesDetail.seasons">
-       <button mat-raised-button class="seasonButton" (click)="showSeason = tmdbSeasonDto">
-         {{getSeasonTitle(tmdbSeasonDto)}}
-      </button>
-      <mat-icon class="topRightIcon" *ngIf="isPartiallyDownloaded(tmdbSeasonDto)">done</mat-icon>
-      <mat-icon class="topRightIcon" *ngIf="notAiredYet(tmdbSeasonDto)">date_range</mat-icon>
-    </span>
-
-    </p>
-    <app-season [tmdbSeasonDto]="showSeason" [seriesDetail]="seriesDetail" *ngIf="showSeason"></app-season>
+} @else if (seriesDetail(); as seriesDetail) {
+  <div class="series-detail">
+    <div class="backdrop">
+      <img [src]="backdropUrl(seriesDetail.backdrop_path)" alt="" loading="lazy" />
+    </div>
+    <div class="foreground">
+      <p class="meta-line">
+        <mat-icon>date_range</mat-icon>{{ seriesDetail.first_air_date }} <mat-icon>timer</mat-icon
+        >{{ runtime() }} min <mat-icon>star</mat-icon>{{ seriesDetail.vote_average }}
+      </p>
+      <mat-chip-set>
+        @for (genre of seriesDetail.genres; track genre.id) {
+          <mat-chip>{{ genre.name }}</mat-chip>
+        }
+      </mat-chip-set>
+      <p class="overview">{{ seriesDetail.overview }}</p>
+      <div class="season-buttons">
+        @for (tmdbSeasonDto of seriesDetail.seasons; track tmdbSeasonDto.id) {
+          <button matButton="elevated" class="chip-button" (click)="showSeason.set(tmdbSeasonDto)">
+            {{ seasonTitle(tmdbSeasonDto) }}
+            @if (isPartiallyDownloaded(tmdbSeasonDto)) {
+              <mat-icon>done</mat-icon>
+            } @else if (notAiredYet(tmdbSeasonDto)) {
+              <mat-icon>date_range</mat-icon>
+            }
+          </button>
+        }
+      </div>
+      @if (showSeason(); as season) {
+        <app-season [tmdbSeasonDto]="season" [seriesDetail]="seriesDetail" />
+      }
+    </div>
   </div>
-</div>
+}
