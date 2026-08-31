@@ -62,7 +62,8 @@ it before final acceptance.
 | Phase | Angular | Node/npm | Result | Commit |
 | --- | --- | --- | --- | --- |
 | 0 | 6.1.10 | Host audit: 22.19.0 / 10.9.3 | Decisions frozen; Docker 29.7.2 available | `1d5c8f8` |
-| 1 | 6.1.10 | Angular host: 22.19.0 / 10.9.3; Playwright target: Node 24 | 12 desktop/mobile characterization tests pass; legacy AOT defect recorded | This phase commit |
+| 1 | 6.1.10 | Angular host: 22.19.0 / 10.9.3; Playwright target: Node 24 | 12 desktop/mobile characterization tests pass; legacy AOT defect recorded | `5585e72` |
+| 2 | 6.1.10 | npm 6.13.4 on host Node 22.19.0 | Exact dependencies and npm v1 lockfile; lint, 3 unit tests, AOT build, and 12 Playwright tests pass | This phase commit |
 
 ## Angular 6 Baseline
 
@@ -94,3 +95,20 @@ Recorded on 2026-08-31 before dependency normalization:
   Chromium. It covers navigation, preferences, direct torrent downloads,
   movie/series expansion, delayed keyup, polling order, completion, and
   notifications. Test screenshots are retained as ignored run artifacts.
+
+## Angular 6 Normalized Checkpoint
+
+- All direct dependencies are exact; Angular packages resolve to `6.1.10`, CLI
+  to `6.2.9`, Material/CDK to `6.4.7`, and TypeScript to `2.9.2`.
+- Unused `@angular/http` was removed after confirming there are no source imports.
+- Sass is temporarily pinned to `1.32.13` for historical runtime compatibility.
+- npm `6.13.4` generated lockfile version 1 and reproduced 1,323 installed packages
+  with `npm ci --ignore-scripts`.
+- `npm ls --depth=0`, TSLint, three Karma tests, production AOT build, and all 12
+  characterization tests pass.
+- The baseline AOT defect was corrected by making the progress-bar mode the
+  literal `determinate` rather than binding an undeclared component property.
+- Exact Node 8 verification remains unavailable on this ARM64 host. npm 6 ran
+  under Node 22, and webpack commands used the temporary
+  `NODE_OPTIONS=--openssl-legacy-provider` option. No production configuration
+  was changed to retain that compatibility option.

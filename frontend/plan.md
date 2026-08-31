@@ -73,21 +73,21 @@ Status: In progress
 
 Runtime: Node `8.17.0`, npm `6.13.4` in an isolated migration environment.
 
-- [ ] Pin Angular core packages to `6.1.10`.
-- [ ] Pin Angular CLI to `6.2.9`.
-- [ ] Pin Angular Material and CDK to `6.4.7`.
-- [ ] Pin TypeScript to `2.9.2`.
-- [ ] Pin all other direct dependencies exactly by removing `^` and `~` ranges.
-- [ ] Temporarily pin Dart Sass to `1.32.13` so it supports the historical runtime.
-- [ ] Confirm whether `@angular/http` has any imports or runtime use.
-- [ ] Remove `@angular/http` before Angular 8 if it is unused; otherwise migrate usage to `HttpClient` first.
-- [ ] Generate a canonical npm 6 lockfile for the normalized checkpoint.
-- [ ] Verify a clean install from the canonical lockfile.
-- [ ] Verify `npm ls --depth=0` has no invalid or missing direct dependencies.
-- [ ] Verify the production build.
-- [ ] Verify the existing unit tests.
-- [ ] Run lint and legacy e2e only if their current scripts are functional; otherwise retain the recorded baseline failure.
-- [ ] Run the independent Playwright characterization suite.
+- [x] Pin Angular core packages to `6.1.10`.
+- [x] Pin Angular CLI to `6.2.9`.
+- [x] Pin Angular Material and CDK to `6.4.7`.
+- [x] Pin TypeScript to `2.9.2`.
+- [x] Pin all other direct dependencies exactly by removing `^` and `~` ranges.
+- [x] Temporarily pin Dart Sass to `1.32.13` so it supports the historical runtime.
+- [x] Confirm whether `@angular/http` has any imports or runtime use.
+- [x] Remove `@angular/http` before Angular 8 if it is unused; otherwise migrate usage to `HttpClient` first.
+- [x] Generate a canonical npm 6 lockfile for the normalized checkpoint.
+- [x] Verify a clean install from the canonical lockfile.
+- [x] Verify `npm ls --depth=0` has no invalid or missing direct dependencies.
+- [x] Verify the production build.
+- [x] Verify the existing unit tests.
+- [x] Run lint and record legacy e2e as superseded by the characterization suite because the checked-in Protractor assertion is stale.
+- [x] Run the independent Playwright characterization suite.
 - [ ] Tag or commit the green Angular 6 checkpoint.
 
 ## Standard Major-Upgrade Procedure
