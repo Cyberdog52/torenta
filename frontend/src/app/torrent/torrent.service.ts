@@ -33,7 +33,7 @@ export class TorrentService {
   torrentSearchResource(searchString: Signal<string | undefined>) {
     return httpResource<TorrentEntry[]>(() => {
       const search = searchString()?.trim();
-      return search ? { url: 'api/torrent/', params: { search } } : undefined;
+      return search ? { url: 'api/torrent', params: { search } } : undefined;
     });
   }
 }
