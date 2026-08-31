@@ -11,7 +11,35 @@ mat-card-content {
 }
 
 .empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 240px;
+  padding: 32px 16px;
+  text-align: center;
   color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+    opacity: 0.6;
+  }
+}
+
+.empty-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface);
+}
+
+.empty-subtitle {
+  margin: 0;
 }
 
 app-download-detail {

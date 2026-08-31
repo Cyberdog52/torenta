@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
+import { MatIconModule } from '@angular/material/icon';
 import { TorrentService } from '../torrent.service';
 import { DownloadDto } from '../../shared/dto/torrent/DownloadDto';
 import { DownloadState } from '../../shared/dto/torrent/DownloadState';
@@ -11,7 +12,7 @@ import { DownloadDetailComponent } from './download-detail/download-detail.compo
 
 @Component({
   selector: 'app-downloads',
-  imports: [MatCardModule, DownloadDetailComponent],
+  imports: [MatCardModule, MatIconModule, DownloadDetailComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './downloads.component.scss',
   templateUrl: './downloads.component.html',

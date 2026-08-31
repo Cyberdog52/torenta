@@ -6,7 +6,11 @@
     @for (downloadDto of downloads(); track downloadDto.id) {
       <app-download-detail [downloadDto]="downloadDto" />
     } @empty {
-      <p class="empty">Downloads will be shown here</p>
+      <div class="empty">
+        <mat-icon>inbox</mat-icon>
+        <p class="empty-title">No downloads yet</p>
+        <p class="empty-subtitle">Start one from the Search page and it will show up here.</p>
+      </div>
     }
   </mat-card-content>
 </mat-card>

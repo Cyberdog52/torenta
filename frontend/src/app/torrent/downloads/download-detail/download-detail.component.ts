@@ -11,6 +11,13 @@ import { backdropUrl } from '../../../shared/tmdb-images';
 
 const BYTES_PER_SECOND_IN_MBIT = 125_000;
 
+/** Label + icon shown on the status chip and the progress row for each state. */
+const STATUS_META: Record<DownloadState, { label: string; icon: string }> = {
+  [DownloadState.STARTED]: { label: 'Downloading', icon: 'downloading' },
+  [DownloadState.FINISHED]: { label: 'Finished', icon: 'check_circle' },
+  [DownloadState.CANCELLED]: { label: 'Cancelled', icon: 'cancel' },
+};
+
 @Component({
   selector: 'app-download-detail',
   imports: [MatIconModule, MatProgressBarModule],
@@ -22,6 +29,11 @@ export class DownloadDetailComponent {
   readonly downloadDto = input.required<DownloadDto>();
 
   protected readonly isRunning = computed(() => this.downloadDto().state === DownloadState.STARTED);
+
+  /** CSS modifier class driving the state-dependent colors in the stylesheet. */
+  protected readonly stateClass = computed(() => `state-${this.downloadDto().state.toLowerCase()}`);
+
+  protected readonly status = computed(() => STATUS_META[this.downloadDto().state]);
 
   protected readonly title = computed(() => getDownloadTitle(this.downloadDto().downloadRequest));
 
@@ -51,11 +63,13 @@ export class DownloadDetailComponent {
     return `${(bytesPerSecond / BYTES_PER_SECOND_IN_MBIT).toFixed(2)} Mbps`;
   });
 
+  /**
+   * Only meaningful while a download is actively running — the caller only
+   * reads this while `isRunning()` is true, so a finished/cancelled download
+   * no longer gets mislabeled with a leftover "Finished"/"Never" ETA.
+   */
   protected readonly estimatedTimeFinished = computed(() => {
     const download = this.downloadDto();
-    if (!this.isRunning()) {
-      return 'Finished';
-    }
     const bytesPerSecond = download.downloadSpeedInBytesPerSecond;
     if (bytesPerSecond == null || bytesPerSecond < 0.1) {
       return 'Never';
