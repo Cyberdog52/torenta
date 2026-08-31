@@ -250,6 +250,56 @@ class BitTorrentServiceTest {
         assertNotNull(secondService.getDownload(MAGNET_LINK.hashCode()));
     }
 
+    @Test
+    void downloadFailure_isSurfacedAsFailedStateWithRootCauseMessage() {
+        service.startDownload(request(MAGNET_LINK), Path.of("target"));
+
+        future.completeExceptionally(new IllegalStateException("wrapper", new IllegalArgumentException("no metadata")));
+
+        DownloadDto dto = service.getAllDownloadDtos().iterator().next();
+        assertEquals(DownloadState.FAILED, dto.getState());
+        assertEquals("IllegalArgumentException: no metadata", dto.getErrorMessage());
+    }
+
+    @Test
+    void downloadTerminatedBeforeCompletion_isSurfacedAsFailedState() {
+        ArgumentCaptor<Consumer<TorrentSessionState>> callbackCaptor = sessionCallbackCaptor();
+        service.startDownload(request(MAGNET_LINK), Path.of("target"));
+        verify(client).startAsync(callbackCaptor.capture(), eq(100L));
+        callbackCaptor.getValue().accept(state(1, 4));
+
+        future.complete(null);
+
+        DownloadDto dto = service.getAllDownloadDtos().iterator().next();
+        assertEquals(DownloadState.FAILED, dto.getState());
+        assertTrue(dto.getErrorMessage().contains("terminated"));
+    }
+
+    @Test
+    void completedDownload_staysFinished() {
+        ArgumentCaptor<Consumer<TorrentSessionState>> callbackCaptor = sessionCallbackCaptor();
+        service.startDownload(request(MAGNET_LINK), Path.of("target"));
+        verify(client).startAsync(callbackCaptor.capture(), eq(100L));
+        callbackCaptor.getValue().accept(state(4, 4));
+
+        future.complete(null);
+
+        DownloadDto dto = service.getAllDownloadDtos().iterator().next();
+        assertEquals(DownloadState.FINISHED, dto.getState());
+        assertNull(dto.getErrorMessage());
+    }
+
+    @Test
+    void cancelledDownload_isNotReportedAsFailed() {
+        service.startDownload(request(MAGNET_LINK), Path.of("target"));
+
+        service.getDownload(MAGNET_LINK.hashCode()).cancel();
+
+        DownloadDto dto = service.getAllDownloadDtos().iterator().next();
+        assertEquals(DownloadState.CANCELLED, dto.getState());
+        assertNull(dto.getErrorMessage());
+    }
+
     private DownloadRequest request(String magnetLink) {
         TorrentEntry torrentEntry = mock(TorrentEntry.class);
         when(torrentEntry.getMagnetLink()).thenReturn(magnetLink);

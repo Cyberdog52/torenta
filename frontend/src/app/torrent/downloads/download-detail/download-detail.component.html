@@ -15,6 +15,9 @@
       <p class="meta-line"><mat-icon>network_check</mat-icon>{{ speed() }}</p>
       <p class="meta-line"><mat-icon>timelapse</mat-icon>{{ estimatedTimeFinished() }}</p>
     }
+    @if (isFailed()) {
+      <p class="meta-line error-line"><mat-icon>error_outline</mat-icon>{{ errorMessage() }}</p>
+    }
     <div class="progress">
       <div
         class="progress-track"

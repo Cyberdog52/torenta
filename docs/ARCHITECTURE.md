@@ -52,7 +52,13 @@ reformat, or clean it up** — only touch it for a deliberate, user-approved int
 2. **Find torrent** — SPA calls `TorrentController` → `TorrentService` → `PirateBayHtmlAPI`
    scrapes result pages with jsoup and returns `TorrentEntry` DTOs.
 3. **Download** — SPA calls `BittorrentController` → `BitTorrentService` starts a `Download`
-   driven by the vendored `bt/**` engine; progress is exposed as `DownloadState`.
+   driven by the vendored `bt/**` engine; progress is exposed as `DownloadState`. Failures and
+   downloads whose processing chain terminates before completion are logged and reported as
+   `DownloadState.FAILED` with an `errorMessage` on `DownloadDto`. A download that finds no peers
+   within `Download.PEER_DISCOVERY_TIMEOUT_IN_MS` is also reported as `FAILED` instead of sitting
+   at 0 % forever. `BitTorrentService` sets the engine's acceptor address from
+   `RoutableAddressResolver`, because the vendored default picks the first non-loopback IPv4
+   address of any interface (often a Hyper-V/WSL/VPN adapter with no internet route).
 4. **Library** — completed media is surfaced through `LibraryService`/`DirectoryService`.
 
 ## Frontend

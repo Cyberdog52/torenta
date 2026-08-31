@@ -98,7 +98,8 @@ class BittorrentControllerTest {
                 1234L,
                 8L,
                 4096L,
-                512.5
+                512.5,
+                null
         );
         when(bitTorrentService.getAllDownloadDtos()).thenReturn(Set.of(download));
 

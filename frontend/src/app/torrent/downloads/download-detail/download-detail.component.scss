@@ -162,3 +162,22 @@
     color: var(--mat-sys-error);
   }
 }
+
+.state-failed {
+  .status-chip {
+    background: var(--mat-sys-error-container);
+    color: var(--mat-sys-on-error-container);
+  }
+
+  .progress-fill {
+    background: var(--mat-sys-error);
+  }
+
+  .progress-icon {
+    color: var(--mat-sys-error);
+  }
+}
+
+.error-line {
+  color: var(--mat-sys-error);
+}

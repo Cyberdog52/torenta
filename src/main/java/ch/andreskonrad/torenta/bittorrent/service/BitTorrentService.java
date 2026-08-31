@@ -16,6 +16,7 @@ import java.nio.file.Path;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.Set;
+import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -61,11 +62,39 @@ public class BitTorrentService {
             CompletableFuture<?> torrentFuture = client.startAsync(
                     torrentSessionState -> processSessionState(torrentSessionState, id),
                     SESSION_STATE_UPDATE_INTERVAL);
+            torrentFuture.whenComplete((result, throwable) -> handleCompletion(id, throwable));
             download.setTorrentFuture(torrentFuture);
         } catch (RuntimeException | Error exception) {
             downloads.remove(id, download);
             throw exception;
         }
+    }
+
+    private void handleCompletion(int id, Throwable throwable) {
+        Download download = getDownload(id);
+        if (download == null) {
+            return;
+        }
+        if (throwable instanceof CancellationException) {
+            return;
+        }
+        if (throwable != null) {
+            LOGGER.error("Torrent download {} failed", id, throwable);
+            download.fail(rootCauseMessage(throwable));
+        } else if (!download.isComplete()) {
+            LOGGER.error("Torrent download {} stopped before completion. The BitTorrent processing chain was "
+                    + "terminated; enable DEBUG logging for the 'bt' package to see the failing stage.", id);
+            download.fail("Torrent processing was terminated before the download completed.");
+        }
+    }
+
+    private String rootCauseMessage(Throwable throwable) {
+        Throwable cause = throwable;
+        while (cause.getCause() != null && cause.getCause() != cause) {
+            cause = cause.getCause();
+        }
+        String message = cause.getMessage();
+        return message == null ? cause.getClass().getName() : cause.getClass().getSimpleName() + ": " + message;
     }
 
     public void startDownloadToPreferredFolder(DownloadRequest downloadRequest) {
@@ -105,12 +134,21 @@ public class BitTorrentService {
     }
 
     private Config getConfig() {
-        return new Config() {
+        Config config = new Config() {
             @Override
             public int getNumOfHashingThreads() {
                 return Runtime.getRuntime().availableProcessors() * 2;
             }
         };
+        RoutableAddressResolver.resolve().ifPresentOrElse(
+                address -> {
+                    config.setAcceptorAddress(address);
+                    LOGGER.info("BitTorrent engine bound to local address {}", address.getHostAddress());
+                },
+                () -> LOGGER.warn("Could not determine a locally routable address; falling back to {}. "
+                                + "If downloads find no peers, this interface likely has no internet route.",
+                        config.getAcceptorAddress()));
+        return config;
     }
 
     private int generateId(String magnetLink) {
