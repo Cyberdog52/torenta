@@ -1,0 +1,30 @@
+# Continue.dev indexing exclusions — see AI_RULES.md (authoritative). Not a security boundary.
+# Protected files: never index, embed, or use as AI context.
+
+# Spring config (may contain secrets)
+src/main/resources/application.properties
+src/main/resources/application-*.properties
+!src/main/resources/application-template.properties
+src/main/resources/bitthief.properties
+
+# Environment files
+.env
+.env.*
+!.env.template
+!.env.example
+
+# Secret material
+secrets/
+certificates/
+credentials/
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.keystore
+*.crt
+id_rsa
+id_dsa
+id_ecdsa
+id_ed25519

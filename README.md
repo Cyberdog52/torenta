@@ -3,7 +3,7 @@
 ## Setup
 
 #### Java
-Install Java OpenJDK 13 from [here](https://jdk.java.net/13/). 
+Install Java OpenJDK 25 (the build uses the Java 25 toolchain configured in `build.gradle`).
 Make sure it is also in the system's path, because gradlew will use the java version that is on the path.
 To see which java version is used, type the following in the terminal:
 
@@ -75,13 +75,20 @@ npm start
 Will start at http://localhost:4200/ and proxies `/api` to the backend on
 http://localhost:8080/ (see `frontend/proxy.conf.json`).
 
+## Documentation
+
+- [CONTRIBUTING.md](CONTRIBUTING.md) — setup, build/test commands, PR checklist
+- [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — components, feature slices, request flow
+- [AI_RULES.md](AI_RULES.md) — authoritative security & development rules (AI and humans)
+- [SECURITY.md](SECURITY.md) — reporting vulnerabilities
+
 ## Development links
 
 [Jira Backlog](https://andreskonrad.atlassian.net/jira/software/projects/TOR/boards/1/backlog)
 
 [Swagger UI](http://localhost:8080/swagger-ui.html)
 
-[Swagger Docs](http://localhost:8080/v2/api-docs)
+[OpenAPI Docs](http://localhost:8080/v3/api-docs)
 
 [TMDB](https://developers.themoviedb.org/3/getting-started/introduction)
 
@@ -104,4 +111,3 @@ https://github.com/atomashpolskiy/bittorrent
 https://github.com/pmoor/bitthief
 
 https://github.com/clamarque/HubMovies
-

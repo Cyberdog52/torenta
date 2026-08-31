@@ -40,7 +40,7 @@ public class PirateBayHtmlAPI {
         }
         try {
             return Jsoup.connect(query.getPirateBayFrontendSearchURI().toString())
-                    .userAgent("Java 11 HttpClient Bot")
+                    .userAgent("Java 25 HttpClient Bot")
                     .timeout(5000)
                     .get();
         } catch (Exception e) {

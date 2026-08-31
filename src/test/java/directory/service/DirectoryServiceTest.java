@@ -4,45 +4,47 @@ import ch.andreskonrad.torenta.directory.dto.DirectoryDto;
 import ch.andreskonrad.torenta.directory.dto.FileDto;
 import ch.andreskonrad.torenta.directory.service.DirectoryService;
 import ch.andreskonrad.torenta.preference.dto.UserPreference;
-import ch.andreskonrad.torenta.preference.service.PreferenceServiceMock;
-import org.junit.Before;
-import org.junit.Rule;
-import org.junit.Test;
-import org.junit.rules.TemporaryFolder;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
+import ch.andreskonrad.torenta.preference.service.PreferenceService;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = PreferenceServiceMock.class)
-@EnableConfigurationProperties
+@ExtendWith(MockitoExtension.class)
 public class DirectoryServiceTest {
 
-    @Autowired
-    private PreferenceServiceMock preferenceServiceMock;
+    @Mock
+    private PreferenceService preferenceService;
 
     private DirectoryService directoryService;
 
-    @Rule
-    public TemporaryFolder rootFolder = new TemporaryFolder();
+    @TempDir
+    Path rootFolder;
 
-    @Before
+    @BeforeEach
     public void setUp() {
-        preferenceServiceMock.save(new UserPreference(rootFolder.getRoot().getAbsolutePath().toString()));
-        directoryService = new DirectoryService(preferenceServiceMock);
+        when(preferenceService.loadPreferences())
+                .thenReturn(new UserPreference(rootFolder.toAbsolutePath().toString()));
+        directoryService = new DirectoryService(preferenceService);
+        verify(preferenceService).setDirectoryService(directoryService);
     }
 
     @Test
     public void initalizeDirectoryService_moviesDirectoryCreated() {
-        Path moviesPath = rootFolder.getRoot().toPath().resolve("Movies");
+        Path moviesPath = rootFolder.resolve("Movies");
 
         assertTrue(Files.exists(moviesPath));
         assertTrue(Files.isDirectory(moviesPath));
@@ -50,7 +52,7 @@ public class DirectoryServiceTest {
 
     @Test
     public void initalizeDirectoryService_seriesDirectoryCreated() {
-        Path seriesPath = rootFolder.getRoot().toPath().resolve("Series");
+        Path seriesPath = rootFolder.resolve("Series");
 
         assertTrue(Files.exists(seriesPath));
         assertTrue(Files.isDirectory(seriesPath));
@@ -98,7 +100,7 @@ public class DirectoryServiceTest {
 
     @Test
     public void getFileHierarchy_newSeries_episodeFound() throws IOException {
-        Path seriesPath = rootFolder.getRoot().toPath().resolve("Series");
+        Path seriesPath = rootFolder.resolve("Series");
         Path mandanlorianPath = Files.createDirectory(seriesPath.resolve("Mandalorian"));
         Path season01 = Files.createDirectory(mandanlorianPath.resolve("S01"));
         Path episodeFilePath = Files.createFile(season01.resolve("empty-episode-S01E01.mp4"));
