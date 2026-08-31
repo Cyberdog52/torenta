@@ -12,7 +12,7 @@ public class RequestThrottler {
         this.timeSpanForMaxRequestsInMillis = timeSpanForMaxRequestsInMillis;
     }
 
-    private ArrayList<Long> requestTimes = new ArrayList<>();
+    private final ArrayList<Long> requestTimes = new ArrayList<>();
 
     public synchronized void throttle() throws InterruptedException {
         boolean gotThrough = false;
@@ -29,6 +29,6 @@ public class RequestThrottler {
 
     private void clearOldRequestTimes() {
         long currentTime = System.currentTimeMillis();
-        requestTimes.removeIf(requestTime -> requestTime < currentTime - timeSpanForMaxRequestsInMillis);
+        requestTimes.removeIf(requestTime -> requestTime <= currentTime - timeSpanForMaxRequestsInMillis);
     }
 }
