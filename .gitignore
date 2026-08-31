@@ -34,3 +34,5 @@ src/main/resources/application.properties
 
 ### macOS ###
 .DS_Store
+# Generated frontend static files (built by copyFrontendToResources Gradle task)
+src/main/resources/static/
