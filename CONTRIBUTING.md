@@ -53,7 +53,7 @@ npm run build        # production build
 ## Pull-request checklist
 
 - [ ] `./gradlew test` passes and `cd frontend && npm test && npm run lint` pass locally.
-- [ ] New or changed behavior has tests (JUnit 5/EasyMock backend, Karma/Jasmine frontend).
+- [ ] New or changed behavior has tests (JUnit 5/Mockito backend, Karma/Jasmine frontend).
 - [ ] Backend DTO changes are mirrored in `frontend/src/app/shared/dto/**`, and OpenAPI
       annotations are updated.
 - [ ] No secrets, credentials, or protected-file contents are added to any tracked file.
