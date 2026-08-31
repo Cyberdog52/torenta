@@ -3,7 +3,7 @@
     Search TV Show
   </mat-card-title>
   <mat-card-content>
-    <input matInput placeholder="TV Show" [(ngModel)]="searchSeriesString" (delayedKeyup)="searchSeries()">
+    <input matInput placeholder="TV Show" [(ngModel)]="searchSeriesString" (appDelayedKeyup)="searchSeries()">
   </mat-card-content>
   <mat-card-footer>
     <mat-accordion *ngIf="searchSeriesResult">
@@ -16,7 +16,7 @@
           </mat-panel-title>
         </mat-expansion-panel-header>
         <div *ngIf="isPanelOpen(seriesOverview.id)">
-          <series-detail [id]="seriesOverview.id"></series-detail>
+          <app-series-detail [id]="seriesOverview.id"></app-series-detail>
         </div>
       </mat-expansion-panel>
     </mat-accordion>
@@ -28,7 +28,7 @@
     Search Movie
   </mat-card-title>
   <mat-card-content>
-    <input matInput placeholder="Movie" [(ngModel)]="searchMovieString" (delayedKeyup)="searchMovie()">
+    <input matInput placeholder="Movie" [(ngModel)]="searchMovieString" (appDelayedKeyup)="searchMovie()">
   </mat-card-content>
   <mat-card-footer>
     <mat-accordion *ngIf="searchMovieResult">
@@ -41,7 +41,7 @@
           </mat-panel-title>
         </mat-expansion-panel-header>
         <div *ngIf="isPanelOpen(movieOverview.id)">
-          <movie-detail [id]="movieOverview.id"></movie-detail>
+          <app-movie-detail [id]="movieOverview.id"></app-movie-detail>
         </div>
       </mat-expansion-panel>
     </mat-accordion>
@@ -54,10 +54,9 @@
   </mat-card-title>
   <mat-card-content>
     <input matInput placeholder="TorrentSearch" [(ngModel)]="searchTorrentString"
-           (delayedKeyup)="searchTorrent()">
+           (appDelayedKeyup)="searchTorrent()">
   </mat-card-content>
   <mat-card-footer *ngIf="delayedTorrentSearchString != null && delayedTorrentSearchString.length > 0">
-    <torrent-suggestions [searchString]="delayedTorrentSearchString" ></torrent-suggestions>
+    <app-torrent-suggestions [searchString]="delayedTorrentSearchString"></app-torrent-suggestions>
   </mat-card-footer>
 </mat-card>
-

@@ -3,11 +3,11 @@ import { Subject, Subscription } from 'rxjs';
 import { debounceTime } from 'rxjs/operators';
 
 @Directive({
-  selector: '[delayedKeyup]'
+  selector: '[appDelayedKeyup]'
 })
 export class DelayedKeyupDirective implements OnDestroy {
   @Output()
-  public delayedKeyup: EventEmitter<any> = new EventEmitter<any>();
+  public appDelayedKeyup: EventEmitter<any> = new EventEmitter<any>();
 
   @Input()
   public delay = 300;
@@ -18,7 +18,7 @@ export class DelayedKeyupDirective implements OnDestroy {
   constructor() {
     this.subscription = this.stream
       .pipe(debounceTime(this.delay))
-      .subscribe((value: any) => this.delayedKeyup.next(value));
+      .subscribe((value: any) => this.appDelayedKeyup.next(value));
   }
 
   ngOnDestroy(): void {
@@ -30,4 +30,3 @@ export class DelayedKeyupDirective implements OnDestroy {
     this.stream.next(value);
   }
 }
-

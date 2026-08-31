@@ -1,9 +1,9 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
-import {NotificationService} from "./notification.service";
-import {Subject} from "rxjs";
-import {Notification, NotificationType} from "../dto/notification/Notification";
-import {takeUntil} from "rxjs/operators";
-import {MatSnackBar} from "@angular/material";
+import {NotificationService} from './notification.service';
+import {Subject} from 'rxjs';
+import {Notification, NotificationType} from '../dto/notification/Notification';
+import {takeUntil} from 'rxjs/operators';
+import {MatSnackBar} from '@angular/material';
 
 
 @Component({
@@ -25,7 +25,7 @@ export class NotificationComponent implements OnInit, OnDestroy {
         takeUntil(this.destroy$)
       )
       .subscribe(n => {
-        if (n.type == NotificationType.ERROR) {
+        if (n.type === NotificationType.ERROR) {
           return this.notifications.push(n);
         } else {
           this._snackBar.open(n.content, null, {

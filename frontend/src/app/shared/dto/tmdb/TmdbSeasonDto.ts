@@ -1,4 +1,4 @@
-import {TmdbEpisodeDto} from "./TmdbEpisodeDto";
+import {TmdbEpisodeDto} from './TmdbEpisodeDto';
 
 export interface TmdbSeasonDto {
   air_date: string;
