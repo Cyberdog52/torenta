@@ -13,14 +13,6 @@
   }
 }
 
-.backdrop {
-  @include panel.backdrop;
-
-  img {
-    @include panel.backdrop-image;
-  }
-}
-
 .foreground {
   @include panel.foreground;
 }

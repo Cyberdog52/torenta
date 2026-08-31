@@ -7,7 +7,6 @@ import { SearchService } from '../../search/search.service';
 import { DirectoryService } from '../../directory/directory.service';
 import { TmdbSeasonDto } from '../../shared/dto/tmdb/TmdbSeasonDto';
 import { SeasonComponent } from '../season/season.component';
-import { backdropUrl } from '../../shared/tmdb-images';
 import { safeValue } from '../../shared/resource';
 
 @Component({
@@ -39,8 +38,6 @@ export class SeriesDetailComponent {
   );
 
   protected readonly showSeason = signal<TmdbSeasonDto | null>(null);
-
-  protected readonly backdropUrl = backdropUrl;
 
   protected readonly runtime = computed(() => {
     const runtimes = this.seriesDetail()?.episode_run_time ?? [];
