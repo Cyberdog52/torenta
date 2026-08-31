@@ -3,7 +3,7 @@
 Source: [`upgrade.md`](./upgrade.md)  
 Matrix frozen: 2026-08-31  
 Overall risk: High  
-Status: Not started
+Status: In progress
 
 ## Checklist Conventions
 
@@ -37,15 +37,15 @@ Status: Not started
 
 ## Phase 0: Decisions And Reproducibility
 
-- [ ] Record the approved target matrix and the npm registry used for the migration.
-- [ ] Decide whether package tarballs and checksums must be mirrored for long-term reproducibility.
+- [x] Record the approved target matrix and the npm registry used for the migration.
+- [x] Decide whether package tarballs and checksums must be mirrored for long-term reproducibility.
 - [ ] Confirm Angular 22's May 2026 browser Baseline with product stakeholders.
 - [ ] Document supported desktop and mobile browser versions.
-- [ ] Identify how the current `dist/frontend` output is packaged and deployed.
-- [ ] Identify every consumer that must be updated if the output changes to `dist/frontend/browser`.
-- [ ] Decide where disposable migration environments and baseline artifacts will be stored.
-- [ ] Ensure EOL Node runtimes run only in isolated disposable environments without credentials or production access.
-- [ ] Define one commit or tag boundary for each green Angular major.
+- [x] Identify how the current `dist/frontend` output is packaged and deployed.
+- [x] Identify every repository consumer that must be updated if the output changes to `dist/frontend/browser`; no automated repository consumer currently exists.
+- [x] Decide where disposable migration environments and baseline artifacts will be stored.
+- [x] Ensure EOL Node runtimes run only in isolated disposable environments without credentials or production access.
+- [x] Define one commit or tag boundary for each green Angular major.
 
 ## Phase 1: Behavioral Baseline
 
