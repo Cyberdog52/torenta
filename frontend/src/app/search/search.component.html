@@ -1,6 +1,7 @@
+<h1 class="visually-hidden">Search</h1>
 <mat-card class="search-card">
   <mat-card-header>
-    <mat-card-title>Search TV Show</mat-card-title>
+    <h2 mat-card-title>Search TV Show</h2>
   </mat-card-header>
   <mat-card-content>
     <mat-form-field appearance="outline" class="search-field">
@@ -11,13 +12,16 @@
 
     @if (seriesSearch.isLoading()) {
       <div class="search-status">
-        <mat-progress-spinner mode="indeterminate" diameter="32" />
+        <mat-progress-spinner mode="indeterminate" diameter="32" aria-label="Searching TV shows" />
       </div>
     } @else if (seriesQuery().length > 0 && seriesOverviews().length === 0) {
-      <p class="search-empty">No TV shows found for "{{ seriesQuery() }}".</p>
+      <p class="search-empty" aria-live="polite">No TV shows found for "{{ seriesQuery() }}".</p>
     }
 
     @if (seriesOverviews().length > 0) {
+      <p class="visually-hidden" aria-live="polite">
+        {{ seriesOverviews().length }} TV shows found for "{{ seriesQuery() }}".
+      </p>
       <mat-accordion class="results">
         @for (seriesOverview of seriesOverviews(); track seriesOverview.id) {
           <mat-expansion-panel
@@ -43,6 +47,7 @@
                   loading="lazy"
                   [src]="posterUrl(seriesOverview.poster_path)"
                   alt=""
+                  aria-hidden="true"
                 />
                 <span class="result-name">{{ seriesOverview.name }}</span>
               </mat-panel-title>
@@ -59,7 +64,7 @@
 
 <mat-card class="search-card">
   <mat-card-header>
-    <mat-card-title>Search Movie</mat-card-title>
+    <h2 mat-card-title>Search Movie</h2>
   </mat-card-header>
   <mat-card-content>
     <mat-form-field appearance="outline" class="search-field">
@@ -70,13 +75,16 @@
 
     @if (movieSearch.isLoading()) {
       <div class="search-status">
-        <mat-progress-spinner mode="indeterminate" diameter="32" />
+        <mat-progress-spinner mode="indeterminate" diameter="32" aria-label="Searching movies" />
       </div>
     } @else if (movieQuery().length > 0 && movieOverviews().length === 0) {
-      <p class="search-empty">No movies found for "{{ movieQuery() }}".</p>
+      <p class="search-empty" aria-live="polite">No movies found for "{{ movieQuery() }}".</p>
     }
 
     @if (movieOverviews().length > 0) {
+      <p class="visually-hidden" aria-live="polite">
+        {{ movieOverviews().length }} movies found for "{{ movieQuery() }}".
+      </p>
       <mat-accordion class="results">
         @for (movieOverview of movieOverviews(); track movieOverview.id) {
           <mat-expansion-panel
@@ -102,6 +110,7 @@
                   loading="lazy"
                   [src]="posterUrl(movieOverview.poster_path)"
                   alt=""
+                  aria-hidden="true"
                 />
                 <span class="result-name">{{ movieOverview.original_title }}</span>
               </mat-panel-title>
@@ -118,7 +127,7 @@
 
 <mat-card class="search-card">
   <mat-card-header>
-    <mat-card-title>Search Torrents</mat-card-title>
+    <h2 mat-card-title>Search Torrents</h2>
   </mat-card-header>
   <mat-card-content>
     <mat-form-field appearance="outline" class="search-field">

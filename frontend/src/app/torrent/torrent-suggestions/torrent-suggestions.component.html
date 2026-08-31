@@ -1,8 +1,10 @@
 @if (isLoading()) {
   <div class="loading">
-    <mat-progress-spinner mode="indeterminate" diameter="32" />
+    <mat-progress-spinner mode="indeterminate" diameter="32" aria-label="Searching for torrents" />
+    <span class="visually-hidden" aria-live="polite">Searching for torrents…</span>
   </div>
 } @else if (suggestions().length > 0) {
+  <p class="visually-hidden" aria-live="polite">{{ suggestions().length }} torrents found.</p>
   <div class="table-scroll">
     <table mat-table [dataSource]="suggestions()">
       <ng-container matColumnDef="size">
@@ -40,7 +42,13 @@
           @if (hasStartedDownload(element)) {
             <span class="downloading">Downloading …</span>
           } @else {
-            <button matButton="elevated" (click)="startDownload(element)">Download</button>
+            <button
+              matButton="elevated"
+              [attr.aria-label]="'Download ' + element.name"
+              (click)="startDownload(element)"
+            >
+              Download
+            </button>
           }
         </td>
       </ng-container>
@@ -50,5 +58,5 @@
     </table>
   </div>
 } @else {
-  <p class="no-results">No torrents found.</p>
+  <p class="no-results" aria-live="polite">No torrents found.</p>
 }

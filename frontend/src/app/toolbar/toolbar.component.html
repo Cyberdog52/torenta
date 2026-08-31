@@ -3,19 +3,37 @@
   <div class="navigationButtonContainer">
     <button
       matIconButton
+      [attr.aria-label]="themeLabel[themeService.current()]"
       [matTooltip]="themeLabel[themeService.current()]"
       (click)="themeService.cycle()"
     >
       <mat-icon>{{ themeIcon[themeService.current()] }}</mat-icon>
     </button>
-    <button matButton="elevated" routerLink="/search" routerLinkActive="active">
-      <mat-icon>movie</mat-icon>Search
-    </button>
-    <button matButton="elevated" routerLink="/downloads" routerLinkActive="active">
-      <mat-icon>archive</mat-icon>Downloads
-    </button>
-    <button matButton="elevated" routerLink="/preferences" routerLinkActive="active">
-      <mat-icon>settings</mat-icon>Preferences
-    </button>
+    <nav aria-label="Main">
+      <button
+        matButton="elevated"
+        routerLink="/search"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+      >
+        <mat-icon>movie</mat-icon>Search
+      </button>
+      <button
+        matButton="elevated"
+        routerLink="/downloads"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+      >
+        <mat-icon>archive</mat-icon>Downloads
+      </button>
+      <button
+        matButton="elevated"
+        routerLink="/preferences"
+        routerLinkActive="active"
+        ariaCurrentWhenActive="page"
+      >
+        <mat-icon>settings</mat-icon>Preferences
+      </button>
+    </nav>
   </div>
 </mat-toolbar>
