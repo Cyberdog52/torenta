@@ -14,6 +14,7 @@ public class PreferenceService {
     //by changing the following static strings users may loose preferences
     private static final String PREFERENCE_NODE_NAME = "ch/andreskonrad/torenta/preference";
     private static final String PREFERENCE_DOWNLOAD_DIRECTORY = "downloadDirectory";
+    private static final String PREFERENCE_TMDB_SERVICE_KEY = "tmdbServiceKey";
 
     private DirectoryService directoryService;
 
@@ -22,8 +23,9 @@ public class PreferenceService {
 
         String defaultDownloadDirectoryPath = Paths.get(System.getProperty("user.home"), "Downloads").toString();
         String downloadDirectoryPath = userPreferenceRoot.get(PREFERENCE_DOWNLOAD_DIRECTORY, defaultDownloadDirectoryPath);
+        String tmdbServiceKey = userPreferenceRoot.get(PREFERENCE_TMDB_SERVICE_KEY, null);
 
-        return new UserPreference(downloadDirectoryPath);
+        return new UserPreference(downloadDirectoryPath, tmdbServiceKey);
     }
 
     public void setDirectoryService(DirectoryService directoryService) {
@@ -35,6 +37,9 @@ public class PreferenceService {
 
         if (preferences.getDownloadDirectoryPath() != null) {
             userPreferenceRoot.put(PREFERENCE_DOWNLOAD_DIRECTORY, preferences.getDownloadDirectoryPath());
+        }
+        if (preferences.getTmdbServiceKey() != null) {
+            userPreferenceRoot.put(PREFERENCE_TMDB_SERVICE_KEY, preferences.getTmdbServiceKey());
         }
 
         if (this.directoryService != null) {

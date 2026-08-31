@@ -20,7 +20,7 @@ which java
 IntelliJ IDEA is optional and only needed if you prefer running/debugging from the IDE.
 
 #### TMDB-Key
-First, you need to get an API key from [TMDB](https://developers.themoviedb.org/3/getting-started/introduction). Create an `application.properties` from the template and add the key. Do not check in the `application.properties` file.
+First, you need to get an API key from [TMDB](https://developers.themoviedb.org/3/getting-started/introduction). Configure the key in the application's user preferences (Preferences in the UI).
 
 #### NodeJs
 The frontend runs on **Angular 22** and requires **Node.js 24 LTS** (>= 24.15.0).

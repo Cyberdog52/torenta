@@ -42,7 +42,7 @@ public class DirectoryServiceTest {
     @BeforeEach
     public void setUp() {
         when(preferenceService.loadPreferences())
-                .thenReturn(new UserPreference(rootFolder.toAbsolutePath().toString()));
+                .thenReturn(new UserPreference(rootFolder.toAbsolutePath().toString(), null));
         directoryService = new DirectoryService(preferenceService);
         verify(preferenceService).setDirectoryService(directoryService);
     }

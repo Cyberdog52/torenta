@@ -47,16 +47,8 @@ committed template files listed below.
 Safe, committed template files (placeholder values only, never real secrets):
 
 ```text
-src/main/resources/application-template.properties
 .env.template
 .env.example
-```
-
-Example placeholder (this is the expected property name; the value must stay a placeholder):
-
-```properties
-# src/main/resources/application-template.properties
-ch.andreskonrad.torenta.tmdb.service.key=YOUR_TMDB_API_KEY
 ```
 
 ### 1.3 Never commit secrets
@@ -163,8 +155,6 @@ Add new functionality as a new feature slice following this pattern; do not crea
 
 ### 3.4 Configuration & external services
 
-- Inject configuration with `@Value("${...}")` (e.g. the TMDB key
-  `ch.andreskonrad.torenta.tmdb.service.key`). Never hard-code keys or hosts that belong in config.
 - Caching uses Spring Cache (`@CacheConfig`, `@Cacheable`) — see `CustomCacheConfig`. Reuse it for
   expensive external calls instead of adding new caching frameworks.
 - External HTTP throttling exists (`RequestThrottler`); respect rate limits when adding external calls.

@@ -18,8 +18,6 @@ This project reads configuration and credentials from files that must never be c
 shared. The authoritative list of protected files is in [`AI_RULES.md`](./AI_RULES.md) §1 and
 includes (non-exhaustive):
 
-- `src/main/resources/application.properties` and `application-*.properties`
-  (except `application-template.properties`)
 - `src/main/resources/bitthief.properties`
 - `.env` / `.env.*` (except `.env.template` / `.env.example`)
 - Anything under `secrets/`, `certificates/`, `credentials/`

@@ -19,10 +19,7 @@ You do **not** need a local Gradle install — use the wrapper (`./gradlew`, `.\
 
 ## First-time setup
 
-1. **TMDB API key.** Copy `src/main/resources/application-template.properties` to
-   `application.properties` and set `ch.andreskonrad.torenta.tmdb.service.key`. **Never commit
-   `application.properties`** — it is a protected file (see `AI_RULES.md §1`).
-2. **Frontend dependencies:**
+1. **Frontend dependencies:**
    ```bash
    cd frontend
    nvm use
