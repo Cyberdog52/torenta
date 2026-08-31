@@ -10,4 +10,5 @@ export interface DownloadDto {
   connectedPeers: number;
   totalBytes: number;
   downloadSpeedInBytesPerSecond: number;
+  errorMessage?: string;
 }

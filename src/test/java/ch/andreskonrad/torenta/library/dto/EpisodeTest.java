@@ -79,6 +79,10 @@ public class EpisodeTest {
                 episodeDto(1, 1, null),
                 directoryWithEpisode,
                 downloadDto(DownloadState.CANCELLED));
+        Episode failed = new Episode(
+                episodeDto(1, 1, null),
+                directoryWithEpisode,
+                downloadDto(DownloadState.FAILED));
         Episode finished = new Episode(
                 episodeDto(1, 1, null),
                 emptyDirectory(),
@@ -86,6 +90,7 @@ public class EpisodeTest {
 
         assertEquals(DownloadStatus.DOWNLOADING, started.getDownloadStatus());
         assertEquals(DownloadStatus.NOT_DOWNLOADED, cancelled.getDownloadStatus());
+        assertEquals(DownloadStatus.NOT_DOWNLOADED, failed.getDownloadStatus());
         assertEquals(DownloadStatus.DOWNLOADED, finished.getDownloadStatus());
     }
 
