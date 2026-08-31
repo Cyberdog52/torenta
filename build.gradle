@@ -250,4 +250,13 @@ tasks.register('createPortableArchive', Zip) {
     archiveVersion = project.version.toString()
     destinationDirectory = layout.buildDirectory.dir('distributions')
     from(layout.buildDirectory.dir('portable-dist'))
+    // Preserve executable bit for launcher script and bundled runtime binaries in the zip.
+    eachFile { fileCopyDetails ->
+        def relativePath = fileCopyDetails.relativePath.pathString
+        if (relativePath == 'run-torenta.sh' || relativePath.startsWith('runtime/')) {
+            fileCopyDetails.permissions {
+                unix(0755)
+            }
+        }
+    }
 }
