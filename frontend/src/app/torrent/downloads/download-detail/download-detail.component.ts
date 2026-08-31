@@ -15,6 +15,7 @@ const STATUS_META: Record<DownloadState, { label: string; icon: string }> = {
   [DownloadState.STARTED]: { label: 'Downloading', icon: 'downloading' },
   [DownloadState.FINISHED]: { label: 'Finished', icon: 'check_circle' },
   [DownloadState.CANCELLED]: { label: 'Cancelled', icon: 'cancel' },
+  [DownloadState.FAILED]: { label: 'Failed', icon: 'error' },
 };
 
 @Component({
@@ -28,6 +29,13 @@ export class DownloadDetailComponent {
   readonly downloadDto = input.required<DownloadDto>();
 
   protected readonly isRunning = computed(() => this.downloadDto().state === DownloadState.STARTED);
+
+  protected readonly isFailed = computed(() => this.downloadDto().state === DownloadState.FAILED);
+
+  /** Reason reported by the backend; downloads can fail without one. */
+  protected readonly errorMessage = computed(
+    () => this.downloadDto().errorMessage ?? 'Unknown error',
+  );
 
   /** CSS modifier class driving the state-dependent colors in the stylesheet. */
   protected readonly stateClass = computed(() => `state-${this.downloadDto().state.toLowerCase()}`);
@@ -49,6 +57,8 @@ export class DownloadDetailComponent {
         return 'Successfully downloaded';
       case DownloadState.CANCELLED:
         return 'Cancelled';
+      case DownloadState.FAILED:
+        return `Failed: ${this.errorMessage()}`;
       case DownloadState.STARTED:
         return `${this.progressPercent().toFixed(1)} %`;
       default:

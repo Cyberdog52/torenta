@@ -14,7 +14,7 @@ const SERIES_OVERVIEW = {
   popularity: 100,
   vote_average: 8.5,
   vote_count: 1000,
-  backdrop_path: null,
+  backdrop_path: '/office-backdrop.jpg',
   poster_path: null,
 };
 
@@ -40,7 +40,12 @@ const SERIES_DETAIL = {
 
 test('shows search results and renders series detail without crashing', async ({ page }) => {
   const pageErrors: Error[] = [];
+  let backdropRequests = 0;
   page.on('pageerror', (error) => pageErrors.push(error));
+  await page.route('**/office-backdrop.jpg', async (route) => {
+    backdropRequests++;
+    await route.fulfill({ status: 204 });
+  });
 
   // The backend proxies TV search/detail to the real TMDB API, which needs a
   // valid API key. CI only ever configures a placeholder key (see
@@ -64,6 +69,16 @@ test('shows search results and renders series detail without crashing', async ({
 
   const firstResult = page.locator('mat-expansion-panel-header').first();
   await expect(firstResult).toBeVisible({ timeout: 15000 });
+  await expect(firstResult.locator('..')).not.toHaveAttribute('style', /office-backdrop/);
+  expect(backdropRequests).toBe(0);
+
+  await firstResult.focus();
+  await expect(firstResult.locator('..')).toHaveCSS(
+    '--media-backdrop-image',
+    'url(https://image.tmdb.org/t/p/w1280//office-backdrop.jpg)',
+  );
+  await expect(firstResult).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
+  await expect.poll(() => backdropRequests).toBeGreaterThan(0);
 
   // Expanding a result triggers a library lookup
   // (`GET /api/directory/series/{name}`) that answers 404 for any series not
@@ -72,6 +87,29 @@ test('shows search results and renders series detail without crashing', async ({
   // whole panel - see `safeValue()` in shared/resource.ts.
   await firstResult.click();
   await expect(page.locator('.series-detail')).toBeVisible();
+  await expect(firstResult.locator('..')).toHaveCSS(
+    '--media-backdrop-image',
+    'url(https://image.tmdb.org/t/p/w1280//office-backdrop.jpg)',
+  );
+  const backdropGeometry = () =>
+    firstResult.locator('..').evaluate((panel) => {
+      const backdrop = getComputedStyle(panel, '::before');
+      const panelWidth = panel.getBoundingClientRect().width;
+      return {
+        widthRatio: Number.parseFloat(backdrop.width) / panelWidth,
+        aspectRatio: Number.parseFloat(backdrop.width) / Number.parseFloat(backdrop.height),
+        top: backdrop.top,
+        right: backdrop.right,
+      };
+    });
+  await expect.poll(async () => (await backdropGeometry()).widthRatio).toBeCloseTo(1 / 2, 3);
+  await expect.poll(async () => (await backdropGeometry()).aspectRatio).toBeCloseTo(16 / 9, 3);
+  await expect
+    .poll(async () => {
+      const geometry = await backdropGeometry();
+      return { top: geometry.top, right: geometry.right };
+    })
+    .toEqual({ top: '0px', right: '0px' });
 
   expect(pageErrors).toEqual([]);
 });

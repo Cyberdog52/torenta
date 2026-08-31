@@ -7,15 +7,7 @@
 }
 
 .series-detail {
-  @include panel.panel;
-}
-
-.backdrop {
-  @include panel.backdrop;
-
-  img {
-    @include panel.backdrop-image;
-  }
+  color: inherit;
 }
 
 .foreground {

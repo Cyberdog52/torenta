@@ -1,66 +1,51 @@
-// Shared styling for the "media detail" panels (series, movie, and download
-// tiles). All three show a full-bleed backdrop image with a gradient fade
-// into the theme's surface color, and a foreground column of metadata
-// sitting on top.
+// Shared styling for media panels with a full-bleed backdrop behind their
+// foreground content.
 @mixin panel {
   position: relative;
   overflow: hidden;
   border-radius: 12px;
   background: var(--mat-sys-surface-container-highest);
   color: var(--mat-sys-on-surface);
-  isolation: isolate; // establishes a stacking context for the z-indexed children below
+  isolation: isolate;
 
-  // A container query (keyed off this panel's own rendered width) rather
-  // than a viewport media query, so a ~420px-wide download tile stays
-  // single-column even on a wide desktop viewport instead of squeezing its
-  // text into a sliver next to a 320px image column.
   container-type: inline-size;
 
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-
-  @container (min-width: 560px) {
-    grid-template-columns: minmax(0, 1fr) minmax(0, 320px);
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
   }
 
-  // A subtle "Ken Burns" zoom on the backdrop image when hovering the card,
-  // clipped by `overflow: hidden` above.
-  &:hover .backdrop img {
+  &::before {
+    z-index: -2;
+    background-image: var(--media-backdrop-image);
+    background-position: center;
+    background-size: cover;
+    transition: transform 0.5s ease;
+  }
+
+  &::after {
+    z-index: -1;
+    background:
+      linear-gradient(to top, var(--mat-sys-surface-container-highest) 0%, transparent 45%),
+      linear-gradient(
+        to right,
+        var(--mat-sys-surface-container-highest) 0%,
+        var(--mat-sys-surface-container-highest) 32%,
+        transparent 80%
+      );
+  }
+
+  &:hover::before {
     transform: scale(1.06);
   }
-}
-
-@mixin backdrop {
-  position: relative;
-  order: -1;
-  aspect-ratio: 16 / 9;
-  overflow: hidden;
-
-  // Only the backdrop opts out of the grid's default item stretch — it
-  // keeps its own aspect ratio instead of being forced to match whatever
-  // height the (often much taller) foreground column ends up with. Without
-  // this, `object-fit: cover` on the image below had to crop/zoom hard to
-  // fill that mismatched box.
-  @container (min-width: 560px) {
-    order: 1;
-    align-self: start;
-  }
-}
-
-@mixin backdrop-image {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.5s ease;
-
-  // Fades the backdrop into the panel's surface color instead of a
-  // hand-tuned black inset shadow, so it works in both light and dark mode.
-  mask-image: linear-gradient(to bottom, black 40%, transparent 100%);
 
   @container (min-width: 560px) {
-    mask-image: linear-gradient(to right, transparent 0%, black 35%);
+    &::before {
+      background-position: right center;
+    }
   }
 }
 

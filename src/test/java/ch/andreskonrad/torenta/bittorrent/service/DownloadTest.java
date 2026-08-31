@@ -153,6 +153,69 @@ class DownloadTest {
         assertFalse(download.equals(new Object()));
     }
 
+    @Test
+    void fail_mapsFailedStateAndErrorMessage() {
+        CompletableFuture<Void> future = new CompletableFuture<>();
+        Download download = download(1, future);
+        download.setState(state(1, 4, 120));
+
+        download.fail("BtException: no peers");
+        DownloadDto dto = download.mapToDownloadDto();
+
+        assertEquals(DownloadState.FAILED, dto.getState());
+        assertEquals("BtException: no peers", dto.getErrorMessage());
+    }
+
+    @Test
+    void isComplete_onlyTrueWhenAllPiecesAreDownloaded() {
+        Download download = download(1, new CompletableFuture<>());
+
+        assertFalse(download.isComplete());
+
+        download.setState(state(3, 4, 120));
+        assertFalse(download.isComplete());
+
+        download.setState(state(4, 4, 120));
+        assertTrue(download.isComplete());
+    }
+
+    @Test
+    void isComplete_falseWhenPieceCountIsUnknown() {
+        Download download = download(1, new CompletableFuture<>());
+        download.setState(state(0, 0, 120));
+
+        assertFalse(download.isComplete());
+    }
+
+    @Test
+    void mapToDownloadDto_withoutPeersAfterDiscoveryTimeout_isReportedAsFailed() {
+        long startedLongAgo = System.currentTimeMillis() - Download.PEER_DISCOVERY_TIMEOUT_IN_MS - 1000;
+        Download download = new Download(1, new DownloadRequest(), Path.of("downloads"),
+                mock(BtClient.class), new CompletableFuture<>(), startedLongAgo);
+        download.setState(state(0, 0, 120));
+
+        DownloadDto dto = download.mapToDownloadDto();
+
+        assertEquals(DownloadState.FAILED, dto.getState());
+        assertTrue(dto.getErrorMessage().contains("No peers found"));
+    }
+
+    @Test
+    void mapToDownloadDto_withPeersAfterDiscoveryTimeout_staysStarted() {
+        long startedLongAgo = System.currentTimeMillis() - Download.PEER_DISCOVERY_TIMEOUT_IN_MS - 1000;
+        Download download = new Download(1, new DownloadRequest(), Path.of("downloads"),
+                mock(BtClient.class), new CompletableFuture<>(), startedLongAgo);
+        TorrentSessionState state = state(0, 4, 120);
+        when(state.getConnectedPeers()).thenReturn(Set.of(mock(ConnectionKey.class)));
+        download.setState(state);
+        download.setState(state(0, 4, 120));
+
+        DownloadDto dto = download.mapToDownloadDto();
+
+        assertEquals(DownloadState.STARTED, dto.getState());
+        assertNull(dto.getErrorMessage());
+    }
+
     private Download download(int id, CompletableFuture<Void> future) {
         return new Download(id, new DownloadRequest(), Path.of("downloads"), mock(BtClient.class), future);
     }

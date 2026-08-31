@@ -17,6 +17,9 @@
         <mat-icon aria-hidden="true">timelapse</mat-icon>{{ estimatedTimeFinished() }} remaining
       </p>
     }
+    @if (isFailed()) {
+      <p class="meta-line error-line"><mat-icon>error_outline</mat-icon>{{ errorMessage() }}</p>
+    }
     <div class="progress">
       <div
         class="progress-track"

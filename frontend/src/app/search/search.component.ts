@@ -10,7 +10,7 @@ import { DelayedKeyupDirective } from '../shared/delayed-keyup.directive';
 import { SeriesDetailComponent } from '../tmdb/series-detail/series-detail.component';
 import { MovieDetailComponent } from '../tmdb/movie-detail/movie-detail.component';
 import { TorrentSuggestionsComponent } from '../torrent/torrent-suggestions/torrent-suggestions.component';
-import { posterUrl } from '../shared/tmdb-images';
+import { backdropUrl, posterUrl } from '../shared/tmdb-images';
 import { safeValue } from '../shared/resource';
 
 @Component({
@@ -61,8 +61,10 @@ export class SearchComponent {
    * TMDB's rate limit of 40 requests / 10s.
    */
   private readonly openPanels = signal<ReadonlySet<number>>(new Set());
+  private readonly focusedPanel = signal<number | null>(null);
 
   protected readonly posterUrl = posterUrl;
+  protected readonly backdropUrl = backdropUrl;
 
   protected setPanelOpen(id: number, open: boolean): void {
     this.openPanels.update((ids) => {
@@ -78,5 +80,18 @@ export class SearchComponent {
 
   protected isPanelOpen(id: number): boolean {
     return this.openPanels().has(id);
+  }
+
+  protected setPanelFocused(id: number, focused: boolean): void {
+    this.focusedPanel.update((current) => {
+      if (focused) {
+        return id;
+      }
+      return current === id ? null : current;
+    });
+  }
+
+  protected isPanelBackdropVisible(id: number): boolean {
+    return this.isPanelOpen(id) || this.focusedPanel() === id;
   }
 }

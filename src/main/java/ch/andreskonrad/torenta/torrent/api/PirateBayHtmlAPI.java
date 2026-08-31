@@ -6,6 +6,8 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 import org.jsoup.select.Elements;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
@@ -22,6 +24,7 @@ import java.util.List;
 public class PirateBayHtmlAPI implements TorrentProvider {
 
     private static final int MAX_ATTEMPTS = 4;
+    private static final Logger LOGGER = LoggerFactory.getLogger(PirateBayHtmlAPI.class);
 
     private final DocumentFetcher documentFetcher;
 
@@ -66,13 +69,18 @@ public class PirateBayHtmlAPI implements TorrentProvider {
 
     private Document getDocumentWithRetries(TorrentQuery query, int maxAttempts) throws HttpServerErrorException {
         URI uri = query.getPirateBayFrontendSearchURI();
+        IOException lastFailure = null;
         for (int attempt = 0; attempt < maxAttempts; attempt++) {
             try {
                 return documentFetcher.fetch(uri);
-            } catch (IOException ignored) {
+            } catch (IOException exception) {
+                lastFailure = exception;
+                LOGGER.warn("Attempt {}/{} to fetch torrent search results failed: {}",
+                        attempt + 1, maxAttempts, exception.toString());
             }
         }
-        throw new HttpServerErrorException(HttpStatus.BAD_GATEWAY, "Could not connect to piratebay");
+        throw new HttpServerErrorException(HttpStatus.BAD_GATEWAY,
+                "Could not connect to piratebay: " + (lastFailure == null ? "unknown cause" : lastFailure.toString()));
     }
 
     private TorrentEntry parsePiratebayEntry(Element element) {
