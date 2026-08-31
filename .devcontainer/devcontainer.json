@@ -7,14 +7,10 @@
   "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
 
   "features": {
-    // Java 11 (Temurin/Adoptium) - compatible with Gradle 7.2 and Spring Boot 2.2.x.
-    // Using version "11" with jdkDistro "ms" (Microsoft OpenJDK) which is reliably
-    // available via the devcontainers java feature without SDKMAN version pinning.
-    // Java 11 LTS is supported by Gradle 7.2 (supports Java 8-16) and
-    // Spring Boot 2.2.x (requires Java 8+).
+    // Java 25 (Temurin/Adoptium), matching the backend toolchain and CI.
     "ghcr.io/devcontainers/features/java:1": {
-      "version": "11",
-      "jdkDistro": "ms",
+      "version": "25",
+      "jdkDistro": "tem",
       "installMaven": false,
       "installGradle": false
     },
@@ -48,9 +44,7 @@
   "onCreateCommand": "chmod +x ./gradlew || true",
   "postCreateCommand": "if [ -d frontend ]; then cd frontend && npm install; fi",
 
-  // Point Gradle (and IntelliJ Gateway) at the devcontainer-installed JDK 11.
-  // Without this, the host JVM leaks in and Gradle 7.2's embedded Groovy/ASM
-  // chokes on Java 21 class files (major version 65).
+  // Point Gradle and IntelliJ Gateway at the devcontainer-installed JDK 25.
   "remoteEnv": {
     "JAVA_HOME": "/usr/local/sdkman/candidates/java/current",
     "PATH": "/usr/local/sdkman/candidates/java/current/bin:${containerEnv:PATH}"

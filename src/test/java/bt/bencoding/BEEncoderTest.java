@@ -21,7 +21,7 @@ import bt.bencoding.model.BEList;
 import bt.bencoding.model.BEMap;
 import bt.bencoding.model.BEObject;
 import bt.bencoding.model.BEString;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -33,7 +33,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BEEncoderTest {
 

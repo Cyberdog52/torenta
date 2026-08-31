@@ -5,8 +5,8 @@ import bt.data.Storage;
 import bt.data.file.FileSystemStorage;
 import bt.runtime.BtClient;
 import bt.runtime.Config;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,7 +14,7 @@ import java.nio.file.Paths;
 public class BtClientTest {
 
     @Test
-    @Ignore("Manual test, requires a valid magnet link")
+    @Disabled("Manual test, requires a valid magnet link")
     public void manual_btClient_downloadToUserDir() {
 
         Config config = new Config() {

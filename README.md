@@ -3,7 +3,7 @@
 ## Setup
 
 #### Java
-Install Java OpenJDK 11 (the build targets Java 11 — see `sourceCompatibility` in `build.gradle`).
+Install Java OpenJDK 25 (the build uses the Java 25 toolchain configured in `build.gradle`).
 Make sure it is also in the system's path, because gradlew will use the java version that is on the path.
 To see which java version is used, type the following in the terminal:
 
@@ -76,7 +76,7 @@ Will start at http://localhost:4200/
 
 [Swagger UI](http://localhost:8080/swagger-ui.html)
 
-[Swagger Docs](http://localhost:8080/v2/api-docs)
+[OpenAPI Docs](http://localhost:8080/v3/api-docs)
 
 [TMDB](https://developers.themoviedb.org/3/getting-started/introduction)
 
@@ -99,4 +99,3 @@ https://github.com/atomashpolskiy/bittorrent
 https://github.com/pmoor/bitthief
 
 https://github.com/clamarque/HubMovies
-

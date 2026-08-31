@@ -19,17 +19,18 @@ package bt.bencoding;
 import bt.bencoding.model.BEList;
 import bt.bencoding.model.BEObject;
 import bt.bencoding.model.BEString;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 
 import java.math.BigInteger;
 import java.nio.charset.Charset;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static org.junit.Assert.assertArrayEquals;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class BEParserTest {
 
@@ -49,9 +50,9 @@ public class BEParserTest {
         assertEquals("!@#$%^&*()_", parser.readString().getValue(charset));
     }
 
-    @Test(expected = Exception.class)
+    @Test
     public void testParse_String_Exception_EmptyString() {
-        new BEParser("".getBytes());
+        assertThrows(Exception.class, () -> new BEParser("".getBytes()));
     }
 
     @Test
@@ -61,9 +62,9 @@ public class BEParserTest {
         assertEquals(0, string.getValue().length);
     }
 
-    @Test(expected = Exception.class)
+    @Test
     public void testParse_String_Exception_InsufficientContent() {
-        new BEParser("7:abcdef".getBytes()).readString();
+        assertThrows(Exception.class, () -> new BEParser("7:abcdef".getBytes()).readString());
     }
 
     @Test
@@ -80,11 +81,13 @@ public class BEParserTest {
         assertEquals(BigInteger.ONE.negate(), parser.readInteger().getValue());
     }
 
-    @Test(expected = Exception.class)
+    @Test
     public void testParse_Integer_Exception_ZeroLength() {
-        BEParser parser = new BEParser("ie".getBytes());
-        assertEquals(BEType.INTEGER, parser.readType());
-        parser.readInteger();
+        assertThrows(Exception.class, () -> {
+            BEParser parser = new BEParser("ie".getBytes());
+            assertEquals(BEType.INTEGER, parser.readType());
+            parser.readInteger();
+        });
     }
 
     @Test//(expected = Exception.class)
@@ -96,18 +99,22 @@ public class BEParserTest {
         assertEquals(BigInteger.ZERO.negate(), parser.readInteger().getValue());
     }
 
-    @Test(expected = Exception.class)
+    @Test
     public void testParse_Integer_Exception_NotTerminated() {
-        BEParser parser = new BEParser("i1".getBytes());
-        assertEquals(BEType.INTEGER, parser.readType());
-        parser.readInteger();
+        assertThrows(Exception.class, () -> {
+            BEParser parser = new BEParser("i1".getBytes());
+            assertEquals(BEType.INTEGER, parser.readType());
+            parser.readInteger();
+        });
     }
 
-    @Test(expected = Exception.class)
+    @Test
     public void testParse_Integer_Exception_UnexpectedTokens() {
-        BEParser parser = new BEParser("i-1-e".getBytes());
-        assertEquals(BEType.INTEGER, parser.readType());
-        parser.readInteger();
+        assertThrows(Exception.class, () -> {
+            BEParser parser = new BEParser("i-1-e".getBytes());
+            assertEquals(BEType.INTEGER, parser.readType());
+            parser.readInteger();
+        });
     }
 
     @Test
