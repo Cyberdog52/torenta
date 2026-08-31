@@ -61,4 +61,36 @@ it before final acceptance.
 
 | Phase | Angular | Node/npm | Result | Commit |
 | --- | --- | --- | --- | --- |
-| 0 | 6.1.10 | Host audit: 22.19.0 / 10.9.3 | Decisions frozen; Docker 29.7.2 available | Pending |
+| 0 | 6.1.10 | Host audit: 22.19.0 / 10.9.3 | Decisions frozen; Docker 29.7.2 available | `1d5c8f8` |
+| 1 | 6.1.10 | Angular host: 22.19.0 / 10.9.3; Playwright target: Node 24 | 12 desktop/mobile characterization tests pass; legacy AOT defect recorded | This phase commit |
+
+## Angular 6 Baseline
+
+Recorded on 2026-08-31 before dependency normalization:
+
+- Routes: `/` redirects to `/search`; `/search`, `/downloads`, and
+  `/preferences` are eager routes; unknown routes render the not-found page.
+- API: the development server proxies `/api/*` to `http://localhost:8080`.
+- Environments: production replaces `src/environments/environment.ts` with
+  `src/environments/environment.prod.ts`.
+- Output: the legacy browser builder writes to `frontend/dist/frontend`.
+- `npm ci --ignore-scripts` completes on the unsupported Node 22 host and reports
+  144 known legacy dependency vulnerabilities (8 low, 30 moderate, 80 high, 26
+  critical). These are addressed through the planned upgrades, not `npm audit fix`.
+- TSLint passes on the Node 22 host.
+- Karma runs three tests successfully on the Node 22 host when webpack 4 is
+  given the temporary `NODE_OPTIONS=--openssl-legacy-provider` compatibility
+  option.
+- The production AOT build reaches template compilation with that compatibility
+  option, then fails because
+  `download-detail.component.html` binds `[mode]="determinate"` to an undeclared
+  property. The Angular 6 normalization phase will correct this to a literal.
+- Without the temporary OpenSSL option, build and test fail before compilation
+  because webpack 4 uses an OpenSSL algorithm disabled by modern Node versions.
+- Docker is usable, but Docker Hub Node image pulls are blocked by invalid daemon
+  registry credentials. A cached Microsoft Node 24 image is available; exact
+  historical runtime verification remains pending.
+- The independent Playwright suite passes 12 tests across desktop and mobile
+  Chromium. It covers navigation, preferences, direct torrent downloads,
+  movie/series expansion, delayed keyup, polling order, completion, and
+  notifications. Test screenshots are retained as ignored run artifacts.

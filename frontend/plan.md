@@ -49,25 +49,25 @@ Status: In progress
 
 ## Phase 1: Behavioral Baseline
 
-- [ ] Record the current Node, npm, Angular CLI, TypeScript, RxJS, Material, CDK, and Sass versions.
-- [ ] Archive the current `package-lock.json` and record that it uses lockfile version 3.
-- [ ] Record the exact installed dependency tree with `npm ls` and preserve any known errors.
-- [ ] Produce and archive the current production build, or document why it cannot be built.
-- [ ] Record all current lint, unit-test, and Protractor results without hiding pre-existing failures.
-- [ ] Document the current routes, API endpoints, proxy behavior, environment files, and build output layout.
-- [ ] Create a Playwright harness that runs independently under Node 24 rather than inside the Angular 6 dependency tree.
-- [ ] Add deterministic API mocks for repeatable browser tests.
+- [x] Record the current Node, npm, Angular CLI, TypeScript, RxJS, Material, CDK, and Sass versions.
+- [x] Archive the current `package-lock.json` in Git and record that it uses lockfile version 3.
+- [x] Record the exact installed dependency tree with `npm ls` and preserve any known errors.
+- [x] Produce and archive the current production build, or document why it cannot be built.
+- [x] Record all current lint, unit-test, and Protractor results without hiding pre-existing failures.
+- [x] Document the current routes, API endpoints, proxy behavior, environment files, and build output layout.
+- [x] Create a Playwright harness that runs independently under Node 24 rather than inside the Angular 6 dependency tree.
+- [x] Add deterministic API mocks for repeatable browser tests.
 - [ ] Add a separate optional API-backed smoke suite for environments with credentials.
-- [ ] Add characterization coverage for search.
-- [ ] Add characterization coverage for movie and series expansion.
-- [ ] Add characterization coverage for preferences load and save.
-- [ ] Add characterization coverage for starting a torrent.
-- [ ] Add characterization coverage for torrent polling and downloads.
-- [ ] Add characterization coverage for notifications.
-- [ ] Add characterization coverage for routing and direct navigation.
-- [ ] Add characterization coverage for delayed keyup behavior.
-- [ ] Capture desktop and mobile screenshots of Material-heavy screens.
-- [ ] Verify the baseline Playwright suite against the Angular 6 application.
+- [x] Add characterization coverage for search.
+- [x] Add characterization coverage for movie and series expansion.
+- [x] Add characterization coverage for preferences load and save.
+- [x] Add characterization coverage for starting a torrent.
+- [x] Add characterization coverage for torrent polling and downloads.
+- [x] Add characterization coverage for notifications.
+- [x] Add characterization coverage for routing and direct navigation.
+- [x] Add characterization coverage for delayed keyup behavior.
+- [x] Capture desktop and mobile screenshots of Material-heavy screens as Playwright run artifacts.
+- [x] Verify the baseline Playwright suite against the Angular 6 application.
 
 ## Phase 2: Normalize Angular 6
 
