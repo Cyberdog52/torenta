@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, effect, inject, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -13,6 +13,10 @@ import { MovieDetailComponent } from '../tmdb/movie-detail/movie-detail.componen
 import { TorrentSuggestionsComponent } from '../torrent/torrent-suggestions/torrent-suggestions.component';
 import { backdropUrl, posterUrl } from '../shared/tmdb-images';
 import { safeValue } from '../shared/resource';
+import { NotificationService } from '../shared/notification/notification.service';
+import { NotificationType } from '../shared/dto/notification/Notification';
+
+const TMDB_KEY_ERROR_MESSAGE = 'Set your TMDB service key in Preferences to start using Torenta.';
 
 @Component({
   selector: 'app-search',
@@ -34,6 +38,7 @@ import { safeValue } from '../shared/resource';
 })
 export class SearchComponent {
   private readonly searchService = inject(SearchService);
+  private readonly notificationService = inject(NotificationService);
 
   protected readonly seriesQuery = signal('');
   protected readonly movieQuery = signal('');
@@ -42,15 +47,20 @@ export class SearchComponent {
   protected readonly seriesSearch = this.searchService.searchSeriesResource(this.seriesQuery);
   protected readonly movieSearch = this.searchService.searchMoviesResource(this.movieQuery);
 
-  protected readonly seriesError = computed(() => {
-    const err = this.seriesSearch.error();
-    return err instanceof HttpErrorResponse && err.status === 412 ? err : null;
-  });
-
-  protected readonly movieError = computed(() => {
-    const err = this.movieSearch.error();
-    return err instanceof HttpErrorResponse && err.status === 412 ? err : null;
-  });
+  constructor() {
+    effect(() => {
+      const err = this.seriesSearch.error();
+      if (err instanceof HttpErrorResponse && err.status === 412) {
+        this.notificationService.notify({ content: TMDB_KEY_ERROR_MESSAGE, type: NotificationType.ERROR });
+      }
+    });
+    effect(() => {
+      const err = this.movieSearch.error();
+      if (err instanceof HttpErrorResponse && err.status === 412) {
+        this.notificationService.notify({ content: TMDB_KEY_ERROR_MESSAGE, type: NotificationType.ERROR });
+      }
+    });
+  }
 
   /**
    * Sorted copies, computed with `toSorted` so the underlying resource value
