@@ -68,10 +68,3 @@ Angular 6 SPA under `frontend/src/app/`. Feature folders each have components an
 (dev proxy in `frontend/proxy.conf.json`). Shared DTO interfaces in
 `frontend/src/app/shared/dto/**` **mirror the backend DTOs** — keep them in sync when changing an
 endpoint (`AI_RULES.md §3.5`).
-
-## Configuration
-
-Runtime config (TMDB key, etc.) is injected via `@Value("${...}")` from
-`application.properties`, which is **protected and never committed**. Use
-`application-template.properties` for placeholder values. See `AI_RULES.md §1` for the full list
-of protected files.

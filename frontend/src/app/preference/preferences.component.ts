@@ -57,4 +57,15 @@ export class PreferencesComponent {
       preferences == null ? preferences : { ...preferences, downloadDirectoryPath },
     );
   }
+
+  protected setTmdbServiceKey(tmdbServiceKey: string): void {
+    this.userPreferences.update((preferences) =>
+      preferences == null
+        ? preferences
+        : {
+            ...preferences,
+            tmdbServiceKey: tmdbServiceKey || null,
+          },
+    );
+  }
 }

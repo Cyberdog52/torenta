@@ -50,6 +50,7 @@ class PreferenceControllerTest {
         ArgumentCaptor<UserPreference> captor = ArgumentCaptor.forClass(UserPreference.class);
         verify(preferenceService).save(captor.capture());
         assertEquals("/media/downloads", captor.getValue().getDownloadDirectoryPath());
+        assertEquals(null, captor.getValue().getTmdbServiceKey());
     }
 
     @Test
@@ -69,11 +70,12 @@ class PreferenceControllerTest {
     @Test
     void get_returnsPreferences() throws Exception {
         when(preferenceService.loadPreferences())
-                .thenReturn(new UserPreference("/media/downloads"));
+                .thenReturn(new UserPreference("/media/downloads", "tmdb-key"));
 
         mockMvc.perform(get("/api/preference"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.downloadDirectoryPath").value("/media/downloads"));
+                .andExpect(jsonPath("$.downloadDirectoryPath").value("/media/downloads"))
+                .andExpect(jsonPath("$.tmdbServiceKey").value("tmdb-key"));
     }
 
     @Test

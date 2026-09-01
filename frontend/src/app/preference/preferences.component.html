@@ -14,6 +14,19 @@
           (ngModelChange)="setDownloadDirectoryPath($event)"
         />
       </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>TMDB service key</mat-label>
+        <input
+          matInput
+          name="tmdbServiceKey"
+          type="text"
+          [ngModel]="preferences.tmdbServiceKey"
+          (ngModelChange)="setTmdbServiceKey($event)"
+        />
+        @if (!preferences.tmdbServiceKey) {
+          <mat-hint>get your own key at https://www.themoviedb.org/documentation/api</mat-hint>
+        }
+      </mat-form-field>
     </mat-card-content>
     <mat-card-actions>
       <button matButton="elevated" (click)="savePreferences()">Save</button>
