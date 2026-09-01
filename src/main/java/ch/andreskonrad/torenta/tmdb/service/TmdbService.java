@@ -1,6 +1,7 @@
 package ch.andreskonrad.torenta.tmdb.service;
 
 import ch.andreskonrad.torenta.CustomCacheConfig;
+import ch.andreskonrad.torenta.preference.dto.UserPreference;
 import ch.andreskonrad.torenta.preference.service.PreferenceService;
 import ch.andreskonrad.torenta.tmdb.dto.*;
 import tools.jackson.databind.ObjectMapper;
@@ -104,10 +105,17 @@ public class TmdbService {
     }
 
     private UriComponentsBuilder getDefaultComponentsBuilder() {
+        UserPreference preferences = preferenceService.loadPreferences();
+        String tmdbServiceKey = preferences == null ? null : preferences.getTmdbServiceKey();
+
+        if (tmdbServiceKey == null || tmdbServiceKey.isBlank()) {
+            throw new IllegalStateException("TmdbKey is null");
+        }
+
         return UriComponentsBuilder.newInstance()
                 .scheme(SCHEME)
                 .host(HOST)
-                .queryParam("api_key", preferenceService.loadPreferences().getTmdbServiceKey())
+                .queryParam("api_key", tmdbServiceKey)
                 .queryParam("language", "en-US");
     }
 

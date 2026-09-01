@@ -126,19 +126,32 @@ class TmdbControllerTest {
     }
 
     @Test
-    void serviceFailures_returnNotFoundForEveryEndpoint() throws Exception {
-        when(tmdbService.searchSeries("broken")).thenThrow(new IllegalStateException("failure"));
-        when(tmdbService.searchMovies("broken")).thenThrow(new IllegalStateException("failure"));
+    void searchEndpoints_returnPreconditionFailedForIllegalStateAndNotFoundForOtherFailures() throws Exception {
+        when(tmdbService.searchSeries("broken-series")).thenThrow(new IllegalStateException("failure"));
+        when(tmdbService.searchMovies("broken-movie")).thenThrow(new IllegalStateException("failure"));
+        when(tmdbService.searchSeries("missing-series")).thenThrow(new RuntimeException("failure"));
+        when(tmdbService.searchMovies("missing-movie")).thenThrow(new RuntimeException("failure"));
+
+        mockMvc.perform(get("/api/tmdb/tv").queryParam("search", "broken-series"))
+                .andExpect(status().isPreconditionFailed())
+                .andExpect(content().string(""));
+        mockMvc.perform(get("/api/tmdb/movie").queryParam("search", "broken-movie"))
+                .andExpect(status().isPreconditionFailed())
+                .andExpect(content().string(""));
+        mockMvc.perform(get("/api/tmdb/tv").queryParam("search", "missing-series"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(""));
+        mockMvc.perform(get("/api/tmdb/movie").queryParam("search", "missing-movie"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(""));
+    }
+
+    @Test
+    void detailEndpoints_returnNotFoundForFailures() throws Exception {
         when(tmdbService.getSeries(1402)).thenThrow(new IllegalStateException("failure"));
-        when(tmdbService.getMovie(550)).thenThrow(new IllegalStateException("failure"));
+        when(tmdbService.getMovie(550)).thenThrow(new RuntimeException("failure"));
         when(tmdbService.getEpisodes(1402, 1)).thenThrow(new IllegalStateException("failure"));
 
-        mockMvc.perform(get("/api/tmdb/tv").queryParam("search", "broken"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string(""));
-        mockMvc.perform(get("/api/tmdb/movie").queryParam("search", "broken"))
-                .andExpect(status().isNotFound())
-                .andExpect(content().string(""));
         mockMvc.perform(get("/api/tmdb/tv/{id}", 1402))
                 .andExpect(status().isNotFound())
                 .andExpect(content().string(""));

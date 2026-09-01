@@ -17,6 +17,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -151,6 +152,16 @@ class TmdbServiceTest {
         TmdbService service = new TmdbService(preferenceService(), failingTransport, new ObjectMapper());
 
         assertNull(service.getMovie(550));
+    }
+
+    @Test
+    void missingTmdbKey_throwsException() {
+        PreferenceService missingKeyService = mock(PreferenceService.class);
+        when(missingKeyService.loadPreferences()).thenReturn(new UserPreference(null, null));
+        TmdbService service = new TmdbService(missingKeyService, _ -> "{}", new ObjectMapper());
+
+        IllegalStateException exception = assertThrows(IllegalStateException.class, () -> service.searchSeries("anything"));
+        assertEquals("TmdbKey is null", exception.getMessage());
     }
 
     @Test

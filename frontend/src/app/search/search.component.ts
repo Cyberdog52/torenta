@@ -1,12 +1,14 @@
 import {
   ChangeDetectionStrategy,
   Component,
-  WritableSignal,
   computed,
+  effect,
   inject,
   signal,
+  WritableSignal,
 } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -27,8 +29,12 @@ import { TmdbSeriesDetailDto } from '../shared/dto/tmdb/TmdbSeriesDetailDto';
 import { TmdbMovieDetailDto } from '../shared/dto/tmdb/TmdbMovieDetailDto';
 import { DirectoryDto } from '../shared/dto/directory/DirectoryDto';
 import { OverviewPopoverComponent } from '../tmdb/overview-popover/overview-popover.component';
+import { NotificationService } from '../shared/notification/notification.service';
+import { NotificationType } from '../shared/dto/notification/Notification';
 
 type MediaKind = 'series' | 'movie';
+
+const TMDB_KEY_ERROR_MESSAGE = 'Set your TMDB service key in Preferences to start using Torenta.';
 
 @Component({
   selector: 'app-search',
@@ -54,6 +60,7 @@ type MediaKind = 'series' | 'movie';
 })
 export class SearchComponent {
   private readonly searchService = inject(SearchService);
+  private readonly notificationService = inject(NotificationService);
 
   protected readonly seriesQuery = signal('');
   protected readonly movieQuery = signal('');
@@ -64,6 +71,35 @@ export class SearchComponent {
 
   protected readonly seriesSearch = this.searchService.searchSeriesResource(this.seriesQuery);
   protected readonly movieSearch = this.searchService.searchMoviesResource(this.movieQuery);
+
+  constructor() {
+    effect(() => {
+      const err = this.seriesSearch.error();
+      if (err instanceof HttpErrorResponse && err.status === 412) {
+        this.notificationService.notify({
+          content: TMDB_KEY_ERROR_MESSAGE,
+          type: NotificationType.ERROR,
+        });
+      }
+    });
+    effect(() => {
+      const err = this.movieSearch.error();
+      if (err instanceof HttpErrorResponse && err.status === 412) {
+        this.notificationService.notify({
+          content: TMDB_KEY_ERROR_MESSAGE,
+          type: NotificationType.ERROR,
+        });
+      }
+    });
+
+    // Lets other pages (e.g. Recommendations) deep-link into a series search,
+    // for example `/search?series=The%20Office`.
+    const seriesName = inject(ActivatedRoute).snapshot.queryParamMap.get('series');
+    if (seriesName) {
+      this.seriesInputValue.set(seriesName);
+      this.seriesQuery.set(seriesName);
+    }
+  }
 
   /**
    * Sorted copies, computed with `toSorted` so the underlying resource value
@@ -99,16 +135,6 @@ export class SearchComponent {
 
   protected readonly posterUrl = posterUrl;
   protected readonly backdropUrl = backdropUrl;
-
-  constructor() {
-    // Lets other pages (e.g. Recommendations) deep-link into a series search,
-    // for example `/search?series=The%20Office`.
-    const seriesName = inject(ActivatedRoute).snapshot.queryParamMap.get('series');
-    if (seriesName) {
-      this.seriesInputValue.set(seriesName);
-      this.seriesQuery.set(seriesName);
-    }
-  }
 
   protected updateInputValue(value: WritableSignal<string>, input: HTMLInputElement): void {
     value.set(input.value);

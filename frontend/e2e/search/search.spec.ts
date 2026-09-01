@@ -47,6 +47,16 @@ test('shows search results and renders series detail without crashing', async ({
     await route.fulfill({ status: 204 });
   });
 
+  // Without a stored TMDB key the app redirects to /preferences. Mock the
+  // preference endpoint so the key is always present on CI.
+  await page.route('**/api/preference', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({ json: { downloadDirectoryPath: '/tmp', tmdbServiceKey: 'test-key' } });
+    } else {
+      await route.continue();
+    }
+  });
+
   // The backend proxies TV search/detail to the real TMDB API, which needs a
   // valid API key. CI only ever configures a placeholder key (see
   // `playwright.config.ts`), so TMDB always rejects it and the backend
