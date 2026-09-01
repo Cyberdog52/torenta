@@ -38,9 +38,6 @@
   },
 
   // Make gradlew executable and install frontend deps on first create.
-  // NOTE: You must still create src/main/resources/application.properties
-  // from the template and add your own TMDB API key - it is intentionally
-  // NOT committed and NOT auto-generated here.
   "onCreateCommand": "chmod +x ./gradlew || true",
   "postCreateCommand": "if [ -d frontend ]; then cd frontend && npm install; fi",
 
