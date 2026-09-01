@@ -1,4 +1,4 @@
-.weeks-field {
+.days-field {
   width: 100%;
   max-width: 420px;
   // No bottom margin needed: the plain-text hint below is in normal flow and
@@ -6,7 +6,7 @@
   // single line and overflows/collides with wrapped, multi-line text).
 }
 
-.weeks-hint {
+.days-hint {
   margin: 4px 0 16px;
   color: var(--mat-sys-on-surface-variant);
   font-size: 0.75rem;
@@ -43,19 +43,19 @@
 
 .recommendation-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(420px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(640px, 100%), 1fr));
   gap: 16px;
 }
 
 .series-card {
   display: flex;
-  gap: 12px;
-  padding: 12px;
+  gap: 16px;
+  padding: 16px;
 }
 
 .poster {
-  width: 92px;
-  height: 138px;
+  width: 120px;
+  height: 180px;
   object-fit: cover;
   border-radius: 4px;
   flex-shrink: 0;
@@ -80,7 +80,7 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 6px;
 }
 
 .episode-string {

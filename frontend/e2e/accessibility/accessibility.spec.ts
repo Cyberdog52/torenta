@@ -25,6 +25,12 @@ test('downloads page has no detectable accessibility violations', async ({ page 
   await expectNoViolations(page);
 });
 
+test('recommendations page has no detectable accessibility violations', async ({ page }) => {
+  await page.goto('/recommendations');
+  await expect(page.getByLabel(/Only rescan series touched in the last/)).toBeVisible();
+  await expectNoViolations(page);
+});
+
 test('preferences page has no detectable accessibility violations', async ({ page }) => {
   await page.goto('/preferences');
   await expect(page.getByLabel('Root folder for downloads')).toBeVisible();

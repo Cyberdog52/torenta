@@ -23,10 +23,10 @@ public class RecommendationController {
 
     @GetMapping
     public ResponseEntity<RecommendationResultDto> getRecommendations(
-            @RequestParam(name = "weeks", defaultValue = "" + RecommendationService.DEFAULT_WEEKS_BACK) int weeks) {
+            @RequestParam(name = "days", defaultValue = "" + RecommendationService.DEFAULT_DAYS_BACK) int days) {
         RecommendationResultDto recommendations;
         try {
-            recommendations = recommendationService.getRecommendations(weeks);
+            recommendations = recommendationService.getRecommendations(days);
         } catch (Exception exception) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

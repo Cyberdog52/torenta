@@ -3,7 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { provideRouter } from '@angular/router';
 import { RecommendationComponent } from './recommendation.component';
-import { DEFAULT_RECOMMENDATION_WEEKS } from './recommendation.service';
+import { DEFAULT_RECOMMENDATION_DAYS } from './recommendation.service';
 import { RecommendationResult } from '../shared/dto/recommendation/RecommendationResult';
 import { SeriesRecommendation } from '../shared/dto/recommendation/SeriesRecommendation';
 import { RecommendedEpisode } from '../shared/dto/recommendation/RecommendedEpisode';
@@ -32,15 +32,15 @@ describe('RecommendationComponent', () => {
     }).compileComponents();
   });
 
-  it('requests recommendations for the default number of weeks', async () => {
+  it('requests recommendations for the default number of days', async () => {
     const fixture = TestBed.createComponent(RecommendationComponent);
     fixture.detectChanges();
 
     const httpTesting = TestBed.inject(HttpTestingController);
     const request = httpTesting.expectOne(
-      (r) => r.url === 'api/recommendation' && r.params.get('weeks') !== null,
+      (r) => r.url === 'api/recommendation' && r.params.get('days') !== null,
     );
-    expect(request.request.params.get('weeks')).toBe(String(DEFAULT_RECOMMENDATION_WEEKS));
+    expect(request.request.params.get('days')).toBe(String(DEFAULT_RECOMMENDATION_DAYS));
     request.flush(result());
     await fixture.whenStable();
 
@@ -122,7 +122,7 @@ describe('RecommendationComponent', () => {
     httpTesting.verify();
   });
 
-  it('re-requests with the updated weeks value when the input changes', async () => {
+  it('re-requests with the updated days value when the input changes', async () => {
     const fixture = TestBed.createComponent(RecommendationComponent);
     fixture.detectChanges();
 
@@ -132,23 +132,23 @@ describe('RecommendationComponent', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const input = compiled.querySelector<HTMLInputElement>('input[name="weeks"]');
+    const input = compiled.querySelector<HTMLInputElement>('input[name="days"]');
     if (input == null) {
-      throw new Error('Weeks input not found');
+      throw new Error('Days input not found');
     }
     input.value = '4';
     input.dispatchEvent(new Event('change'));
     fixture.detectChanges();
 
     const request = httpTesting.expectOne((r) => r.url === 'api/recommendation');
-    expect(request.request.params.get('weeks')).toBe('4');
+    expect(request.request.params.get('days')).toBe('4');
     request.flush(result());
     await fixture.whenStable();
 
     httpTesting.verify();
   });
 
-  it('accepts 0 weeks (scan entire library) from the input', async () => {
+  it('accepts 0 days (scan entire library) from the input', async () => {
     const fixture = TestBed.createComponent(RecommendationComponent);
     fixture.detectChanges();
 
@@ -158,9 +158,9 @@ describe('RecommendationComponent', () => {
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    const input = compiled.querySelector<HTMLInputElement>('input[name="weeks"]');
+    const input = compiled.querySelector<HTMLInputElement>('input[name="days"]');
     if (input == null) {
-      throw new Error('Weeks input not found');
+      throw new Error('Days input not found');
     }
     input.value = '4';
     input.dispatchEvent(new Event('change'));
@@ -174,7 +174,7 @@ describe('RecommendationComponent', () => {
     fixture.detectChanges();
 
     const request = httpTesting.expectOne((r) => r.url === 'api/recommendation');
-    expect(request.request.params.get('weeks')).toBe('0');
+    expect(request.request.params.get('days')).toBe('0');
     request.flush(result());
     await fixture.whenStable();
 

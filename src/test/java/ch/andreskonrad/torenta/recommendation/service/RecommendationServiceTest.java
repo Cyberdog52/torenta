@@ -55,16 +55,16 @@ public class RecommendationServiceTest {
     }
 
     @Test
-    public void getRecommendations_passesWeeksAsDurationToDirectoryService() {
+    public void getRecommendations_passesDaysAsDurationToDirectoryService() {
         when(directoryService.getSeriesNamesModifiedWithin(any())).thenReturn(List.of());
 
         recommendationService.getRecommendations(3);
 
-        verify(directoryService).getSeriesNamesModifiedWithin(Duration.ofDays(21));
+        verify(directoryService).getSeriesNamesModifiedWithin(Duration.ofDays(3));
     }
 
     @Test
-    public void getRecommendations_zeroWeeks_scansEntireLibraryIgnoringRecency() {
+    public void getRecommendations_zeroDays_scansEntireLibraryIgnoringRecency() {
         when(directoryService.getAllSeriesNames()).thenReturn(List.of());
 
         RecommendationResultDto result = recommendationService.getRecommendations(0);
@@ -75,7 +75,7 @@ public class RecommendationServiceTest {
     }
 
     @Test
-    public void getRecommendations_negativeWeeks_scansEntireLibraryIgnoringRecency() {
+    public void getRecommendations_negativeDays_scansEntireLibraryIgnoringRecency() {
         when(directoryService.getAllSeriesNames()).thenReturn(List.of());
 
         recommendationService.getRecommendations(-1);

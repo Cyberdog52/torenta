@@ -63,7 +63,7 @@ reformat, or clean it up** — only touch it for a deliberate, user-approved int
 4. **Library** — completed media is surfaced through `LibraryService`/`DirectoryService`.
 5. **Recommend** — the Recommendations page calls `RecommendationController` →
    `RecommendationService`, which by default lists series folders under
-   `<download-root>/Series` touched within the last 2 weeks (`weeks` query param; `0` scans the
+   `<download-root>/Series` touched within the last 14 days (`days` query param; `0` scans the
    whole library instead). The filter checks *directory* mtimes, not file mtimes — BitTorrent
    downloads and archive extraction routinely preserve old file timestamps — via
    `DirectoryService.getSeriesNamesModifiedWithin`/`getAllSeriesNames`, trading completeness for

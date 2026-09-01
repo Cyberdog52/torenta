@@ -3,18 +3,18 @@
     <h1 mat-card-title>Recommendations</h1>
   </mat-card-header>
   <mat-card-content>
-    <mat-form-field appearance="outline" class="weeks-field">
-      <mat-label>Only rescan series touched in the last (weeks, 0 = entire library)</mat-label>
+    <mat-form-field appearance="outline" class="days-field">
+      <mat-label>Only rescan series touched in the last (days, 0 = entire library)</mat-label>
       <input
         matInput
-        name="weeks"
+        name="days"
         type="number"
         min="0"
-        [value]="weeks()"
-        (change)="setWeeks($any($event.target))"
+        [value]="days()"
+        (change)="setDays($any($event.target))"
       />
     </mat-form-field>
-    <p class="weeks-hint">0 scans your whole library; set a number to speed up large libraries.</p>
+    <p class="days-hint">0 scans your whole library; set a number to speed up large libraries.</p>
 
     <p class="visually-hidden" aria-live="polite">
       {{ recommendations().length }} series with missing episodes.
@@ -51,18 +51,24 @@
           <div class="series-body">
             <h2 class="series-name">{{ recommendation.seriesName }}</h2>
             <ul class="episode-list">
-              @for (episode of recommendation.recommendedEpisodes; track episode.episodeString) {
+              @for (
+                episode of recommendation.recommendedEpisodes;
+                track episode.episodeString;
+                let first = $first
+              ) {
                 <li>
                   <span class="episode-string">{{ episode.episodeString }}</span>
                   <span class="episode-name">{{ episode.name }}</span>
                   <span class="episode-air-date">({{ episode.airDate }})</span>
+                  @if (first) {
+                    <app-series-torrents
+                      [seriesDetail]="recommendation.seriesDetail"
+                      [episode]="episode"
+                    />
+                  }
                 </li>
               }
             </ul>
-            <app-series-torrents
-              [seriesDetail]="recommendation.seriesDetail"
-              [episode]="recommendation.recommendedEpisodes[0]"
-            />
             <a
               matButton="elevated"
               [routerLink]="['/search']"
@@ -79,10 +85,10 @@
           <p class="empty-subtitle">
             @if (seriesConsidered() === 0) {
               No series folders were found to scan.
-              @if (weeks() !== 0) {
-                Set the weeks field to 0 to scan your entire library.
+              @if (days() !== 0) {
+                Set the days field to 0 to scan your entire library.
               }
-            } @else if (weeks() === 0) {
+            } @else if (days() === 0) {
               No missing aired episodes found across the {{ seriesConsidered() }} series folder{{
                 seriesConsidered() === 1 ? '' : 's'
               }}
@@ -91,8 +97,8 @@
               No missing aired episodes found in the {{ seriesConsidered() }} series folder{{
                 seriesConsidered() === 1 ? '' : 's'
               }}
-              touched in the last {{ weeks() }} week{{ weeks() === 1 ? '' : 's' }}. Set the weeks
-              field to 0 to scan your entire library.
+              touched in the last {{ days() }} day{{ days() === 1 ? '' : 's' }}. Set the days field
+              to 0 to scan your entire library.
             }
           </p>
         </div>

@@ -12,7 +12,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
-import { RecommendationService, DEFAULT_RECOMMENDATION_WEEKS } from './recommendation.service';
+import { RecommendationService, DEFAULT_RECOMMENDATION_DAYS } from './recommendation.service';
 import { SeriesTorrentsComponent } from './series-torrents/series-torrents.component';
 import { safeValue } from '../shared/resource';
 import { posterUrl } from '../shared/tmdb-images';
@@ -39,14 +39,14 @@ export class RecommendationComponent {
   private readonly notificationService = inject(NotificationService);
 
   /**
-   * How far back (in weeks) a series folder must have been touched to still
+   * How far back (in days) a series folder must have been touched to still
    * be considered for recommendations, keeping the scan fast for large
    * libraries. `0` means "no filter": scan the whole library.
    */
-  protected readonly weeks = signal(DEFAULT_RECOMMENDATION_WEEKS);
+  protected readonly days = signal(DEFAULT_RECOMMENDATION_DAYS);
 
   private readonly recommendationsResource = this.recommendationService.recommendationsResource(
-    this.weeks,
+    this.days,
   );
 
   protected readonly result = computed(() => safeValue(this.recommendationsResource));
@@ -74,10 +74,10 @@ export class RecommendationComponent {
     });
   }
 
-  protected setWeeks(input: HTMLInputElement): void {
+  protected setDays(input: HTMLInputElement): void {
     const value = Number(input.value);
     if (Number.isFinite(value) && value >= 0) {
-      this.weeks.set(Math.trunc(value));
+      this.days.set(Math.trunc(value));
     }
   }
 }

@@ -38,13 +38,13 @@ class RecommendationControllerTest {
         // trailing-slash matching by default) and 404s for the exact path the frontend calls.
         when(recommendationService.getRecommendations(0)).thenReturn(new RecommendationResultDto(0, List.of(), List.of()));
 
-        mockMvc.perform(get("/api/recommendation").param("weeks", "0"))
+        mockMvc.perform(get("/api/recommendation").param("days", "0"))
                 .andExpect(status().isOk());
     }
 
     @Test
-    void get_defaultsWeeksToTwo() throws Exception {
-        when(recommendationService.getRecommendations(2)).thenReturn(new RecommendationResultDto(0, List.of(), List.of()));
+    void get_defaultsDaysToFourteen() throws Exception {
+        when(recommendationService.getRecommendations(14)).thenReturn(new RecommendationResultDto(0, List.of(), List.of()));
 
         mockMvc.perform(get("/api/recommendation"))
                 .andExpect(status().isOk());
@@ -57,7 +57,7 @@ class RecommendationControllerTest {
                 List.of("Ambiguous Show"),
                 List.of()));
 
-        mockMvc.perform(get("/api/recommendation").param("weeks", "3"))
+        mockMvc.perform(get("/api/recommendation").param("days", "3"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.seriesConsidered").value(5))
                 .andExpect(jsonPath("$.unresolvedSeriesNames[0]").value("Ambiguous Show"));
@@ -65,7 +65,7 @@ class RecommendationControllerTest {
 
     @Test
     void get_serviceFailureReturnsInternalServerError() throws Exception {
-        when(recommendationService.getRecommendations(2)).thenThrow(new IllegalStateException("failure"));
+        when(recommendationService.getRecommendations(14)).thenThrow(new IllegalStateException("failure"));
 
         mockMvc.perform(get("/api/recommendation"))
                 .andExpect(status().isInternalServerError());
