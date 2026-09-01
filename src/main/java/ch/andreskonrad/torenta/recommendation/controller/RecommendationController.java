@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/recommendation/")
+@RequestMapping("/api/recommendation")
 public class RecommendationController {
 
     private final RecommendationService recommendationService;
