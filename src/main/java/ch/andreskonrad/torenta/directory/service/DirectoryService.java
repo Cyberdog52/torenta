@@ -128,10 +128,10 @@ public class DirectoryService {
         if (!Files.isDirectory(path)) {
             try {
                 Files.createDirectory(path);
-                LOGGER.info("Created directory", path);
+                LOGGER.info("Created directory {}", path);
                 return true;
             } catch (IOException e) {
-                e.printStackTrace();
+                LOGGER.warn("Couldn't create directory {}", path, e);
                 return false;
             }
         }

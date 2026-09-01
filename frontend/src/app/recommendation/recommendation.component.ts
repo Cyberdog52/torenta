@@ -7,6 +7,7 @@ import {
   signal,
 } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -18,6 +19,8 @@ import { safeValue } from '../shared/resource';
 import { backdropUrl } from '../shared/tmdb-images';
 import { NotificationService } from '../shared/notification/notification.service';
 import { NotificationType } from '../shared/dto/notification/Notification';
+
+const TMDB_KEY_ERROR_MESSAGE = 'Set your TMDB service key in Preferences to start using Torenta.';
 
 @Component({
   selector: 'app-recommendation',
@@ -63,14 +66,23 @@ export class RecommendationComponent {
 
   constructor() {
     effect(() => {
-      if (this.recommendationsResource.error()) {
-        this.notificationService.notify({
-          content: 'Recommendations could not be loaded.',
-          // Shown as a toast: recommendations are a convenience feature, not
-          // critical enough to warrant the persistent error banner.
-          type: NotificationType.INFO,
-        });
+      const err = this.recommendationsResource.error();
+      if (!err) {
+        return;
       }
+      if (err instanceof HttpErrorResponse && err.status === 412) {
+        this.notificationService.notify({
+          content: TMDB_KEY_ERROR_MESSAGE,
+          type: NotificationType.ERROR,
+        });
+        return;
+      }
+      this.notificationService.notify({
+        content: 'Recommendations could not be loaded.',
+        // Shown as a toast: recommendations are a convenience feature, not
+        // critical enough to warrant the persistent error banner.
+        type: NotificationType.INFO,
+      });
     });
   }
 

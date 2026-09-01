@@ -73,6 +73,15 @@ class LibraryControllerTest {
     }
 
     @Test
+    void seriesNotInLibrary_returnsNotFound() throws Exception {
+        when(libraryService.getSeriesInLibrary("Not Downloaded")).thenReturn(null);
+
+        mockMvc.perform(get("/api/library/tv/{seriesName}", "Not Downloaded"))
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(""));
+    }
+
+    @Test
     void serviceFailure_returnsInternalServerError() throws Exception {
         when(libraryService.getSeriesInLibrary("Broken Series"))
                 .thenThrow(new IllegalStateException("failure"));

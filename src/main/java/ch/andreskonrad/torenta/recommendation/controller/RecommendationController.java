@@ -2,6 +2,7 @@ package ch.andreskonrad.torenta.recommendation.controller;
 
 import ch.andreskonrad.torenta.recommendation.dto.RecommendationResultDto;
 import ch.andreskonrad.torenta.recommendation.service.RecommendationService;
+import ch.andreskonrad.torenta.tmdb.service.MissingTmdbKeyException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,6 +28,8 @@ public class RecommendationController {
         RecommendationResultDto recommendations;
         try {
             recommendations = recommendationService.getRecommendations(days);
+        } catch (MissingTmdbKeyException exception) {
+            return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         } catch (Exception exception) {
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

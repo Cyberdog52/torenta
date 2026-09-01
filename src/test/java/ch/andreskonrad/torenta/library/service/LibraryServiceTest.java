@@ -23,6 +23,7 @@ import java.util.List;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -180,14 +181,12 @@ public class LibraryServiceTest {
     }
 
     @Test
-    public void getSeriesInLibrary_missingSeriesDirectory_throwsControlledException() {
+    public void getSeriesInLibrary_missingSeriesDirectory_returnsNull() {
         when(directoryService.getSeriesDirectory("Missing")).thenReturn(null);
 
-        IllegalStateException exception = assertThrows(
-                IllegalStateException.class,
-                () -> libraryService.getSeriesInLibrary("Missing"));
+        Series series = libraryService.getSeriesInLibrary("Missing");
 
-        assertEquals("Series directory does not exist: Missing", exception.getMessage());
+        assertNull(series);
         verify(tmdbService, never()).searchSeries("Missing");
     }
 

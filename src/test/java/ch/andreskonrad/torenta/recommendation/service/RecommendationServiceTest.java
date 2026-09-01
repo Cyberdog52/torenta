@@ -10,6 +10,7 @@ import ch.andreskonrad.torenta.recommendation.dto.SeriesRecommendationDto;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbSeasonDto;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbSeriesDetailDto;
+import ch.andreskonrad.torenta.tmdb.service.MissingTmdbKeyException;
 import ch.andreskonrad.torenta.tmdb.service.TmdbService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -27,6 +28,7 @@ import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -128,7 +130,19 @@ public class RecommendationServiceTest {
     }
 
     @Test
-    public void getRecommendations_unresolvableSeries_isReportedNotThrown() {
+    public void getRecommendations_seriesNotResolvedToTmdbShow_isReportedNotThrown() {
+        when(directoryService.getSeriesNamesModifiedWithin(any())).thenReturn(List.of("Unknown"));
+        when(libraryService.getSeriesInLibrary("Unknown")).thenReturn(null);
+
+        RecommendationResultDto result = recommendationService.getRecommendations(2);
+
+        assertTrue(result.getRecommendations().isEmpty());
+        assertEquals(List.of("Unknown"), result.getUnresolvedSeriesNames());
+        assertEquals(1, result.getSeriesConsidered());
+    }
+
+    @Test
+    public void getRecommendations_seriesThrowsUnexpectedException_isReportedNotThrown() {
         when(directoryService.getSeriesNamesModifiedWithin(any())).thenReturn(List.of("Unknown"));
         when(libraryService.getSeriesInLibrary("Unknown")).thenThrow(new IllegalStateException("boom"));
 
@@ -137,6 +151,15 @@ public class RecommendationServiceTest {
         assertTrue(result.getRecommendations().isEmpty());
         assertEquals(List.of("Unknown"), result.getUnresolvedSeriesNames());
         assertEquals(1, result.getSeriesConsidered());
+    }
+
+    @Test
+    public void getRecommendations_missingTmdbKey_isPropagatedNotSwallowed() {
+        when(directoryService.getSeriesNamesModifiedWithin(any())).thenReturn(List.of("Any Show"));
+        when(libraryService.getSeriesInLibrary("Any Show"))
+                .thenThrow(new MissingTmdbKeyException("TmdbKey is null"));
+
+        assertThrows(MissingTmdbKeyException.class, () -> recommendationService.getRecommendations(2));
     }
 
     @Test
