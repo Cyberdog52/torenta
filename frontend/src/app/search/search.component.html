@@ -43,6 +43,7 @@
         @for (seriesOverview of seriesOverviews(); track seriesOverview.id) {
           <mat-expansion-panel
             class="result-panel"
+            [class.result-panel--backdrop]="isPanelBackdropVisible('series', seriesOverview.id)"
             [style.--media-backdrop-image]="
               isPanelBackdropVisible('series', seriesOverview.id)
                 ? 'url(' + backdropUrl(seriesOverview.backdrop_path) + ')'
@@ -51,11 +52,8 @@
             (opened)="setPanelOpen('series', seriesOverview.id, true)"
             (closed)="setPanelOpen('series', seriesOverview.id, false)"
           >
-            <mat-expansion-panel-header
-              class="result-header"
-              (focus)="setPanelFocused('series', seriesOverview.id, true)"
-              (blur)="setPanelFocused('series', seriesOverview.id, false)"
-            >
+            <div class="backdrop-ambience" aria-hidden="true"></div>
+            <mat-expansion-panel-header class="result-header">
               <mat-panel-title class="result-title">
                 <img
                   class="poster"
@@ -156,6 +154,7 @@
         @for (movieOverview of movieOverviews(); track movieOverview.id) {
           <mat-expansion-panel
             class="result-panel"
+            [class.result-panel--backdrop]="isPanelBackdropVisible('movie', movieOverview.id)"
             [style.--media-backdrop-image]="
               isPanelBackdropVisible('movie', movieOverview.id)
                 ? 'url(' + backdropUrl(movieOverview.backdrop_path) + ')'
@@ -164,11 +163,8 @@
             (opened)="setPanelOpen('movie', movieOverview.id, true)"
             (closed)="setPanelOpen('movie', movieOverview.id, false)"
           >
-            <mat-expansion-panel-header
-              class="result-header"
-              (focus)="setPanelFocused('movie', movieOverview.id, true)"
-              (blur)="setPanelFocused('movie', movieOverview.id, false)"
-            >
+            <div class="backdrop-ambience" aria-hidden="true"></div>
+            <mat-expansion-panel-header class="result-header">
               <mat-panel-title class="result-title">
                 <img
                   class="poster"

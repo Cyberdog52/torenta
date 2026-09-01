@@ -92,7 +92,6 @@ export class SearchComponent {
    * TMDB's rate limit of 40 requests / 10s.
    */
   private readonly openPanels = signal<ReadonlySet<string>>(new Set());
-  private readonly focusedPanel = signal<string | null>(null);
   protected readonly seriesDetails = signal<ReadonlyMap<number, TmdbSeriesDetailDto>>(new Map());
   protected readonly movieDetails = signal<ReadonlyMap<number, TmdbMovieDetailDto>>(new Map());
   protected readonly movieDirectories = signal<ReadonlyMap<number, DirectoryDto>>(new Map());
@@ -140,19 +139,8 @@ export class SearchComponent {
     return this.openPanels().has(this.panelKey(kind, id));
   }
 
-  protected setPanelFocused(kind: MediaKind, id: number, focused: boolean): void {
-    const key = this.panelKey(kind, id);
-    this.focusedPanel.update((current) => {
-      if (focused) {
-        return key;
-      }
-      return current === key ? null : current;
-    });
-  }
-
   protected isPanelBackdropVisible(kind: MediaKind, id: number): boolean {
-    const key = this.panelKey(kind, id);
-    return this.isPanelOpen(kind, id) || this.focusedPanel() === key;
+    return this.isPanelOpen(kind, id);
   }
 
   protected setSeriesDetail(detail: TmdbSeriesDetailDto): void {
