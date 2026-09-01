@@ -12,6 +12,7 @@ import ch.andreskonrad.torenta.recommendation.dto.RecommendationResultDto;
 import ch.andreskonrad.torenta.recommendation.dto.RecommendedEpisodeDto;
 import ch.andreskonrad.torenta.recommendation.dto.SeriesRecommendationDto;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
+import ch.andreskonrad.torenta.tmdb.service.MissingTmdbKeyException;
 import ch.andreskonrad.torenta.tmdb.service.TmdbService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,8 +69,20 @@ public class RecommendationService {
             Series series;
             try {
                 series = libraryService.getSeriesInLibrary(seriesName);
+            } catch (MissingTmdbKeyException e) {
+                // Systemic configuration problem, not a per-series match failure: let it
+                // propagate so the controller can report it distinctly instead of masking it
+                // as "this folder couldn't be matched to a TMDB show".
+                throw e;
             } catch (Exception e) {
                 LOGGER.warn("Could not resolve series in library for recommendations: {}", seriesName, e);
+                unresolvedSeriesNames.add(seriesName);
+                continue;
+            }
+
+            if (series == null) {
+                // Folder exists but isn't recognized as a downloaded series (e.g. it couldn't be
+                // matched to a TMDB show, or hasn't finished being scanned yet).
                 unresolvedSeriesNames.add(seriesName);
                 continue;
             }

@@ -109,7 +109,7 @@ public class TmdbService {
         String tmdbServiceKey = preferences == null ? null : preferences.getTmdbServiceKey();
 
         if (tmdbServiceKey == null || tmdbServiceKey.isBlank()) {
-            throw new IllegalStateException("TmdbKey is null");
+            throw new MissingTmdbKeyException("TmdbKey is null");
         }
 
         return UriComponentsBuilder.newInstance()

@@ -34,10 +34,16 @@ public class LibraryService {
     }
 
 
+    /**
+     * @return the series' library entry, or {@code null} if it hasn't been downloaded (i.e. no
+     * matching directory exists). This is an everyday, expected condition (not every series a
+     * user is browsing is already in their library), so it's signalled by a {@code null} return
+     * rather than an exception.
+     */
     public Series getSeriesInLibrary(String seriesName) {
         DirectoryDto seriesDirectory = this.directoryService.getSeriesDirectory(seriesName);
         if (seriesDirectory == null) {
-            throw new IllegalStateException("Series directory does not exist: " + seriesName);
+            return null;
         }
 
         return getSeriesEntry(seriesDirectory);
