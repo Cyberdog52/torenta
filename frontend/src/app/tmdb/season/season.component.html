@@ -1,10 +1,11 @@
 <div class="season">
-  <p class="meta-line">
-    <mat-icon aria-hidden="true">queue_play_next</mat-icon>{{ tmdbSeasonDto().name }}
+  <div class="meta-line">
+    <mat-icon aria-hidden="true">queue_play_next</mat-icon>
+    <span>{{ tmdbSeasonDto().name }}</span>
+    <app-overview-popover [title]="tmdbSeasonDto().name" [overview]="tmdbSeasonDto().overview" />
     <mat-icon aria-hidden="true">date_range</mat-icon>
     <span class="visually-hidden">Air date:</span>{{ tmdbSeasonDto().air_date }}
-  </p>
-  <p class="overview">{{ tmdbSeasonDto().overview }}</p>
+  </div>
   <div class="episode-buttons">
     @for (tmdbEpisodeDto of episodes(); track tmdbEpisodeDto.id) {
       <button

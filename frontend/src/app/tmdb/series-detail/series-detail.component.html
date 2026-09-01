@@ -5,20 +5,6 @@
 } @else if (seriesDetail(); as seriesDetail) {
   <div class="series-detail">
     <div class="foreground">
-      <p class="meta-line">
-        <mat-icon aria-hidden="true">date_range</mat-icon>
-        <span class="visually-hidden">First aired:</span>{{ seriesDetail.first_air_date }}
-        <mat-icon aria-hidden="true">timer</mat-icon>
-        <span class="visually-hidden">Episode runtime:</span>{{ runtime() }} min
-        <mat-icon aria-hidden="true">star</mat-icon>
-        <span class="visually-hidden">Rating:</span>{{ seriesDetail.vote_average }}
-      </p>
-      <mat-chip-set>
-        @for (genre of seriesDetail.genres; track genre.id) {
-          <mat-chip>{{ genre.name }}</mat-chip>
-        }
-      </mat-chip-set>
-      <p class="overview">{{ seriesDetail.overview }}</p>
       <div class="season-buttons">
         @for (tmdbSeasonDto of seriesDetail.seasons; track tmdbSeasonDto.id) {
           <button

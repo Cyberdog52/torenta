@@ -1,25 +1,23 @@
 @use '../media-detail-panel' as panel;
 
 .season {
-  margin-top: 12px;
+  margin-top: 8px;
   padding: 12px;
-  border-radius: 8px;
-  background: var(--mat-sys-surface-container-high);
+  border: 1px solid var(--mat-sys-outline-variant);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--mat-sys-surface-container-high) 88%, transparent);
+  backdrop-filter: blur(6px);
 }
 
 .meta-line {
   @include panel.meta-line;
 }
 
-.overview {
-  margin: 8px 0;
-  color: var(--mat-sys-on-surface-variant);
-}
-
 .episode-buttons {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  margin-top: 8px;
 }
 
 .chip-button {

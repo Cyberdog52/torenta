@@ -1,12 +1,13 @@
 <div class="episode">
-  <p class="meta-line">
-    <mat-icon aria-hidden="true">queue_play_next</mat-icon>{{ tmdbEpisodeDto().name }}
+  <div class="meta-line">
+    <mat-icon aria-hidden="true">queue_play_next</mat-icon>
+    <span>{{ tmdbEpisodeDto().name }}</span>
+    <app-overview-popover [title]="tmdbEpisodeDto().name" [overview]="tmdbEpisodeDto().overview" />
     <mat-icon aria-hidden="true">date_range</mat-icon>
     <span class="visually-hidden">Air date:</span>{{ tmdbEpisodeDto().air_date }}
-  </p>
+  </div>
   @if (downloadText(); as downloadText) {
     <p class="meta-line"><mat-icon aria-hidden="true">archive</mat-icon>{{ downloadText }}</p>
   }
-  <p class="overview">{{ tmdbEpisodeDto().overview }}</p>
   <app-torrent-suggestions [tmdbEpisodeDto]="tmdbEpisodeDto()" [seriesDetail]="seriesDetail()" />
 </div>
