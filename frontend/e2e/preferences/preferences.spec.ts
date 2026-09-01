@@ -10,4 +10,5 @@ test('loads preferences from the backend', async ({ page }) => {
 
   expect((await preferencesResponse).ok()).toBeTruthy();
   await expect(page.getByLabel('Root folder for downloads')).toBeVisible();
+  await expect(page.getByLabel('OpenAI API key')).toBeVisible();
 });

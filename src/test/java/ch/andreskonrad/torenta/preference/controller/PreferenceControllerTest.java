@@ -42,7 +42,11 @@ class PreferenceControllerTest {
         mockMvc.perform(post("/api/preference")
                         .contentType(MediaType.APPLICATION_JSON)
                         .content("""
-                                {"downloadDirectoryPath":"/media/downloads"}
+                                {
+                                  "downloadDirectoryPath": "/media/downloads",
+                                  "tmdbServiceKey": "tmdb-key",
+                                  "openAiApiKey": "openai-key"
+                                }
                                 """))
                 .andExpect(status().isOk())
                 .andExpect(content().string(""));
@@ -50,7 +54,8 @@ class PreferenceControllerTest {
         ArgumentCaptor<UserPreference> captor = ArgumentCaptor.forClass(UserPreference.class);
         verify(preferenceService).save(captor.capture());
         assertEquals("/media/downloads", captor.getValue().getDownloadDirectoryPath());
-        assertEquals(null, captor.getValue().getTmdbServiceKey());
+        assertEquals("tmdb-key", captor.getValue().getTmdbServiceKey());
+        assertEquals("openai-key", captor.getValue().getOpenAiApiKey());
     }
 
     @Test
@@ -70,12 +75,13 @@ class PreferenceControllerTest {
     @Test
     void get_returnsPreferences() throws Exception {
         when(preferenceService.loadPreferences())
-                .thenReturn(new UserPreference("/media/downloads", "tmdb-key"));
+                .thenReturn(new UserPreference("/media/downloads", "tmdb-key", "openai-key"));
 
         mockMvc.perform(get("/api/preference"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.downloadDirectoryPath").value("/media/downloads"))
-                .andExpect(jsonPath("$.tmdbServiceKey").value("tmdb-key"));
+                .andExpect(jsonPath("$.tmdbServiceKey").value("tmdb-key"))
+                .andExpect(jsonPath("$.openAiApiKey").value("openai-key"));
     }
 
     @Test

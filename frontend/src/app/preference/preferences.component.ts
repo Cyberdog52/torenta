@@ -77,4 +77,15 @@ export class PreferencesComponent {
           },
     );
   }
+
+  protected setOpenAiApiKey(openAiApiKey: string): void {
+    this.userPreferences.update((preferences) =>
+      preferences == null
+        ? preferences
+        : {
+            ...preferences,
+            openAiApiKey: openAiApiKey || null,
+          },
+    );
+  }
 }

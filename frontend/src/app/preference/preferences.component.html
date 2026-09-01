@@ -27,6 +27,17 @@
           <mat-hint>get your own key at https://www.themoviedb.org/documentation/api</mat-hint>
         }
       </mat-form-field>
+      <mat-form-field appearance="outline">
+        <mat-label>OpenAI API key</mat-label>
+        <input
+          matInput
+          name="openAiApiKey"
+          type="password"
+          autocomplete="off"
+          [ngModel]="preferences.openAiApiKey"
+          (ngModelChange)="setOpenAiApiKey($event)"
+        />
+      </mat-form-field>
     </mat-card-content>
     <mat-card-actions>
       <button matButton="elevated" (click)="savePreferences()">Save</button>

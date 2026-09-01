@@ -11,10 +11,12 @@ import org.junit.jupiter.api.io.TempDir;
 import tools.jackson.databind.ObjectMapper;
 
 import java.io.IOException;
+import java.nio.file.FileSystemException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
+import static org.junit.jupiter.api.Assumptions.assumeTrue;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -104,7 +106,11 @@ class DownloadRecordStoreTest {
         Path outsideTarget = Files.createTempDirectory("torenta-outside");
         try {
             Path linkParent = root.resolve("linked");
-            Files.createSymbolicLink(linkParent, outsideTarget);
+            try {
+                Files.createSymbolicLink(linkParent, outsideTarget);
+            } catch (FileSystemException exception) {
+                assumeTrue(false, "Symbolic links are unavailable: " + exception.getReason());
+            }
 
             assertThrows(IllegalArgumentException.class,
                     () -> recordStore.resolveRootRelative(root, "linked/file.txt"));
