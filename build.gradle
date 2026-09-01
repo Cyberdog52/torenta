@@ -209,6 +209,7 @@ tasks.register('extractJRE') {
 }
 
 def frontendDirectory = layout.projectDirectory.dir('frontend')
+def frontendStaticResourcesDirectory = layout.projectDirectory.dir('src/main/resources/static')
 
 node {
     download = true
@@ -241,7 +242,11 @@ tasks.register('buildFrontend', NpmTask) {
 tasks.register('copyFrontendToResources', Copy) {
     dependsOn tasks.named('buildFrontend')
     from('frontend/dist/frontend/browser')
-    into('src/main/resources/static')
+    into(frontendStaticResourcesDirectory)
+}
+
+tasks.named('clean') {
+    delete(frontendStaticResourcesDirectory)
 }
 
 tasks.named('processResources') {
