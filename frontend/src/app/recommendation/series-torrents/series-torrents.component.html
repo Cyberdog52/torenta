@@ -1,7 +1,6 @@
-<h3 class="torrents-title">Top trusted torrents</h3>
 @if (isLoading()) {
   <div class="loading">
-    <mat-progress-spinner mode="indeterminate" diameter="24" aria-label="Searching for torrents" />
+    <mat-progress-spinner mode="indeterminate" diameter="18" aria-label="Searching for torrents" />
     <span class="visually-hidden" aria-live="polite">Searching for torrents…</span>
   </div>
 } @else if (topTorrents().length > 0) {
@@ -16,6 +15,7 @@
         } @else {
           <button
             matButton="elevated"
+            class="download-button"
             [disabled]="isDownloadPending(torrent)"
             [attr.aria-label]="
               (isDownloadPending(torrent) ? 'Starting download of ' : 'Download ') + torrent.name

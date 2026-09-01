@@ -1,3 +1,5 @@
+@use '../tmdb/media-detail-panel' as panel;
+
 .days-field {
   width: 100%;
   max-width: 420px;
@@ -43,29 +45,29 @@
 
 .recommendation-list {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(640px, 100%), 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(min(480px, 100%), 1fr));
   gap: 16px;
+  align-items: start;
 }
 
+// Reuses the same full-bleed-backdrop-behind-content pattern as the
+// Downloads page's cards (see `_media-detail-panel.scss`/`download-detail`),
+// which is far more space-efficient than a large square poster + separate
+// text column for content that's mostly a compact list of episodes.
+//
+// Unlike `download-detail` (short text confined to the left, where the
+// mixin's gradient already fades to opaque), this card's rows span the full
+// width, so the untouched right/bottom portion of the backdrop leaves text
+// with poor contrast there. A near-opaque scrim over the whole foreground
+// fixes that everywhere while still hinting at the backdrop underneath.
 .series-card {
-  display: flex;
-  gap: 16px;
-  padding: 16px;
+  @include panel.panel;
 }
 
-.poster {
-  width: 120px;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-
-.series-body {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  min-width: 0;
+.foreground {
+  @include panel.foreground;
+  background: color-mix(in srgb, var(--mat-sys-surface-container-highest) 92%, transparent);
+  border-radius: inherit;
 }
 
 .series-name {
@@ -80,7 +82,14 @@
   list-style: none;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 8px;
+}
+
+.episode-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0;
 }
 
 .episode-string {
@@ -91,6 +100,10 @@
 .episode-air-date {
   color: var(--mat-sys-on-surface-variant);
   margin-left: 6px;
+}
+
+.find-more-button {
+  align-self: flex-start;
 }
 
 .empty {

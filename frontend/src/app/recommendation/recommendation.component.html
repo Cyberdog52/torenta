@@ -42,42 +42,39 @@
 
     <div class="recommendation-list">
       @for (recommendation of recommendations(); track recommendation.tmdbSeriesId) {
-        <mat-card class="series-card" appearance="outlined">
-          <img
-            class="poster"
-            [src]="posterUrl(recommendation.posterPath)"
-            [alt]="recommendation.seriesName + ' poster'"
-          />
-          <div class="series-body">
+        <div
+          class="series-card"
+          [style.--media-backdrop-image]="
+            'url(' + backdropUrl(recommendation.seriesDetail.backdrop_path) + ')'
+          "
+        >
+          <div class="foreground">
             <h2 class="series-name">{{ recommendation.seriesName }}</h2>
             <ul class="episode-list">
-              @for (
-                episode of recommendation.recommendedEpisodes;
-                track episode.episodeString;
-                let first = $first
-              ) {
+              @for (episode of recommendation.recommendedEpisodes; track episode.episodeString) {
                 <li>
-                  <span class="episode-string">{{ episode.episodeString }}</span>
-                  <span class="episode-name">{{ episode.name }}</span>
-                  <span class="episode-air-date">({{ episode.airDate }})</span>
-                  @if (first) {
-                    <app-series-torrents
-                      [seriesDetail]="recommendation.seriesDetail"
-                      [episode]="episode"
-                    />
-                  }
+                  <div class="episode-line">
+                    <span class="episode-string">{{ episode.episodeString }}</span>
+                    <span class="episode-name">{{ episode.name }}</span>
+                    <span class="episode-air-date">({{ episode.airDate }})</span>
+                  </div>
+                  <app-series-torrents
+                    [seriesDetail]="recommendation.seriesDetail"
+                    [episode]="episode"
+                  />
                 </li>
               }
             </ul>
             <a
               matButton="elevated"
+              class="find-more-button"
               [routerLink]="['/search']"
               [queryParams]="{ series: recommendation.seriesName }"
             >
               <mat-icon>search</mat-icon>Find more torrents
             </a>
           </div>
-        </mat-card>
+        </div>
       } @empty {
         <div class="empty">
           <mat-icon aria-hidden="true">check_circle</mat-icon>

@@ -15,7 +15,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { RecommendationService, DEFAULT_RECOMMENDATION_DAYS } from './recommendation.service';
 import { SeriesTorrentsComponent } from './series-torrents/series-torrents.component';
 import { safeValue } from '../shared/resource';
-import { posterUrl } from '../shared/tmdb-images';
+import { backdropUrl } from '../shared/tmdb-images';
 import { NotificationService } from '../shared/notification/notification.service';
 import { NotificationType } from '../shared/dto/notification/Notification';
 
@@ -59,7 +59,7 @@ export class RecommendationComponent {
     () => this.result()?.unresolvedSeriesNames ?? [],
   );
 
-  protected readonly posterUrl = posterUrl;
+  protected readonly backdropUrl = backdropUrl;
 
   constructor() {
     effect(() => {
