@@ -137,6 +137,9 @@ public class BitTorrentService {
     public synchronized void startDownload(DownloadRequest downloadRequest, Path finalTargetDirectory) throws IllegalStateException {
         ensureLoadedForCurrentRoot();
         Path root = loadedRoot;
+        if (downloadRequest.getTorrentEntry() == null) {
+            throw new InvalidDownloadStateException("Download cannot be started without a torrent entry.");
+        }
         String magnetLink = downloadRequest.getTorrentEntry().getMagnetLink();
         String id = DownloadIdGenerator.generate(magnetLink);
         if (downloads.get(id) != null) {
@@ -241,7 +244,8 @@ public class BitTorrentService {
             boolean restartable = download.getRecordState() == DownloadRecordState.PAUSED
                     || (download.getRecordState() == DownloadRecordState.FAILED
                     && download.getFailureKind() == DownloadFailureKind.RESTARTABLE);
-            if (!restartable || download.getDownloadRequest() == null) {
+            if (!restartable || download.getDownloadRequest() == null
+                    || download.getDownloadRequest().getTorrentEntry() == null) {
                 throw new InvalidDownloadStateException("Download " + id + " cannot be restarted from its current state.");
             }
             try {

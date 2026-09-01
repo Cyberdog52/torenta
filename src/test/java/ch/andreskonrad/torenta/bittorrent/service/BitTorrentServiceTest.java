@@ -159,6 +159,17 @@ class BitTorrentServiceTest {
     }
 
     @Test
+    void startDownload_missingTorrentEntry_throwsInvalidState() {
+        DownloadRequest request = new DownloadRequest(null, null, null, null);
+
+        assertThrows(
+                InvalidDownloadStateException.class,
+                () -> service.startDownload(request, root.resolve("target")));
+
+        verify(clientFactory, never()).create(any(), any(), any());
+    }
+
+    @Test
     void startDownload_rejectsDuplicateMagnetLink() {
         DownloadRequest request = request(MAGNET_LINK);
         service.startDownload(request, root.resolve("first"));
@@ -422,6 +433,28 @@ class BitTorrentServiceTest {
         recoveredService.restart(id);
 
         assertEquals(DownloadState.STARTED, recoveredService.getDownload(id).mapToDownloadDto().getState());
+    }
+
+    @Test
+    void restart_recoveredDownloadWithoutTorrentEntry_throwsInvalidState() {
+        String id = DownloadIdGenerator.generate(MAGNET_LINK);
+        DownloadRequest downloadRequest = new DownloadRequest(null, null, null, null);
+        DownloadRecord record = DownloadRecord.builder()
+                .version(DownloadRecord.CURRENT_VERSION)
+                .id(id)
+                .state(DownloadRecordState.PAUSED)
+                .downloadRequest(downloadRequest)
+                .finalTargetRelativePath("target")
+                .startTimeInMs(System.currentTimeMillis())
+                .finalPayloadManifest(List.of())
+                .build();
+        recordStore.writeRecord(root, record);
+        BitTorrentService recoveredService = new BitTorrentService(directoryService, clientFactory, recordStore);
+
+        assertThrows(InvalidDownloadStateException.class, () -> recoveredService.restart(id));
+
+        assertEquals(DownloadState.PAUSED, recoveredService.getDownload(id).mapToDownloadDto().getState());
+        verify(clientFactory, never()).create(any(), any(), any());
     }
 
     @Test
