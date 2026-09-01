@@ -16,7 +16,7 @@ describe('App', () => {
     }).compileComponents();
   });
 
-  it('renders the shell with the toolbar', async () => {
+  it('renders the shell with the toolbar', () => {
     const fixture = TestBed.createComponent(App);
     fixture.detectChanges();
 
