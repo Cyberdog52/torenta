@@ -2,6 +2,7 @@ package ch.andreskonrad.torenta.recommendation.controller;
 
 import ch.andreskonrad.torenta.recommendation.dto.RecommendationResultDto;
 import ch.andreskonrad.torenta.recommendation.service.RecommendationService;
+import ch.andreskonrad.torenta.tmdb.service.MissingTmdbKeyException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -61,6 +62,15 @@ class RecommendationControllerTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.seriesConsidered").value(5))
                 .andExpect(jsonPath("$.unresolvedSeriesNames[0]").value("Ambiguous Show"));
+    }
+
+    @Test
+    void get_missingTmdbKey_returnsPreconditionFailed() throws Exception {
+        when(recommendationService.getRecommendations(14))
+                .thenThrow(new MissingTmdbKeyException("TmdbKey is null"));
+
+        mockMvc.perform(get("/api/recommendation"))
+                .andExpect(status().isPreconditionFailed());
     }
 
     @Test
