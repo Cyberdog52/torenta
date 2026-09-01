@@ -40,6 +40,8 @@ public class PreferenceService {
         }
         if (preferences.getTmdbServiceKey() != null) {
             userPreferenceRoot.put(PREFERENCE_TMDB_SERVICE_KEY, preferences.getTmdbServiceKey());
+        } else {
+            userPreferenceRoot.remove(PREFERENCE_TMDB_SERVICE_KEY);
         }
 
         if (this.directoryService != null) {
