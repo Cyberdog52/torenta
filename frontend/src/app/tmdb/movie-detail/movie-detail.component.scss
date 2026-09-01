@@ -13,12 +13,3 @@
 .foreground {
   @include panel.foreground;
 }
-
-.meta-line {
-  @include panel.meta-line;
-}
-
-.overview {
-  margin: 0;
-  color: var(--mat-sys-on-surface-variant);
-}

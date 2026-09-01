@@ -14,14 +14,53 @@
     transform: none;
   }
 
-  &::after {
-    background:
-      linear-gradient(to top, var(--mat-sys-surface-container-highest) 0%, transparent 25%),
-      linear-gradient(to right, var(--mat-sys-surface-container-highest) 0%, transparent 25%);
+  &.result-panel--backdrop {
+    --mat-expansion-container-text-color: rgb(245 247 251);
+    --mat-expansion-header-description-color: rgb(245 247 251 / 78%);
+    --mat-expansion-header-indicator-color: rgb(245 247 251 / 85%);
+    --mat-expansion-header-text-color: rgb(245 247 251);
+
+    background: rgb(18 24 32);
+    color: rgb(245 247 251);
+
+    &::before {
+      -webkit-mask-image:
+        linear-gradient(to right, transparent 0%, black 28%),
+        linear-gradient(to top, transparent 0%, black 28%);
+      -webkit-mask-composite: source-in;
+      mask-image:
+        linear-gradient(to right, transparent 0%, black 28%),
+        linear-gradient(to top, transparent 0%, black 28%);
+      mask-composite: intersect;
+    }
+
+    &::after {
+      background: rgb(8 12 18 / 12%);
+    }
+
+    .backdrop-ambience {
+      opacity: 1;
+    }
   }
 }
 
+.backdrop-ambience {
+  position: absolute;
+  z-index: -3;
+  inset: -48px -48px auto;
+  aspect-ratio: 16 / 9;
+  background-image: var(--media-backdrop-image);
+  background-position: center;
+  background-size: cover;
+  filter: blur(34px) brightness(0.42) saturate(0.9);
+  transform: scale(1.08);
+  opacity: 0;
+  pointer-events: none;
+}
+
 .result-header {
+  min-height: 86px;
+  padding-right: 16px;
   background: transparent !important;
 
   // Material's own keyboard-focus indicator is a background state-layer,
@@ -70,8 +109,9 @@
 .result-title {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
+  flex: 0 1 auto;
 }
 
 .poster {
@@ -86,4 +126,73 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.result-summary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  min-width: 0;
+  margin-left: 16px;
+  color: rgb(245 247 251 / 78%);
+}
+
+.header-meta,
+.download-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  white-space: nowrap;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+.download-indicator {
+  color: rgb(145 196 255);
+}
+
+.header-genres {
+  min-width: 0;
+
+  mat-chip {
+    --mat-chip-container-height: 30px;
+  }
+}
+
+@container (max-width: 980px) {
+  .header-genres {
+    display: none;
+  }
+}
+
+@container (max-width: 720px) {
+  .header-meta--runtime {
+    display: none;
+  }
+}
+
+@container (max-width: 580px) {
+  .header-meta--date {
+    display: none;
+  }
+
+  .result-summary {
+    margin-left: 8px;
+  }
+}
+
+@container (max-width: 430px) {
+  .result-summary {
+    margin-left: 4px;
+  }
+
+  .download-indicator {
+    display: none;
+  }
 }

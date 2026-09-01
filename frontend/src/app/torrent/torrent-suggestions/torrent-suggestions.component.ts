@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
 import { MatTableModule } from '@angular/material/table';
@@ -74,6 +74,7 @@ export class TorrentSuggestionsComponent {
    * and unsubscribes on destroy, which stops the shared refCounted poll.
    */
   private readonly downloads = toSignal(this.torrentService.downloads$, { initialValue: [] });
+  private readonly pendingDownloads = signal<ReadonlySet<string>>(new Set());
 
   protected hasStartedDownload(torrentEntry: TorrentEntry): boolean {
     return this.downloads().some(
@@ -81,7 +82,16 @@ export class TorrentSuggestionsComponent {
     );
   }
 
+  protected isDownloadPending(torrentEntry: TorrentEntry): boolean {
+    return this.pendingDownloads().has(torrentEntry.magnetLink);
+  }
+
   protected startDownload(torrentEntry: TorrentEntry): void {
+    if (this.hasStartedDownload(torrentEntry) || this.isDownloadPending(torrentEntry)) {
+      return;
+    }
+    this.setDownloadPending(torrentEntry.magnetLink, true);
+
     const downloadRequest: DownloadRequestDto = {
       tmdbEpisode: this.tmdbEpisodeDto(),
       seriesDetail: this.seriesDetail(),
@@ -98,11 +108,25 @@ export class TorrentSuggestionsComponent {
             onClick: () => void this.router.navigate(['/downloads']),
           },
         }),
-      error: () =>
+      error: () => {
+        this.setDownloadPending(torrentEntry.magnetLink, false);
         this.notificationService.notify({
           content: `Could not start download of ${getDownloadTitle(downloadRequest)}`,
           type: NotificationType.ERROR,
-        }),
+        });
+      },
+    });
+  }
+
+  private setDownloadPending(magnetLink: string, pending: boolean): void {
+    this.pendingDownloads.update((entries) => {
+      const next = new Set(entries);
+      if (pending) {
+        next.add(magnetLink);
+      } else {
+        next.delete(magnetLink);
+      }
+      return next;
     });
   }
 }

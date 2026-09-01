@@ -125,4 +125,140 @@ describe('SearchComponent', () => {
       vi.useRealTimers();
     }
   });
+
+  it('shows series metadata and overview control only while expanded', async () => {
+    vi.useFakeTimers();
+    try {
+      const fixture = TestBed.createComponent(SearchComponent);
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const input = compiled.querySelector<HTMLInputElement>(
+        '.search-card:nth-of-type(1) input[matInput]',
+      );
+      if (input == null) {
+        throw new Error('Series search input not found');
+      }
+
+      input.value = 'andor';
+      input.dispatchEvent(new KeyboardEvent('keyup'));
+      vi.advanceTimersByTime(300);
+      fixture.detectChanges();
+
+      const httpTesting = TestBed.inject(HttpTestingController);
+      httpTesting
+        .expectOne((request) => request.url === 'api/tmdb/tv')
+        .flush({
+          results: [
+            {
+              id: 7,
+              name: 'Andor',
+              popularity: 90,
+              poster_path: '/andor-poster.jpg',
+              backdrop_path: '/andor.jpg',
+            },
+          ],
+        });
+
+      vi.useRealTimers();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      expect(compiled.querySelector('.result-summary')).toBeNull();
+
+      const header = compiled.querySelector<HTMLElement>('mat-expansion-panel-header');
+      if (header == null) {
+        throw new Error('Series result header not found');
+      }
+      header.click();
+      fixture.detectChanges();
+
+      httpTesting.expectOne('api/tmdb/tv/7').flush({
+        id: 7,
+        name: 'Andor',
+        overview: 'A rebellion begins.',
+        first_air_date: '2022-09-21',
+        episode_run_time: [],
+        vote_average: 8.2,
+        genres: [{ id: 18, name: 'Drama' }],
+        seasons: [],
+      });
+      fixture.detectChanges();
+      await Promise.resolve();
+      fixture.detectChanges();
+      httpTesting.expectOne('api/directory/series/Andor').flush({
+        name: 'Andor',
+        absolutePath: '/media/Andor',
+        files: [],
+        directories: [],
+      });
+      await fixture.whenStable();
+      fixture.detectChanges();
+
+      expect(compiled.querySelector('.result-summary')?.textContent).toContain('8.2');
+      expect(compiled.querySelector('.result-summary')?.textContent).toContain('Drama');
+      expect(compiled.querySelector('.result-summary')?.textContent).not.toContain('min');
+      expect(compiled.querySelector('.overview-trigger')).not.toBeNull();
+      expect(compiled.querySelector('.series-detail .overview')).toBeNull();
+
+      header.click();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      expect(compiled.querySelector('.result-summary')).toBeNull();
+      httpTesting.verify();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('clears a search input and removes its result list', async () => {
+    vi.useFakeTimers();
+    try {
+      const fixture = TestBed.createComponent(SearchComponent);
+      fixture.detectChanges();
+      const compiled = fixture.nativeElement as HTMLElement;
+      const input = compiled.querySelector<HTMLInputElement>(
+        '.search-card:nth-of-type(1) input[matInput]',
+      );
+      if (input == null) {
+        throw new Error('Series search input not found');
+      }
+
+      input.value = 'andor';
+      input.dispatchEvent(new InputEvent('input'));
+      input.dispatchEvent(new KeyboardEvent('keyup'));
+      fixture.detectChanges();
+      expect(compiled.querySelector('[aria-label="Clear TV show search"]')).not.toBeNull();
+
+      vi.advanceTimersByTime(300);
+      fixture.detectChanges();
+      const httpTesting = TestBed.inject(HttpTestingController);
+      httpTesting
+        .expectOne((request) => request.url === 'api/tmdb/tv')
+        .flush({
+          results: [
+            {
+              id: 7,
+              name: 'Andor',
+              popularity: 90,
+              poster_path: '/andor-poster.jpg',
+              backdrop_path: '/andor.jpg',
+            },
+          ],
+        });
+
+      vi.useRealTimers();
+      await fixture.whenStable();
+      fixture.detectChanges();
+      expect(compiled.querySelector('.result-panel')).not.toBeNull();
+
+      compiled.querySelector<HTMLButtonElement>('[aria-label="Clear TV show search"]')?.click();
+      fixture.detectChanges();
+
+      expect(input.value).toBe('');
+      expect(compiled.querySelector('.result-panel')).toBeNull();
+      expect(document.activeElement).toBe(input);
+      httpTesting.verify();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

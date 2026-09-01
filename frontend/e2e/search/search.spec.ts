@@ -73,12 +73,10 @@ test('shows search results and renders series detail without crashing', async ({
   expect(backdropRequests).toBe(0);
 
   await firstResult.focus();
-  await expect(firstResult.locator('..')).toHaveCSS(
-    '--media-backdrop-image',
-    'url(https://image.tmdb.org/t/p/w1280//office-backdrop.jpg)',
-  );
+  await expect(firstResult.locator('..')).not.toHaveClass(/result-panel--backdrop/);
+  await expect(firstResult.locator('..')).not.toHaveAttribute('style', /office-backdrop/);
   await expect(firstResult).toHaveCSS('background-color', 'rgba(0, 0, 0, 0)');
-  await expect.poll(() => backdropRequests).toBeGreaterThan(0);
+  expect(backdropRequests).toBe(0);
 
   // Expanding a result triggers a library lookup
   // (`GET /api/directory/series/{name}`) that answers 404 for any series not
@@ -91,6 +89,18 @@ test('shows search results and renders series detail without crashing', async ({
     '--media-backdrop-image',
     'url(https://image.tmdb.org/t/p/w1280//office-backdrop.jpg)',
   );
+  await expect(firstResult.locator('..')).toHaveClass(/result-panel--backdrop/);
+  await expect(firstResult.locator('..')).toHaveCSS('background-color', 'rgb(18, 24, 32)');
+  await expect(firstResult).toHaveCSS('color', 'rgb(245, 247, 251)');
+  await expect(firstResult.locator('..').locator('.backdrop-ambience')).toHaveCSS(
+    'filter',
+    'blur(34px) brightness(0.42) saturate(0.9)',
+  );
+  await expect(firstResult.locator('..').locator('.backdrop-ambience')).toHaveCSS(
+    'aspect-ratio',
+    '16 / 9',
+  );
+  await expect.poll(() => backdropRequests).toBeGreaterThan(0);
   const backdropGeometry = () =>
     firstResult.locator('..').evaluate((panel) => {
       const backdrop = getComputedStyle(panel, '::before');

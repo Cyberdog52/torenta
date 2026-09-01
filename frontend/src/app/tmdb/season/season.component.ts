@@ -16,10 +16,11 @@ import { TmdbSeriesDetailDto } from '../../shared/dto/tmdb/TmdbSeriesDetailDto';
 import { DownloadStatus } from '../../shared/dto/library/DownloadStatus';
 import { EpisodeComponent } from '../episode/episode.component';
 import { safeValue } from '../../shared/resource';
+import { OverviewPopoverComponent } from '../overview-popover/overview-popover.component';
 
 @Component({
   selector: 'app-season',
-  imports: [MatIconModule, MatButtonModule, EpisodeComponent],
+  imports: [MatIconModule, MatButtonModule, EpisodeComponent, OverviewPopoverComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './season.component.scss',
   templateUrl: './season.component.html',

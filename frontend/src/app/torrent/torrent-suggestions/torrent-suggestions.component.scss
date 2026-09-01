@@ -7,11 +7,23 @@
 .table-scroll {
   overflow-x: auto;
   border-radius: 8px;
+  background-color: color-mix(in srgb, var(--mat-sys-surface-container-high) 70%, transparent);
+  backdrop-filter: blur(8px);
 }
 
 table {
+  --mat-table-background-color: transparent;
+
   width: 100%;
-  background: var(--mat-sys-surface-container-high);
+  background: transparent;
+}
+
+thead,
+tbody,
+tr,
+th,
+td {
+  background: transparent;
 }
 
 th,
@@ -32,6 +44,12 @@ td {
 
 .downloading {
   color: var(--mat-sys-on-surface-variant);
+}
+
+.download-spinner {
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
 }
 
 .no-results {
