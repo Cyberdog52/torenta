@@ -7,6 +7,7 @@ import {NotificationComponent} from './shared/notification/notification.componen
 import {PreferenceService} from './preference/preference.service';
 import {NotificationService} from './shared/notification/notification.service';
 import {NotificationType} from './shared/dto/notification/Notification';
+import {safeValue} from './shared/resource';
 
 @Component({
   selector: 'app-root',
@@ -27,6 +28,7 @@ export class App {
   private readonly preferenceService = inject(PreferenceService);
   private readonly notificationService = inject(NotificationService);
   private tmdbKeyChecked = false;
+  private readonly preferenceResource = this.preferenceService.preferenceResource;
 
   /**
    * Most pages read comfortably at the default max-width, but a route can
@@ -68,19 +70,22 @@ export class App {
     if (this.tmdbKeyChecked || event.urlAfterRedirects === '/preferences') {
       return;
     }
+
+    const preferences = safeValue(this.preferenceResource);
+    if (preferences == null) {
+      return;
+    }
+
     this.tmdbKeyChecked = true;
-    this.preferenceService.load().subscribe({
-      next: (preferences) => {
-        if (preferences.tmdbServiceKey) {
-          return;
-        }
-        this.notificationService.notify({
-          content: 'Set your TMDB service key in Preferences to start using Torenta.',
-          type: NotificationType.WARNING,
-        });
-        void this.router.navigate(['/preferences']);
-      },
+    if (preferences.tmdbServiceKey) {
+      return;
+    }
+
+    this.notificationService.notify({
+      content: 'Set your TMDB service key in Preferences to start using Torenta.',
+      type: NotificationType.WARNING,
     });
+    void this.router.navigate(['/preferences']);
   }
 }
 
