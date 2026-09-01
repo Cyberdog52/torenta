@@ -4,7 +4,14 @@ import { SeriesRecommendation } from '../shared/dto/recommendation/SeriesRecomme
 
 const BACKEND_URL = 'api/recommendation';
 
-export const DEFAULT_RECOMMENDATION_WEEKS = 2;
+/**
+ * `0` means "no filter": scan every series regardless of when it was last touched. This is the
+ * default because a series can be genuinely incomplete but untouched for a long time (e.g. an
+ * old download that was never finished), which a recency filter would otherwise hide from the
+ * very feature meant to surface it. Set to a positive number of weeks to speed up the scan for
+ * very large libraries by only considering recently touched series.
+ */
+export const DEFAULT_RECOMMENDATION_WEEKS = 0;
 
 @Injectable({ providedIn: 'root' })
 export class RecommendationService {

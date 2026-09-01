@@ -32,7 +32,7 @@ public class RecommendationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecommendationService.class);
 
-    public static final int DEFAULT_WEEKS_BACK = 2;
+    public static final int DEFAULT_WEEKS_BACK = 0;
     private static final int RECOMMENDED_EPISODE_COUNT = 3;
 
     private final DirectoryService directoryService;
@@ -46,9 +46,20 @@ public class RecommendationService {
         this.tmdbService = tmdbService;
     }
 
+    /**
+     * @param weeksBack only consider series folders modified within this many weeks, to keep the
+     *                  scan fast for large libraries. {@code 0} (the default) or a negative value
+     *                  means "no filter": scan every series regardless of when it was last
+     *                  touched. This matters because a series can be genuinely incomplete but
+     *                  untouched for a long time (e.g. a show downloaded years ago that was never
+     *                  finished), which a recency filter would otherwise hide from the very
+     *                  feature meant to surface it.
+     */
     @Cacheable
     public List<SeriesRecommendationDto> getRecommendations(int weeksBack) {
-        List<String> seriesNames = directoryService.getSeriesNamesModifiedWithin(Duration.ofDays(weeksBack * 7L));
+        List<String> seriesNames = weeksBack <= 0
+                ? directoryService.getAllSeriesNames()
+                : directoryService.getSeriesNamesModifiedWithin(Duration.ofDays(weeksBack * 7L));
 
         List<SeriesRecommendationDto> recommendations = new ArrayList<>();
         for (String seriesName : seriesNames) {

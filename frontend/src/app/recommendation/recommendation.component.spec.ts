@@ -91,6 +91,39 @@ describe('RecommendationComponent', () => {
     httpTesting.verify();
   });
 
+  it('accepts 0 weeks (scan entire library) from the input', async () => {
+    const fixture = TestBed.createComponent(RecommendationComponent);
+    fixture.detectChanges();
+
+    const httpTesting = TestBed.inject(HttpTestingController);
+    httpTesting.expectOne((r) => r.url === 'api/recommendation').flush([]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    const input = compiled.querySelector<HTMLInputElement>('input[name="weeks"]');
+    if (input == null) {
+      throw new Error('Weeks input not found');
+    }
+    input.value = '4';
+    input.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+    httpTesting.expectOne((r) => r.url === 'api/recommendation').flush([]);
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    input.value = '0';
+    input.dispatchEvent(new Event('change'));
+    fixture.detectChanges();
+
+    const request = httpTesting.expectOne((r) => r.url === 'api/recommendation');
+    expect(request.request.params.get('weeks')).toBe('0');
+    request.flush([]);
+    await fixture.whenStable();
+
+    httpTesting.verify();
+  });
+
   it('shows the empty state when there are no recommendations', async () => {
     const fixture = TestBed.createComponent(RecommendationComponent);
     fixture.detectChanges();

@@ -138,6 +138,18 @@ public class DirectoryService {
         return true;
     }
 
+    public List<String> getAllSeriesNames() {
+        try (Stream<Path> seriesFolders = Files.list(tvDirectoryPath)) {
+            return seriesFolders
+                    .filter(Files::isDirectory)
+                    .map(seriesFolder -> seriesFolder.getFileName().toString())
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            LOGGER.warn("Couldn't list series directories under " + tvDirectoryPath, e);
+            return List.of();
+        }
+    }
+
     public List<String> getSeriesNamesModifiedWithin(Duration duration) {
         try (Stream<Path> seriesFolders = Files.list(tvDirectoryPath)) {
             Instant cutoff = Instant.now().minus(duration);

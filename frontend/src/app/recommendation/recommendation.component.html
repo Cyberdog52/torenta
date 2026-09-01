@@ -4,15 +4,16 @@
   </mat-card-header>
   <mat-card-content>
     <mat-form-field appearance="outline" class="weeks-field">
-      <mat-label>Only consider series watched in the last (weeks)</mat-label>
+      <mat-label>Only rescan series touched in the last (weeks, 0 = entire library)</mat-label>
       <input
         matInput
         name="weeks"
         type="number"
-        min="1"
+        min="0"
         [value]="weeks()"
         (change)="setWeeks($any($event.target))"
       />
+      <mat-hint>0 scans your whole library; set a number to speed up large libraries</mat-hint>
     </mat-form-field>
 
     <p class="visually-hidden" aria-live="polite">
@@ -52,9 +53,13 @@
           <mat-icon aria-hidden="true">check_circle</mat-icon>
           <p class="empty-title">You're all caught up</p>
           <p class="empty-subtitle">
-            No missing aired episodes found in series watched in the last {{ weeks() }} week{{
-              weeks() === 1 ? '' : 's'
-            }}.
+            @if (weeks() === 0) {
+              No missing aired episodes found across your whole library.
+            } @else {
+              No missing aired episodes found in series touched in the last {{ weeks() }} week{{
+                weeks() === 1 ? '' : 's'
+              }}. Set the weeks field to 0 to scan your entire library.
+            }
           </p>
         </div>
       }

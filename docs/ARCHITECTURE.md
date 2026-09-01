@@ -62,10 +62,14 @@ reformat, or clean it up** — only touch it for a deliberate, user-approved int
    address of any interface (often a Hyper-V/WSL/VPN adapter with no internet route).
 4. **Library** — completed media is surfaced through `LibraryService`/`DirectoryService`.
 5. **Recommend** — the Recommendations page calls `RecommendationController` →
-   `RecommendationService`, which lists series folders recently modified under
-   `<download-root>/Series` (`DirectoryService.getSeriesNamesModifiedWithin`), resolves each via
-   `LibraryService`, and returns up to 3 missing aired episodes per series (chronologically,
-   spanning into the next TMDB season even if it has no local folder yet). Results are cached
+   `RecommendationService`, which by default lists every series folder under
+   `<download-root>/Series` (`DirectoryService.getAllSeriesNames`); a positive `weeks` query
+   param instead restricts the scan to folders whose *directory* mtimes (not file mtimes — BitTorrent
+   downloads and archive extraction routinely preserve old file timestamps) were touched within
+   that many weeks (`DirectoryService.getSeriesNamesModifiedWithin`), trading completeness for
+   speed on very large libraries. Each candidate series is resolved via `LibraryService`, and up
+   to 3 missing aired episodes are returned per series (chronologically, spanning into the next
+   TMDB season even if it has no local folder yet). Results are cached
    (`CustomCacheConfig.RECOMMENDATION_CACHE_NAME`) and evicted every 5 minutes.
 
 ## Frontend

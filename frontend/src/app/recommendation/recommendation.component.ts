@@ -39,7 +39,7 @@ export class RecommendationComponent {
   /**
    * How far back (in weeks) a series folder must have been touched to still
    * be considered for recommendations, keeping the scan fast for large
-   * libraries. Defaults to 2 weeks; editable in the UI.
+   * libraries. `0` (the default) means "no filter": scan the whole library.
    */
   protected readonly weeks = signal(DEFAULT_RECOMMENDATION_WEEKS);
 
@@ -68,7 +68,7 @@ export class RecommendationComponent {
 
   protected setWeeks(input: HTMLInputElement): void {
     const value = Number(input.value);
-    if (Number.isFinite(value) && value > 0) {
+    if (Number.isFinite(value) && value >= 0) {
       this.weeks.set(Math.trunc(value));
     }
   }

@@ -62,6 +62,26 @@ public class RecommendationServiceTest {
     }
 
     @Test
+    public void getRecommendations_zeroWeeks_scansEntireLibraryIgnoringRecency() {
+        when(directoryService.getAllSeriesNames()).thenReturn(List.of());
+
+        recommendationService.getRecommendations(0);
+
+        verify(directoryService).getAllSeriesNames();
+        verify(directoryService, never()).getSeriesNamesModifiedWithin(any());
+    }
+
+    @Test
+    public void getRecommendations_negativeWeeks_scansEntireLibraryIgnoringRecency() {
+        when(directoryService.getAllSeriesNames()).thenReturn(List.of());
+
+        recommendationService.getRecommendations(-1);
+
+        verify(directoryService).getAllSeriesNames();
+        verify(directoryService, never()).getSeriesNamesModifiedWithin(any());
+    }
+
+    @Test
     public void getRecommendations_seriesFullyCaughtUp_isExcluded() {
         when(directoryService.getSeriesNamesModifiedWithin(any())).thenReturn(List.of("Caught Up Show"));
         Series series = series(detail(1, "Caught Up Show"), season(1, episode(1, 1, past(), true)));

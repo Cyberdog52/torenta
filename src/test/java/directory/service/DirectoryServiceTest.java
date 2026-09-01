@@ -221,6 +221,17 @@ public class DirectoryServiceTest {
     }
 
     @Test
+    public void getAllSeriesNames_returnsEveryTopLevelSeriesFolderRegardlessOfAge() throws IOException {
+        Files.createDirectory(rootFolder.resolve("Series").resolve("Recent Show"));
+        Path oldShowPath = Files.createDirectory(rootFolder.resolve("Series").resolve("Old Show"));
+        setLastModifiedRecursively(oldShowPath, Instant.now().minus(Duration.ofDays(365 * 5)));
+
+        List<String> seriesNames = directoryService.getAllSeriesNames();
+
+        assertEquals(Set.of("Recent Show", "Old Show"), Set.copyOf(seriesNames));
+    }
+
+    @Test
     public void getSeriesNamesModifiedWithin_recentlyModifiedSeries_isIncluded() throws IOException {
         Path seriesPath = rootFolder.resolve("Series").resolve("Recent Show");
         Files.createDirectory(seriesPath);
