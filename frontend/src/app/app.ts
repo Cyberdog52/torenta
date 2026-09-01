@@ -1,13 +1,13 @@
-import {ChangeDetectionStrategy, Component, inject} from '@angular/core';
-import {toSignal} from '@angular/core/rxjs-interop';
-import {ActivatedRoute, NavigationEnd, Router, RouterOutlet} from '@angular/router';
-import {filter, map, skip, tap} from 'rxjs';
-import {ToolbarComponent} from './toolbar/toolbar.component';
-import {NotificationComponent} from './shared/notification/notification.component';
-import {PreferenceService} from './preference/preference.service';
-import {NotificationService} from './shared/notification/notification.service';
-import {NotificationType} from './shared/dto/notification/Notification';
-import {safeValue} from './shared/resource';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter, map, skip, tap } from 'rxjs';
+import { ToolbarComponent } from './toolbar/toolbar.component';
+import { NotificationComponent } from './shared/notification/notification.component';
+import { PreferenceService } from './preference/preference.service';
+import { NotificationService } from './shared/notification/notification.service';
+import { NotificationType } from './shared/dto/notification/Notification';
+import { safeValue } from './shared/resource';
 
 @Component({
   selector: 'app-root',
