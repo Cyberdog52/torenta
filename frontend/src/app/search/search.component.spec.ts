@@ -403,9 +403,7 @@ describe('SearchComponent', () => {
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
 
-    const input = compiled.querySelector<HTMLInputElement>(
-      '.search-card:nth-of-type(1) input[matInput]',
-    );
+    const input = compiled.querySelector<HTMLInputElement>('.series-search-card input[matInput]');
     expect(input?.value).toBe('The Office');
 
     const httpTesting = TestBed.inject(HttpTestingController);
