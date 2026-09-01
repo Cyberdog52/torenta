@@ -24,6 +24,14 @@
   gap: 8px;
 }
 
+.header-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 2px;
+  flex-wrap: wrap;
+}
+
 .title {
   margin: 0;
   font-size: 1.125rem;
@@ -145,19 +153,18 @@
   }
 }
 
-.state-cancelled {
+.state-paused {
   .status-chip {
-    background: var(--mat-sys-error-container);
-    color: var(--mat-sys-on-error-container);
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
   }
 
   .progress-fill {
-    background: var(--mat-sys-error);
-    opacity: 0.5;
+    background: var(--mat-sys-secondary);
   }
 
   .progress-icon {
-    color: var(--mat-sys-error);
+    color: var(--mat-sys-secondary);
   }
 }
 

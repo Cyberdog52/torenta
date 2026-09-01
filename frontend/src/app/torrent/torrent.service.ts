@@ -43,6 +43,22 @@ export class TorrentService {
     return this.httpClient.post<void>(BACKEND_URL, downloadRequest);
   }
 
+  pauseTorrent(id: string): Observable<void> {
+    return this.httpClient.post<void>(`${BACKEND_URL}/${id}/pause`, null);
+  }
+
+  restartTorrent(id: string): Observable<void> {
+    return this.httpClient.post<void>(`${BACKEND_URL}/${id}/restart`, null);
+  }
+
+  stopAndDeleteTorrent(id: string): Observable<void> {
+    return this.httpClient.delete<void>(`${BACKEND_URL}/${id}`);
+  }
+
+  removeTorrentTile(id: string): Observable<void> {
+    return this.httpClient.delete<void>(`${BACKEND_URL}/${id}/tile`);
+  }
+
   torrentSearchResource(searchString: Signal<string | undefined>) {
     return httpResource<TorrentEntry[]>(() => {
       const search = searchString()?.trim();

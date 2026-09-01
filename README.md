@@ -100,6 +100,20 @@ npm start
 Will start at http://localhost:4200/ and proxies `/api` to the backend on
 http://localhost:8080/ (see `frontend/proxy.conf.json`).
 
+## Download lifecycle and recovery
+
+Torenta stores durable download records and partial payloads under
+`<download-directory>/.torenta/downloads/`. Running downloads are recovered as paused after an
+application restart and must be restarted manually. The Downloads page can pause or restart a
+download, stop it and delete only its torrent-owned files, or remove a finished tile while keeping
+the media files.
+
+Torrent payloads download into an isolated hidden staging directory. On completion Torenta copies
+them into the movie or season directory, overwriting files with the same paths, records the final
+file manifest, and then removes staging. This crash-safe process can temporarily require twice the
+torrent size. Changing the configured download directory does not move old records or partial
+payloads; only the newly configured root is loaded.
+
 #### Run End-to-End Test:
 
 The Playwright test starts the Spring Boot backend and Angular dev server automatically. If either

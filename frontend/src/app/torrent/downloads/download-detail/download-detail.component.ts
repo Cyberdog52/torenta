@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { DownloadDto } from '../../../shared/dto/torrent/DownloadDto';
 import { DownloadState } from '../../../shared/dto/torrent/DownloadState';
 import {
@@ -13,22 +15,27 @@ const BYTES_PER_SECOND_IN_MBIT = 125_000;
 /** Label + icon shown on the status chip and the progress row for each state. */
 const STATUS_META: Record<DownloadState, { label: string; icon: string }> = {
   [DownloadState.STARTED]: { label: 'Downloading', icon: 'downloading' },
+  [DownloadState.PAUSED]: { label: 'Paused', icon: 'pause_circle' },
   [DownloadState.FINISHED]: { label: 'Finished', icon: 'check_circle' },
-  [DownloadState.CANCELLED]: { label: 'Cancelled', icon: 'cancel' },
   [DownloadState.FAILED]: { label: 'Failed', icon: 'error' },
 };
 
+export type DownloadAction = 'pause' | 'restart' | 'stopAndDelete' | 'remove';
+
 @Component({
   selector: 'app-download-detail',
-  imports: [MatIconModule],
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './download-detail.component.scss',
   templateUrl: './download-detail.component.html',
 })
 export class DownloadDetailComponent {
   readonly downloadDto = input.required<DownloadDto>();
+  readonly busy = input(false);
+  readonly actionRequested = output<DownloadAction>();
 
   protected readonly isRunning = computed(() => this.downloadDto().state === DownloadState.STARTED);
+  protected readonly isPaused = computed(() => this.downloadDto().state === DownloadState.PAUSED);
 
   protected readonly isFailed = computed(() => this.downloadDto().state === DownloadState.FAILED);
 
@@ -42,7 +49,15 @@ export class DownloadDetailComponent {
 
   protected readonly status = computed(() => STATUS_META[this.downloadDto().state]);
 
-  protected readonly title = computed(() => getDownloadTitle(this.downloadDto().downloadRequest));
+  protected readonly title = computed(() => {
+    const download = this.downloadDto();
+    return (
+      download.displayTitle ??
+      (download.downloadRequest == null
+        ? `Unknown download (${download.id})`
+        : getDownloadTitle(download.downloadRequest))
+    );
+  });
 
   protected readonly backgroundImage = computed(() =>
     backdropUrl(backdropPathOf(this.downloadDto().downloadRequest)),
@@ -55,8 +70,8 @@ export class DownloadDetailComponent {
     switch (this.downloadDto().state) {
       case DownloadState.FINISHED:
         return 'Successfully downloaded';
-      case DownloadState.CANCELLED:
-        return 'Cancelled';
+      case DownloadState.PAUSED:
+        return `${this.progressPercent().toFixed(1)} % paused`;
       case DownloadState.FAILED:
         return `Failed: ${this.errorMessage()}`;
       case DownloadState.STARTED:
@@ -104,8 +119,8 @@ export class DownloadDetailComponent {
     switch (this.downloadDto().state) {
       case DownloadState.FINISHED:
         return 'Finished';
-      case DownloadState.CANCELLED:
-        return 'Cancelled';
+      case DownloadState.PAUSED:
+        return `${this.progressPercent().toFixed(1)}% downloaded, paused`;
       case DownloadState.STARTED:
         return `${this.progressPercent().toFixed(1)}% downloaded, ${this.estimatedTimeFinished()} remaining`;
       default:
@@ -124,8 +139,8 @@ export class DownloadDetailComponent {
     switch (download.state) {
       case DownloadState.FINISHED:
         return `${this.title()} finished downloading.`;
-      case DownloadState.CANCELLED:
-        return `${this.title()} download cancelled.`;
+      case DownloadState.PAUSED:
+        return `${this.title()} download paused at ${this.progressPercent().toFixed(1)}%.`;
       case DownloadState.STARTED: {
         const roundedPercent = Math.floor(this.progressPercent() / 10) * 10;
         return `${this.title()}: ${roundedPercent}% downloaded.`;
@@ -136,7 +151,10 @@ export class DownloadDetailComponent {
   });
 }
 
-function backdropPathOf(downloadRequest: DownloadRequestDto): string | null {
+function backdropPathOf(downloadRequest: DownloadRequestDto | null): string | null {
+  if (downloadRequest == null) {
+    return null;
+  }
   return (
     downloadRequest.seriesDetail?.backdrop_path ??
     downloadRequest.movieDetail?.backdrop_path ??
