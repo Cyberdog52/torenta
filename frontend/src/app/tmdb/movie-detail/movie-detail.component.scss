@@ -13,3 +13,7 @@
 .foreground {
   @include panel.foreground;
 }
+
+app-torrent-suggestions {
+  --torrent-suggestions-empty-color: rgb(245 247 251 / 78%);
+}

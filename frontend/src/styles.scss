@@ -37,20 +37,13 @@ body {
 // consistent gutters at every viewport size.
 .page {
   box-sizing: border-box;
-  max-width: 1100px;
+  max-width: 1400px;
   margin: 0 auto;
   padding: 16px;
 
   @media (min-width: 600px) {
     padding: 24px;
   }
-}
-
-// Opt-in wider container for routes with `data: { wide: true }` (see
-// `app.ts`/`app.routes.ts`) — e.g. /search, whose three result panels
-// benefit from extra horizontal room.
-.page--wide {
-  max-width: 1400px;
 }
 
 // Visually hides content while keeping it in the accessibility tree, for
