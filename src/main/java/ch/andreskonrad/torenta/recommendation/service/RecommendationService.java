@@ -33,7 +33,7 @@ public class RecommendationService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(RecommendationService.class);
 
-    public static final int DEFAULT_WEEKS_BACK = 0;
+    public static final int DEFAULT_WEEKS_BACK = 2;
     private static final int RECOMMENDED_EPISODE_COUNT = 3;
 
     private final DirectoryService directoryService;
@@ -80,7 +80,8 @@ public class RecommendationService {
                         seriesName,
                         series.getSeriesDetail().getId(),
                         series.getSeriesDetail().getPoster_path(),
-                        missingEpisodes));
+                        missingEpisodes,
+                        series.getSeriesDetail()));
             }
         }
 
@@ -161,7 +162,8 @@ public class RecommendationService {
                 episodeString(tmdbEpisodeDto.getSeason_number(), tmdbEpisodeDto.getEpisode_number()),
                 tmdbEpisodeDto.getName(),
                 tmdbEpisodeDto.getAir_date(),
-                tmdbEpisodeDto.getStill_path());
+                tmdbEpisodeDto.getStill_path(),
+                tmdbEpisodeDto);
     }
 
     private String episodeString(int seasonNumber, int episodeNumber) {

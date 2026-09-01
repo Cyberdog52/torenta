@@ -1,5 +1,7 @@
 package ch.andreskonrad.torenta.recommendation.dto;
 
+import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
+
 import java.util.Objects;
 
 public class RecommendedEpisodeDto {
@@ -10,6 +12,7 @@ public class RecommendedEpisodeDto {
     private final String name;
     private final String airDate;
     private final String stillPath;
+    private final TmdbEpisodeDto tmdbEpisodeDto;
 
     public RecommendedEpisodeDto(
             int seasonNumber,
@@ -17,7 +20,8 @@ public class RecommendedEpisodeDto {
             String episodeString,
             String name,
             String airDate,
-            String stillPath
+            String stillPath,
+            TmdbEpisodeDto tmdbEpisodeDto
     ) {
         this.seasonNumber = seasonNumber;
         this.episodeNumber = episodeNumber;
@@ -25,6 +29,7 @@ public class RecommendedEpisodeDto {
         this.name = name;
         this.airDate = airDate;
         this.stillPath = stillPath;
+        this.tmdbEpisodeDto = tmdbEpisodeDto;
     }
 
     public int getSeasonNumber() {
@@ -49,6 +54,16 @@ public class RecommendedEpisodeDto {
 
     public String getStillPath() {
         return stillPath;
+    }
+
+    /**
+     * The raw TMDB episode, needed by the frontend to build a {@code DownloadRequestDto} with a
+     * real TMDB {@code id}/{@code show_id} (required for correct equals-based download-status
+     * matching later, see {@code Episode}/{@code Season}), so a torrent found for this episode
+     * can be started directly from the Recommendations page.
+     */
+    public TmdbEpisodeDto getTmdbEpisodeDto() {
+        return tmdbEpisodeDto;
     }
 
     @Override

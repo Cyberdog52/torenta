@@ -13,6 +13,7 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { RecommendationService, DEFAULT_RECOMMENDATION_WEEKS } from './recommendation.service';
+import { SeriesTorrentsComponent } from './series-torrents/series-torrents.component';
 import { safeValue } from '../shared/resource';
 import { posterUrl } from '../shared/tmdb-images';
 import { NotificationService } from '../shared/notification/notification.service';
@@ -27,6 +28,7 @@ import { NotificationType } from '../shared/dto/notification/Notification';
     MatFormFieldModule,
     MatInputModule,
     MatButtonModule,
+    SeriesTorrentsComponent,
   ],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './recommendation.component.scss',
@@ -39,7 +41,7 @@ export class RecommendationComponent {
   /**
    * How far back (in weeks) a series folder must have been touched to still
    * be considered for recommendations, keeping the scan fast for large
-   * libraries. `0` (the default) means "no filter": scan the whole library.
+   * libraries. `0` means "no filter": scan the whole library.
    */
   protected readonly weeks = signal(DEFAULT_RECOMMENDATION_WEEKS);
 

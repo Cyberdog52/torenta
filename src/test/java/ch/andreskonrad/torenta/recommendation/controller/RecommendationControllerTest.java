@@ -43,8 +43,8 @@ class RecommendationControllerTest {
     }
 
     @Test
-    void get_defaultsWeeksToZero() throws Exception {
-        when(recommendationService.getRecommendations(0)).thenReturn(new RecommendationResultDto(0, List.of(), List.of()));
+    void get_defaultsWeeksToTwo() throws Exception {
+        when(recommendationService.getRecommendations(2)).thenReturn(new RecommendationResultDto(0, List.of(), List.of()));
 
         mockMvc.perform(get("/api/recommendation"))
                 .andExpect(status().isOk());
@@ -65,7 +65,7 @@ class RecommendationControllerTest {
 
     @Test
     void get_serviceFailureReturnsInternalServerError() throws Exception {
-        when(recommendationService.getRecommendations(0)).thenThrow(new IllegalStateException("failure"));
+        when(recommendationService.getRecommendations(2)).thenThrow(new IllegalStateException("failure"));
 
         mockMvc.perform(get("/api/recommendation"))
                 .andExpect(status().isInternalServerError());

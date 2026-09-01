@@ -28,3 +28,14 @@ export function getDownloadTitle(downloadRequest: DownloadRequestDto): string {
   }
   return downloadRequest.torrentEntry.name;
 }
+
+/**
+ * Drops a leading franchise prefix, e.g. 'Star Wars: Andor S01E01' -> 'Andor S01E01'.
+ * Only splits on the *first* colon and trims the result, so titles with more
+ * than one colon (e.g. 'Marvel: Agents of S.H.I.E.L.D.: Season 1') keep
+ * everything after the franchise name instead of losing it to `.pop()`.
+ */
+export function dropFranchisePrefix(title: string): string {
+  const separatorIndex = title.indexOf(':');
+  return (separatorIndex === -1 ? title : title.slice(separatorIndex + 1)).trim();
+}

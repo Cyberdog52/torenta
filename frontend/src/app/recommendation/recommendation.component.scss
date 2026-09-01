@@ -1,6 +1,15 @@
 .weeks-field {
   width: 100%;
   max-width: 420px;
+  // No bottom margin needed: the plain-text hint below is in normal flow and
+  // can never overlap it (unlike mat-hint, which reserves height for a
+  // single line and overflows/collides with wrapped, multi-line text).
+}
+
+.weeks-hint {
+  margin: 4px 0 16px;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.75rem;
 }
 
 .scan-summary {

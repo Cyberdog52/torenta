@@ -13,8 +13,8 @@
         [value]="weeks()"
         (change)="setWeeks($any($event.target))"
       />
-      <mat-hint>0 scans your whole library; set a number to speed up large libraries</mat-hint>
     </mat-form-field>
+    <p class="weeks-hint">0 scans your whole library; set a number to speed up large libraries.</p>
 
     <p class="visually-hidden" aria-live="polite">
       {{ recommendations().length }} series with missing episodes.
@@ -59,12 +59,16 @@
                 </li>
               }
             </ul>
+            <app-series-torrents
+              [seriesDetail]="recommendation.seriesDetail"
+              [episode]="recommendation.recommendedEpisodes[0]"
+            />
             <a
               matButton="elevated"
               [routerLink]="['/search']"
               [queryParams]="{ series: recommendation.seriesName }"
             >
-              <mat-icon>search</mat-icon>Find torrents
+              <mat-icon>search</mat-icon>Find more torrents
             </a>
           </div>
         </mat-card>

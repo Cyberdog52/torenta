@@ -26,6 +26,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -99,8 +100,9 @@ public class RecommendationServiceTest {
     @Test
     public void getRecommendations_seriesWithMissingEpisodesAcrossSeasons_recommendsUpToThreeChronologically() {
         when(directoryService.getSeriesNamesModifiedWithin(any())).thenReturn(List.of("The Office"));
+        TmdbSeriesDetailDto detail = detail(1, "The Office");
         Series series = series(
-                detail(1, "The Office"),
+                detail,
                 season(1, episode(1, 1, past(), true), episode(1, 2, past(), true)),
                 season(2, episode(2, 1, past(), true), episode(2, 2, past(), false)),
                 season(3,
@@ -116,10 +118,13 @@ public class RecommendationServiceTest {
         assertEquals(1, recommendations.size());
         SeriesRecommendationDto recommendation = recommendations.get(0);
         assertEquals("The Office", recommendation.getSeriesName());
+        assertSame(detail, recommendation.getSeriesDetail());
         assertEquals(3, recommendation.getRecommendedEpisodes().size());
         assertEquals("S02E02", recommendation.getRecommendedEpisodes().get(0).getEpisodeString());
         assertEquals("S03E02", recommendation.getRecommendedEpisodes().get(1).getEpisodeString());
         assertEquals("S03E03", recommendation.getRecommendedEpisodes().get(2).getEpisodeString());
+        assertEquals(2, recommendation.getRecommendedEpisodes().get(0).getTmdbEpisodeDto().getSeason_number());
+        assertEquals(2, recommendation.getRecommendedEpisodes().get(0).getTmdbEpisodeDto().getEpisode_number());
     }
 
     @Test
@@ -151,6 +156,7 @@ public class RecommendationServiceTest {
 
         assertEquals(1, recommendations.size());
         assertEquals("S02E01", recommendations.get(0).getRecommendedEpisodes().get(0).getEpisodeString());
+        assertSame(nextSeasonEpisode, recommendations.get(0).getRecommendedEpisodes().get(0).getTmdbEpisodeDto());
     }
 
     @Test

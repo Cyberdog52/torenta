@@ -5,6 +5,10 @@ import { provideRouter } from '@angular/router';
 import { RecommendationComponent } from './recommendation.component';
 import { DEFAULT_RECOMMENDATION_WEEKS } from './recommendation.service';
 import { RecommendationResult } from '../shared/dto/recommendation/RecommendationResult';
+import { SeriesRecommendation } from '../shared/dto/recommendation/SeriesRecommendation';
+import { RecommendedEpisode } from '../shared/dto/recommendation/RecommendedEpisode';
+import { TorrentService } from '../torrent/torrent.service';
+import { FakeTorrentService } from '../torrent/testing/fake-torrent-service';
 
 function result(overrides: Partial<RecommendationResult> = {}): RecommendationResult {
   return {
@@ -19,7 +23,12 @@ describe('RecommendationComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [RecommendationComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
+      providers: [
+        provideHttpClient(),
+        provideHttpClientTesting(),
+        provideRouter([]),
+        { provide: TorrentService, useClass: FakeTorrentService },
+      ],
     }).compileComponents();
   });
 
@@ -53,6 +62,7 @@ describe('RecommendationComponent', () => {
               seriesName: 'The Office',
               tmdbSeriesId: 1,
               posterPath: '/office.jpg',
+              seriesDetail: { id: 1, name: 'The Office' } as SeriesRecommendation['seriesDetail'],
               recommendedEpisodes: [
                 {
                   seasonNumber: 3,
@@ -61,12 +71,25 @@ describe('RecommendationComponent', () => {
                   name: 'Initiation',
                   airDate: '2006-11-30',
                   stillPath: null,
+                  tmdbEpisodeDto: {
+                    season_number: 3,
+                    episode_number: 5,
+                  } as RecommendedEpisode['tmdbEpisodeDto'],
                 },
               ],
             },
           ],
         }),
       );
+
+    // Flush both the recommendation request and the torrent search triggered by the embedded
+    // <app-series-torrents> using plain synchronous detectChanges() cycles, *before* awaiting
+    // whenStable(): the child's torrent search is itself tracked as a pending task, so awaiting
+    // stability before it's flushed would deadlock forever.
+    fixture.detectChanges();
+    await Promise.resolve();
+    fixture.detectChanges();
+    httpTesting.expectOne((r) => r.url === 'api/torrent').flush([]);
 
     await fixture.whenStable();
     fixture.detectChanges();

@@ -5,13 +5,12 @@ import { RecommendationResult } from '../shared/dto/recommendation/Recommendatio
 const BACKEND_URL = 'api/recommendation';
 
 /**
- * `0` means "no filter": scan every series regardless of when it was last touched. This is the
- * default because a series can be genuinely incomplete but untouched for a long time (e.g. an
- * old download that was never finished), which a recency filter would otherwise hide from the
- * very feature meant to surface it. Set to a positive number of weeks to speed up the scan for
- * very large libraries by only considering recently touched series.
+ * Only series folders touched within this many weeks are scanned by default, to keep the scan
+ * fast for large libraries. Set to `0` in the UI to scan the whole library regardless of when a
+ * series was last touched (useful for older, genuinely-incomplete downloads that a recency
+ * filter would otherwise hide from the very feature meant to surface them).
  */
-export const DEFAULT_RECOMMENDATION_WEEKS = 0;
+export const DEFAULT_RECOMMENDATION_WEEKS = 2;
 
 @Injectable({ providedIn: 'root' })
 export class RecommendationService {

@@ -62,18 +62,22 @@ reformat, or clean it up** — only touch it for a deliberate, user-approved int
    address of any interface (often a Hyper-V/WSL/VPN adapter with no internet route).
 4. **Library** — completed media is surfaced through `LibraryService`/`DirectoryService`.
 5. **Recommend** — the Recommendations page calls `RecommendationController` →
-   `RecommendationService`, which by default lists every series folder under
-   `<download-root>/Series` (`DirectoryService.getAllSeriesNames`); a positive `weeks` query
-   param instead restricts the scan to folders whose *directory* mtimes (not file mtimes — BitTorrent
-   downloads and archive extraction routinely preserve old file timestamps) were touched within
-   that many weeks (`DirectoryService.getSeriesNamesModifiedWithin`), trading completeness for
+   `RecommendationService`, which by default lists series folders under
+   `<download-root>/Series` touched within the last 2 weeks (`weeks` query param; `0` scans the
+   whole library instead). The filter checks *directory* mtimes, not file mtimes — BitTorrent
+   downloads and archive extraction routinely preserve old file timestamps — via
+   `DirectoryService.getSeriesNamesModifiedWithin`/`getAllSeriesNames`, trading completeness for
    speed on very large libraries. Each candidate series is resolved via `LibraryService`, and up
    to 3 missing aired episodes are returned per series (chronologically, spanning into the next
-   TMDB season even if it has no local folder yet). The response (`RecommendationResultDto`)
-   also reports how many series folders were scanned and lists any that could not be resolved to
-   a TMDB show, so a user can tell "nothing missing" apart from "couldn't check this" from the UI
-   alone. Results are cached (`CustomCacheConfig.RECOMMENDATION_CACHE_NAME`) and evicted every 5
-   minutes.
+   TMDB season even if it has no local folder yet), each carrying the raw TMDB series/episode
+   objects so the frontend can start a download without another round trip. The response
+   (`RecommendationResultDto`) also reports how many series folders were scanned and lists any
+   that could not be resolved to a TMDB show, so a user can tell "nothing missing" apart from
+   "couldn't check this" from the UI alone. Results are cached
+   (`CustomCacheConfig.RECOMMENDATION_CACHE_NAME`) and evicted every 5 minutes. Each recommended
+   series card additionally has its own `SeriesTorrentsComponent`, which lazily searches
+   `TorrentService` (same `<series> S0xE0y` query convention as the Search page) for the top 3
+   trusted/VIP torrents by seeders and can start a download directly from the page.
 
 ## Frontend
 
