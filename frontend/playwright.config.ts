@@ -8,6 +8,10 @@ const backendCommand =
 export default defineConfig({
   outputDir: './dist/playwright-test-results',
   testDir: './e2e',
+  globalSetup: './e2e/global-setup.ts',
+  expect: {
+    timeout: 10000,
+  },
   use: {
     baseURL: 'http://localhost:4200',
     trace: 'retain-on-failure',
