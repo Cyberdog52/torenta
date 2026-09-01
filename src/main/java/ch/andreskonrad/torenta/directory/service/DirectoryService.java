@@ -153,8 +153,14 @@ public class DirectoryService {
     }
 
     private boolean wasModifiedAfter(Path path, Instant cutoff) {
-        try (Stream<Path> allPaths = Files.walk(path)) {
-            return allPaths.anyMatch(p -> isModifiedAfter(p, cutoff));
+        // Only directory mtimes are considered, not file mtimes: torrent clients (including
+        // ours) commonly preserve a downloaded file's original mtime from the torrent metadata,
+        // which can be years in the past even though the file was just downloaded. A directory's
+        // own mtime, on the other hand, is set by the filesystem whenever an entry is added or
+        // removed inside it, so it reliably reflects recent local activity regardless of what
+        // timestamp the downloaded files themselves carry.
+        try (Stream<Path> directories = Files.walk(path).filter(Files::isDirectory)) {
+            return directories.anyMatch(p -> isModifiedAfter(p, cutoff));
         } catch (IOException e) {
             LOGGER.warn("Couldn't determine last modified time for " + path, e);
             return false;

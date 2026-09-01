@@ -242,12 +242,36 @@ public class DirectoryServiceTest {
     }
 
     @Test
-    public void getSeriesNamesModifiedWithin_recentFileInStaleSeriesFolder_isIncluded() throws IOException {
+    public void getSeriesNamesModifiedWithin_freshFileWithOldMtimeInStaleFolder_isExcluded() throws IOException {
+        // Torrent clients (including ours) commonly preserve a downloaded file's original mtime
+        // from the torrent metadata, which can be years old even though it was just downloaded.
+        // A stale file mtime alone must not make an otherwise untouched series folder count as
+        // recently modified.
         Path seriesPath = rootFolder.resolve("Series").resolve("Old Show");
         Path seasonPath = Files.createDirectories(seriesPath.resolve("S03"));
-        Path newEpisode = Files.createFile(seasonPath.resolve("episode-S03E01.mp4"));
+        Path oldEpisode = Files.createFile(seasonPath.resolve("episode-S03E01.mp4"));
+        Instant longAgo = Instant.now().minus(Duration.ofDays(365 * 5));
+        setLastModifiedRecursively(seriesPath, longAgo);
+        Files.setLastModifiedTime(oldEpisode, FileTime.from(longAgo));
+
+        List<String> seriesNames = directoryService.getSeriesNamesModifiedWithin(Duration.ofDays(14));
+
+        assertTrue(seriesNames.isEmpty());
+    }
+
+    @Test
+    public void getSeriesNamesModifiedWithin_newlyCreatedSeasonFolderWithOldFileMtimes_isIncluded()
+            throws IOException {
+        // Simulates a fresh download whose extracted file preserves an old mtime from the
+        // torrent metadata: the season folder itself was just created by the app, so it (not the
+        // file inside it) must be what makes the series count as recently modified.
+        Path seriesPath = rootFolder.resolve("Series").resolve("Old Show");
+        Files.createDirectory(seriesPath);
         setLastModifiedRecursively(seriesPath, Instant.now().minus(Duration.ofDays(30)));
-        Files.setLastModifiedTime(newEpisode, FileTime.from(Instant.now()));
+
+        Path seasonPath = Files.createDirectory(seriesPath.resolve("S03"));
+        Path newEpisode = Files.createFile(seasonPath.resolve("episode-S03E01.mp4"));
+        Files.setLastModifiedTime(newEpisode, FileTime.from(Instant.now().minus(Duration.ofDays(365 * 5))));
 
         List<String> seriesNames = directoryService.getSeriesNamesModifiedWithin(Duration.ofDays(14));
 

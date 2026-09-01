@@ -58,7 +58,9 @@ export class RecommendationComponent {
       if (this.recommendationsResource.error()) {
         this.notificationService.notify({
           content: 'Recommendations could not be loaded.',
-          type: NotificationType.ERROR,
+          // Shown as a toast: recommendations are a convenience feature, not
+          // critical enough to warrant the persistent error banner.
+          type: NotificationType.INFO,
         });
       }
     });
