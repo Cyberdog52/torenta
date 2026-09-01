@@ -15,6 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -215,6 +218,83 @@ public class DirectoryServiceTest {
                 .map(DirectoryDto::getAbsolutePath)
                 .map(Path::of)
                 .allMatch(path -> path.normalize().startsWith(rootFolder.toAbsolutePath().normalize())));
+    }
+
+    @Test
+    public void getAllSeriesNames_returnsEveryTopLevelSeriesFolderRegardlessOfAge() throws IOException {
+        Files.createDirectory(rootFolder.resolve("Series").resolve("Recent Show"));
+        Path oldShowPath = Files.createDirectory(rootFolder.resolve("Series").resolve("Old Show"));
+        setLastModifiedRecursively(oldShowPath, Instant.now().minus(Duration.ofDays(365 * 5)));
+
+        List<String> seriesNames = directoryService.getAllSeriesNames();
+
+        assertEquals(Set.of("Recent Show", "Old Show"), Set.copyOf(seriesNames));
+    }
+
+    @Test
+    public void getSeriesNamesModifiedWithin_recentlyModifiedSeries_isIncluded() throws IOException {
+        Path seriesPath = rootFolder.resolve("Series").resolve("Recent Show");
+        Files.createDirectory(seriesPath);
+
+        List<String> seriesNames = directoryService.getSeriesNamesModifiedWithin(Duration.ofDays(14));
+
+        assertEquals(List.of("Recent Show"), seriesNames);
+    }
+
+    @Test
+    public void getSeriesNamesModifiedWithin_staleSeries_isExcluded() throws IOException {
+        Path seriesPath = rootFolder.resolve("Series").resolve("Old Show");
+        Files.createDirectory(seriesPath);
+        setLastModifiedRecursively(seriesPath, Instant.now().minus(Duration.ofDays(30)));
+
+        List<String> seriesNames = directoryService.getSeriesNamesModifiedWithin(Duration.ofDays(14));
+
+        assertTrue(seriesNames.isEmpty());
+    }
+
+    @Test
+    public void getSeriesNamesModifiedWithin_freshFileWithOldMtimeInStaleFolder_isExcluded() throws IOException {
+        // Torrent clients (including ours) commonly preserve a downloaded file's original mtime
+        // from the torrent metadata, which can be years old even though it was just downloaded.
+        // A stale file mtime alone must not make an otherwise untouched series folder count as
+        // recently modified.
+        Path seriesPath = rootFolder.resolve("Series").resolve("Old Show");
+        Path seasonPath = Files.createDirectories(seriesPath.resolve("S03"));
+        Path oldEpisode = Files.createFile(seasonPath.resolve("episode-S03E01.mp4"));
+        Instant longAgo = Instant.now().minus(Duration.ofDays(365 * 5));
+        setLastModifiedRecursively(seriesPath, longAgo);
+        Files.setLastModifiedTime(oldEpisode, FileTime.from(longAgo));
+
+        List<String> seriesNames = directoryService.getSeriesNamesModifiedWithin(Duration.ofDays(14));
+
+        assertTrue(seriesNames.isEmpty());
+    }
+
+    @Test
+    public void getSeriesNamesModifiedWithin_newlyCreatedSeasonFolderWithOldFileMtimes_isIncluded()
+            throws IOException {
+        // Simulates a fresh download whose extracted file preserves an old mtime from the
+        // torrent metadata: the season folder itself was just created by the app, so it (not the
+        // file inside it) must be what makes the series count as recently modified.
+        Path seriesPath = rootFolder.resolve("Series").resolve("Old Show");
+        Files.createDirectory(seriesPath);
+        setLastModifiedRecursively(seriesPath, Instant.now().minus(Duration.ofDays(30)));
+
+        Path seasonPath = Files.createDirectory(seriesPath.resolve("S03"));
+        Path newEpisode = Files.createFile(seasonPath.resolve("episode-S03E01.mp4"));
+        Files.setLastModifiedTime(newEpisode, FileTime.from(Instant.now().minus(Duration.ofDays(365 * 5))));
+
+        List<String> seriesNames = directoryService.getSeriesNamesModifiedWithin(Duration.ofDays(14));
+
+        assertEquals(List.of("Old Show"), seriesNames);
+    }
+
+    private static void setLastModifiedRecursively(Path root, Instant instant) throws IOException {
+        try (var paths = Files.walk(root)) {
+            for (Path path : paths.collect(Collectors.toList())) {
+                Files.setLastModifiedTime(path, FileTime.from(instant));
+            }
+        }
     }
 
     private static DirectoryDto directoryNamed(DirectoryDto parent, String name) {

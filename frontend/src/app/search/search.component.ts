@@ -7,6 +7,7 @@ import {
   signal,
   WritableSignal,
 } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -90,6 +91,14 @@ export class SearchComponent {
         });
       }
     });
+
+    // Lets other pages (e.g. Recommendations) deep-link into a series search,
+    // for example `/search?series=The%20Office`.
+    const seriesName = inject(ActivatedRoute).snapshot.queryParamMap.get('series');
+    if (seriesName) {
+      this.seriesInputValue.set(seriesName);
+      this.seriesQuery.set(seriesName);
+    }
   }
 
   /**

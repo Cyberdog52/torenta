@@ -4,7 +4,11 @@
   "cli": {
     "packageManager": "npm",
     "analytics": "781a8817-5224-4f1c-803b-78d2f469d51b",
-    "schematicCollections": ["angular-eslint"]
+    "schematicCollections": ["angular-eslint"],
+    "cache": {
+      "enabled": true,
+      "environment": "all"
+    }
   },
   "newProjectRoot": "projects",
   "projects": {

@@ -9,6 +9,7 @@
       <input
         #seriesInput
         matInput
+        [value]="seriesInputValue()"
         (input)="updateInputValue(seriesInputValue, seriesInput)"
         (appDelayedKeyup)="seriesQuery.set($event)"
         autocomplete="off"

@@ -25,6 +25,23 @@ test('downloads page has no detectable accessibility violations', async ({ page 
   await expectNoViolations(page);
 });
 
+test('recommendations page has no detectable accessibility violations', async ({ page }) => {
+  // Without a stored TMDB key the app redirects to /preferences. Mock the
+  // preference endpoint so the key is always present, keeping this test
+  // deterministic on CI where no OS-level preferences are pre-configured.
+  await page.route('**/api/preference', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({ json: { downloadDirectoryPath: '/tmp', tmdbServiceKey: 'test-key' } });
+    } else {
+      await route.continue();
+    }
+  });
+
+  await page.goto('/recommendations');
+  await expect(page.getByLabel(/Only rescan series touched in the last/)).toBeVisible();
+  await expectNoViolations(page);
+});
+
 test('preferences page has no detectable accessibility violations', async ({ page }) => {
   await page.goto('/preferences');
   await expect(page.getByLabel('Root folder for downloads')).toBeVisible();

@@ -1,0 +1,43 @@
+@if (isLoading()) {
+  <div class="loading">
+    <mat-progress-spinner mode="indeterminate" diameter="18" aria-label="Searching for torrents" />
+    <span class="visually-hidden" aria-live="polite">Searching for torrents…</span>
+  </div>
+} @else if (topTorrents().length > 0) {
+  <ul class="torrent-list">
+    @for (torrent of topTorrents(); track torrent.magnetLink) {
+      <li class="torrent-row">
+        <mat-icon class="trusted-icon" aria-label="Trusted uploader">verified</mat-icon>
+        <span class="torrent-name">{{ torrent.name }}</span>
+        <span class="torrent-seeders">{{ torrent.numberOfSeeders }} seeders</span>
+        @if (hasStartedDownload(torrent)) {
+          <span class="downloading">Downloading …</span>
+        } @else {
+          <button
+            matButton="elevated"
+            class="download-button"
+            [disabled]="isDownloadPending(torrent)"
+            [attr.aria-label]="
+              (isDownloadPending(torrent) ? 'Starting download of ' : 'Download ') + torrent.name
+            "
+            (click)="startDownload(torrent)"
+          >
+            @if (isDownloadPending(torrent)) {
+              <mat-progress-spinner
+                class="download-spinner"
+                mode="indeterminate"
+                diameter="16"
+                aria-hidden="true"
+              />
+              Starting…
+            } @else {
+              Download
+            }
+          </button>
+        }
+      </li>
+    }
+  </ul>
+} @else {
+  <p class="no-results">No trusted torrents found.</p>
+}

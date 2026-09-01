@@ -1,0 +1,77 @@
+:host {
+  display: block;
+  margin: 2px 0 4px 16px;
+}
+
+.loading {
+  display: flex;
+  align-items: center;
+  padding: 2px 0;
+}
+
+.torrent-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.torrent-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.8125rem;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
+.trusted-icon {
+  color: var(--mat-sys-primary);
+  flex-shrink: 0;
+}
+
+.torrent-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.torrent-seeders {
+  flex-shrink: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.downloading {
+  flex-shrink: 0;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.download-button {
+  flex-shrink: 0;
+  min-width: 0;
+  padding: 0 12px;
+  height: 28px;
+  line-height: 28px;
+  font-size: 0.75rem;
+}
+
+.download-spinner {
+  display: inline-block;
+  margin-right: 6px;
+  vertical-align: middle;
+}
+
+.no-results {
+  margin: 2px 0;
+  font-size: 0.8125rem;
+  color: var(--mat-sys-on-surface-variant);
+}

@@ -1,0 +1,139 @@
+@use '../tmdb/media-detail-panel' as panel;
+
+.days-field {
+  width: 100%;
+  max-width: 420px;
+  // No bottom margin needed: the plain-text hint below is in normal flow and
+  // can never overlap it (unlike mat-hint, which reserves height for a
+  // single line and overflows/collides with wrapped, multi-line text).
+}
+
+.days-hint {
+  margin: 4px 0 16px;
+  color: var(--mat-sys-on-surface-variant);
+  font-size: 0.75rem;
+}
+
+.scan-summary {
+  margin: 0 0 12px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.unresolved-warning {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0 0 16px;
+  padding: 12px;
+  border-radius: 4px;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+
+  mat-icon {
+    flex-shrink: 0;
+  }
+}
+
+.unresolved-title {
+  margin: 0;
+  font-weight: 500;
+}
+
+.unresolved-list {
+  margin: 4px 0 0;
+}
+
+.recommendation-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(480px, 100%), 1fr));
+  gap: 16px;
+  align-items: start;
+}
+
+// Reuses the same full-bleed-backdrop-behind-content pattern as the
+// Downloads page's cards (see `_media-detail-panel.scss`/`download-detail`),
+// which is far more space-efficient than a large square poster + separate
+// text column for content that's mostly a compact list of episodes.
+//
+// Unlike `download-detail` (short text confined to the left, where the
+// mixin's gradient already fades to opaque), this card's rows span the full
+// width, so the untouched right/bottom portion of the backdrop leaves text
+// with poor contrast there. A near-opaque scrim over the whole foreground
+// fixes that everywhere while still hinting at the backdrop underneath.
+.series-card {
+  @include panel.panel;
+}
+
+.foreground {
+  @include panel.foreground;
+  background: color-mix(in srgb, var(--mat-sys-surface-container-highest) 92%, transparent);
+  border-radius: inherit;
+}
+
+.series-name {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.episode-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.episode-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 0;
+}
+
+.episode-string {
+  font-weight: 500;
+  margin-right: 6px;
+}
+
+.episode-air-date {
+  color: var(--mat-sys-on-surface-variant);
+  margin-left: 6px;
+}
+
+.find-more-button {
+  align-self: flex-start;
+}
+
+.empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 240px;
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+    opacity: 0.6;
+  }
+}
+
+.empty-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface);
+}
+
+.empty-subtitle {
+  margin: 0;
+}
