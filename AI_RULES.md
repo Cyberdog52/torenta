@@ -20,8 +20,6 @@ The following may contain secrets, credentials, tokens, API keys, or other confi
 and **must never be used as AI context** in any form:
 
 ```text
-src/main/resources/application.properties
-src/main/resources/application-*.properties      # EXCEPT application-template.properties
 src/main/resources/bitthief.properties
 .env
 .env.*                                            # EXCEPT .env.template / .env.example
@@ -50,6 +48,10 @@ Safe, committed template files (placeholder values only, never real secrets):
 .env.template
 .env.example
 ```
+
+Spring `application.properties` and `application-*.properties` files contain non-sensitive
+configuration and may be read and committed. API keys and other secrets must remain in user
+preferences, environment variables, or a secret manager.
 
 ### 1.3 Never commit secrets
 
@@ -131,8 +133,8 @@ ch.andreskonrad.torenta.<feature>.service      # @Service, business logic
 ch.andreskonrad.torenta.<feature>.dto          # request/response data objects
 ```
 
-Existing features: `bittorrent`, `directory`, `library`, `preference`, `recommendation`, `tmdb`,
-`torrent`.
+Existing features: `bittorrent`, `concierge`, `directory`, `library`, `preference`,
+`recommendation`, `tmdb`, `torrent`.
 Add new functionality as a new feature slice following this pattern; do not create cross-cutting
 "utils"/"helpers" dumping grounds.
 

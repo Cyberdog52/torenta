@@ -15,6 +15,7 @@ public class PreferenceService {
     private static final String PREFERENCE_NODE_NAME = "ch/andreskonrad/torenta/preference";
     private static final String PREFERENCE_DOWNLOAD_DIRECTORY = "downloadDirectory";
     private static final String PREFERENCE_TMDB_SERVICE_KEY = "tmdbServiceKey";
+    private static final String PREFERENCE_OPENAI_API_KEY = "openAiApiKey";
 
     private DirectoryService directoryService;
 
@@ -24,8 +25,9 @@ public class PreferenceService {
         String defaultDownloadDirectoryPath = Paths.get(System.getProperty("user.home"), "Downloads").toString();
         String downloadDirectoryPath = userPreferenceRoot.get(PREFERENCE_DOWNLOAD_DIRECTORY, defaultDownloadDirectoryPath);
         String tmdbServiceKey = userPreferenceRoot.get(PREFERENCE_TMDB_SERVICE_KEY, null);
+        String openAiApiKey = userPreferenceRoot.get(PREFERENCE_OPENAI_API_KEY, null);
 
-        return new UserPreference(downloadDirectoryPath, tmdbServiceKey);
+        return new UserPreference(downloadDirectoryPath, tmdbServiceKey, openAiApiKey);
     }
 
     public void setDirectoryService(DirectoryService directoryService) {
@@ -42,6 +44,9 @@ public class PreferenceService {
             userPreferenceRoot.put(PREFERENCE_TMDB_SERVICE_KEY, preferences.getTmdbServiceKey());
         } else {
             userPreferenceRoot.remove(PREFERENCE_TMDB_SERVICE_KEY);
+        }
+        if (preferences.getOpenAiApiKey() != null) {
+            userPreferenceRoot.put(PREFERENCE_OPENAI_API_KEY, preferences.getOpenAiApiKey());
         }
 
         if (this.directoryService != null) {

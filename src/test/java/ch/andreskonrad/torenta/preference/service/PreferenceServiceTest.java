@@ -34,9 +34,10 @@ public class PreferenceServiceTest {
 
     @Test
     public void saveDownloadDirectory_customFolder_stored() {
-        UserPreference userPreferences = new UserPreference("C:/", "tmdb-key");
+        UserPreference userPreferences = new UserPreference("C:/", "tmdb-key", "openai-key");
         when(preferences.get(eq("downloadDirectory"), anyString())).thenReturn("C:/");
         when(preferences.get(eq("tmdbServiceKey"), eq(null))).thenReturn("tmdb-key");
+        when(preferences.get(eq("openAiApiKey"), eq(null))).thenReturn("openai-key");
 
         preferenceService.save(userPreferences);
 
@@ -44,22 +45,25 @@ public class PreferenceServiceTest {
         assertEquals(userPreferences, storedPreferences);
         verify(preferences).put("downloadDirectory", "C:/");
         verify(preferences).put("tmdbServiceKey", "tmdb-key");
+        verify(preferences).put("openAiApiKey", "openai-key");
     }
 
     @Test
     public void saveDownloadDirectory_null_notStored() {
-        UserPreference oldPreferences = new UserPreference("C:/old", "tmdb-old");
+        UserPreference oldPreferences = new UserPreference("C:/old", "tmdb-old", "openai-old");
         preferenceService.save(oldPreferences);
 
         UserPreference newPreferences = new UserPreference(null, null);
         preferenceService.save(newPreferences);
         when(preferences.get(eq("downloadDirectory"), anyString())).thenReturn("C:/old");
         when(preferences.get(eq("tmdbServiceKey"), eq(null))).thenReturn("tmdb-old");
+        when(preferences.get(eq("openAiApiKey"), eq(null))).thenReturn("openai-old");
 
         UserPreference storedPreferences = preferenceService.loadPreferences();
         assertEquals(oldPreferences, storedPreferences);
         verify(preferences, times(1)).put("downloadDirectory", "C:/old");
         verify(preferences, times(1)).put("tmdbServiceKey", "tmdb-old");
+        verify(preferences, times(1)).put("openAiApiKey", "openai-old");
     }
 
 }

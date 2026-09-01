@@ -1,8 +1,6 @@
 {
   "permissions": {
     "deny": [
-      "Read(src/main/resources/application.properties)",
-      "Read(src/main/resources/application-*.properties)",
       "Read(src/main/resources/bitthief.properties)",
       "Read(.env)",
       "Read(.env.*)",
@@ -22,7 +20,6 @@
       "Read(**/id_ed25519)"
     ],
     "allow": [
-      "Read(src/main/resources/application-template.properties)",
       "Read(.env.template)",
       "Read(.env.example)"
     ]

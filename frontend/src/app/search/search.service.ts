@@ -1,15 +1,28 @@
-import { Injectable, Signal } from '@angular/core';
-import { httpResource } from '@angular/common/http';
+import { inject, Injectable, Signal } from '@angular/core';
+import { HttpClient, httpResource } from '@angular/common/http';
+import { Observable, timeout } from 'rxjs';
 import { TmdbSeriesDetailDto } from '../shared/dto/tmdb/TmdbSeriesDetailDto';
 import { TmdbEpisodeDto } from '../shared/dto/tmdb/TmdbEpisodeDto';
 import { TmdbMovieDetailDto } from '../shared/dto/tmdb/TmdbMovieDetailDto';
 import { TmdbSearchSeriesResultDto } from '../shared/dto/tmdb/TmdbSearchSeriesResultDto';
 import { TmdbSearchMoviesResultDto } from '../shared/dto/tmdb/TmdbSearchMoviesResultDto';
+import { ConciergeSearchRequestDto } from '../shared/dto/concierge/ConciergeSearchRequestDto';
+import { ConciergeSearchResponseDto } from '../shared/dto/concierge/ConciergeSearchResponseDto';
 
 const BACKEND_URL = 'api/tmdb';
+const CONCIERGE_URL = 'api/concierge/search';
+const CONCIERGE_TIMEOUT_MS = 130_000;
 
 @Injectable({ providedIn: 'root' })
 export class SearchService {
+  private readonly httpClient = inject(HttpClient);
+
+  searchConcierge(request: ConciergeSearchRequestDto): Observable<ConciergeSearchResponseDto> {
+    return this.httpClient
+      .post<ConciergeSearchResponseDto>(CONCIERGE_URL, request)
+      .pipe(timeout(CONCIERGE_TIMEOUT_MS));
+  }
+
   /** Reactive TV show search. Stays idle while the query is empty. */
   searchSeriesResource(query: Signal<string>) {
     return httpResource<TmdbSearchSeriesResultDto>(() => {
