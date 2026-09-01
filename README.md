@@ -35,6 +35,33 @@ IntelliJ IDEA is optional and only needed if you prefer running/debugging from t
 #### TMDB-Key
 First, you need to get an API key from [TMDB](https://developers.themoviedb.org/3/getting-started/introduction). Configure the key in the application's user preferences (Preferences in the UI).
 
+#### AI Concierge
+
+The `/search` page includes a natural-language AI Concierge. It uses **Ollama** by default:
+
+```bash
+ollama pull qwen3:8b
+ollama serve
+```
+
+The tracked `src/main/resources/application.properties` contains the non-sensitive defaults for
+Ollama at `http://localhost:11434` with `qwen3:8b`.
+
+To use OpenAI instead, save the API key on the Preferences page and set
+`app.ai.provider=OPENAI`. Never add the key to a tracked file. Provider models can be changed with
+`app.ai.ollama.model` or `app.ai.openai.model`. The concierge uses typed, evidence-backed filters
+covering the current TMDB movie/TV Discover API. Unresolved names remain ranking criteria rather
+than becoming raw query parameters. TMDB supplies all candidate facts; the model only extracts,
+ranks, and explains, and it never starts downloads.
+
+Ollama and OpenAI calls time out after 120 seconds; the concierge UI stops waiting after 130
+seconds and displays an error instead of remaining in its loading state.
+
+For local diagnostics, set `app.ai.logging.enabled=true`. This logs the intent and ranking
+prompts, structured AI responses, and TMDB requests/responses in execution order. TMDB API keys
+are removed from logged URLs. Keep it disabled outside local development because prompts and
+candidate metadata can contain user-provided or sensitive text.
+
 #### NodeJs
 The frontend runs on **Angular 22** and requires **Node.js 24 LTS** (>= 24.15.0).
 The repository pins the version in `.nvmrc`:
@@ -152,6 +179,7 @@ not installed during setup.
 
 - [CONTRIBUTING.md](CONTRIBUTING.md) — setup, build/test commands, PR checklist
 - [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md) — components, feature slices, request flow
+- [docs/AI_CONCIERGE.md](docs/AI_CONCIERGE.md) — AI provider setup, architecture, and API examples
 - [AI_RULES.md](AI_RULES.md) — authoritative security & development rules (AI and humans)
 - [SECURITY.md](SECURITY.md) — reporting vulnerabilities
 

@@ -1,5 +1,89 @@
 <h1 class="visually-hidden">Search</h1>
-<mat-card class="search-card">
+<mat-card class="search-card concierge-card">
+  <mat-card-header>
+    <h2 mat-card-title>AI Concierge</h2>
+  </mat-card-header>
+  <mat-card-content>
+    <form class="concierge-form" (ngSubmit)="submitConcierge(conciergeInput.value)">
+      <mat-form-field appearance="outline" class="concierge-field">
+        <mat-label>What would you like to watch?</mat-label>
+        <input
+          #conciergeInput
+          matInput
+          name="conciergePrompt"
+          autocomplete="off"
+          placeholder="For example: a hopeful science-fiction story from the 2010s"
+          [value]="conciergePrompt()"
+        />
+        <mat-icon matPrefix>auto_awesome</mat-icon>
+        <mat-hint>Describe genres, moods, actors, dates, rating, language, or runtime.</mat-hint>
+      </mat-form-field>
+      <button matButton="filled" type="submit" [disabled]="conciergeLoading()">Search</button>
+    </form>
+
+    @if (conciergeLoading()) {
+      <div class="search-status" aria-live="polite">
+        <mat-progress-spinner mode="indeterminate" diameter="32" aria-label="Searching concierge" />
+        <span>Finding recommendations…</span>
+      </div>
+    } @else if (conciergeError(); as error) {
+      <p class="search-error" role="alert">{{ error }}</p>
+    } @else if (conciergeSearched() && conciergeResults().length === 0) {
+      <p class="search-empty" aria-live="polite">No recommendations matched your request.</p>
+    }
+
+    @if (conciergeResults().length > 0) {
+      <p class="visually-hidden" aria-live="polite">
+        {{ conciergeResults().length }} concierge recommendations found.
+      </p>
+      <mat-accordion class="results concierge-results">
+        @for (result of conciergeResults(); track conciergePanelKey(result)) {
+          @let key = conciergePanelKey(result);
+          <mat-expansion-panel
+            class="result-panel concierge-result-panel"
+            (opened)="setConciergePanelOpen(key, true)"
+            (closed)="setConciergePanelOpen(key, false)"
+          >
+            <mat-expansion-panel-header class="result-header">
+              <mat-panel-title class="result-title concierge-result-title">
+                <span class="result-rank" [attr.aria-label]="'Rank ' + result.rank"
+                  >#{{ result.rank }}</span
+                >
+                <img
+                  class="poster"
+                  width="46"
+                  height="69"
+                  loading="lazy"
+                  [src]="posterUrl(result.posterPath)"
+                  alt=""
+                  aria-hidden="true"
+                />
+                <span class="concierge-result-copy">
+                  <span class="result-heading">
+                    <span class="result-name">{{ result.title }}</span>
+                    <span class="result-rating" [attr.aria-label]="'Rating ' + result.rating">
+                      <mat-icon aria-hidden="true">star</mat-icon>{{ result.rating }}
+                    </span>
+                  </span>
+                  <span class="concierge-explanation">{{ result.explanation }}</span>
+                </span>
+              </mat-panel-title>
+            </mat-expansion-panel-header>
+            @if (isConciergePanelOpen(key)) {
+              @if (result.mediaType === 'MOVIE') {
+                <app-movie-detail [id]="result.id" />
+              } @else {
+                <app-series-detail [id]="result.id" />
+              }
+            }
+          </mat-expansion-panel>
+        }
+      </mat-accordion>
+    }
+  </mat-card-content>
+</mat-card>
+
+<mat-card class="search-card series-search-card">
   <mat-card-header>
     <h2 mat-card-title>Search TV Show</h2>
   </mat-card-header>
@@ -113,7 +197,7 @@
   </mat-card-content>
 </mat-card>
 
-<mat-card class="search-card">
+<mat-card class="search-card movie-search-card">
   <mat-card-header>
     <h2 mat-card-title>Search Movie</h2>
   </mat-card-header>
@@ -231,7 +315,7 @@
   </mat-card-content>
 </mat-card>
 
-<mat-card class="search-card">
+<mat-card class="search-card torrent-search-card">
   <mat-card-header>
     <h2 mat-card-title>Search Torrents</h2>
   </mat-card-header>

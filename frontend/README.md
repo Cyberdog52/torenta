@@ -60,8 +60,9 @@ Install Playwright's bundled Chromium browser once:
 npx playwright install chromium
 ```
 
-The Playwright configuration starts the Spring Boot backend and Angular dev server automatically.
-Locally, it reuses either server if it is already running.
+The Playwright configuration starts a dependency-free Ollama/TMDB protocol fixture, the Spring Boot
+backend, and the Angular dev server automatically. The backend is always Playwright-managed so it
+uses the deterministic fixture configuration; an existing Angular dev server may be reused locally.
 
 Run the smoke test headlessly:
 
@@ -75,8 +76,9 @@ Open Playwright's interactive UI to run, watch, and debug the test:
 npm run e2e:ui
 ```
 
-Both commands verify that the application renders and that the Preferences page loads its data from
-the backend through the frontend proxy.
+The suite verifies that the application renders, Preferences load through the frontend proxy, and
+AI Concierge recommendations flow through the real Spring endpoint while only Ollama and TMDB are
+protocol-mocked.
 
 Tests are organized by feature under `e2e/`, for example `e2e/app/` and `e2e/preferences/`.
 

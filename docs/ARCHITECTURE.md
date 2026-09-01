@@ -14,11 +14,10 @@ architecture **rules**; this file describes the runtime **structure and data flo
 │  shared/dto mirrors     │            JSON DTOs                    │                           │
 └─────────────────────────┘                                         └─────────────┬─────────────┘
                                                                                   │
-                     ┌─────────────────────────────┬───────────────────┬──────────┴────────────┐
-                     ▼                             ▼                   ▼                       ▼
-              TMDB REST API              PirateBay (HTML scrape)   bt/** engine          local filesystem
-              (movie/series             via jsoup                 (vendored BitTorrent   (media library,
-               metadata)                                           library)               directories)
+                     ┌─────────────────┬──────────────────┬──────────────────┬─────────┴──────────┐
+                     ▼                 ▼                  ▼                  ▼                    ▼
+              TMDB REST API       AI provider      PirateBay scrape     bt/** engine      local filesystem
+              (factual media)   (intent/ranking)       (jsoup)         (vendored)         (media library)
 ```
 
 ## Backend feature slices
@@ -29,6 +28,7 @@ Root package `ch.andreskonrad.torenta`. Each feature is a vertical slice
 | Feature      | Responsibility                                                        | Notable classes                                  |
 |--------------|-----------------------------------------------------------------------|--------------------------------------------------|
 | `tmdb`       | Search/fetch movie & series metadata from TMDB; throttles + caches    | `TmdbService`, `RequestThrottler`                |
+| `concierge`  | Extract intent, retrieve TMDB candidates, and rank/explain them       | `AiConciergeService`, `AiProvider`               |
 | `torrent`    | Find torrents by scraping PirateBay HTML                              | `TorrentService`, `PirateBayHtmlAPI`             |
 | `bittorrent` | Start/track/persist downloads via the vendored `bt` engine            | `BitTorrentService`, `Download`, `DownloadRecordStore` |
 | `library`    | Model & manage the local media library (series/seasons/episodes)     | `LibraryService`, `Series`/`Season`/`Episode`    |
@@ -38,6 +38,14 @@ Root package `ch.andreskonrad.torenta`. Each feature is a vertical slice
 
 Cross-cutting config lives at the package root: `TorentaApplication` (entry point) and
 `CustomCacheConfig` + `CacheCustomizer` (Spring Cache). Springdoc auto-configures OpenAPI.
+
+The concierge is a stateless two-stage flow. Spring AI first maps user text to typed,
+evidence-backed `SearchIntent` criteria. An allowlisted registry validates and maps all current
+movie/TV Discover filter families; cached TMDB lookups resolve names, while unresolved names remain
+ranking criteria. Application code retrieves and selectively enriches a bounded factual candidate
+set, then Spring AI ranks only those candidate IDs. Ollama and OpenAI are selected at startup behind
+`AiProvider`. No torrent or download service is exposed to the model. See
+[`AI_CONCIERGE.md`](AI_CONCIERGE.md) for the full sequence and configuration.
 
 ## Vendored library
 
@@ -102,3 +110,10 @@ Angular 6 SPA under `frontend/src/app/`. Feature folders each have components an
 (dev proxy in `frontend/proxy.conf.json`). Shared DTO interfaces in
 `frontend/src/app/shared/dto/**` **mirror the backend DTOs** — keep them in sync when changing an
 endpoint (`AI_RULES.md §3.5`).
+
+## Configuration
+
+TMDB and OpenAI API keys are loaded dynamically from the application's user preferences. AI
+provider/model settings and non-secret endpoint configuration are injected from the tracked
+`application.properties`. See `AI_RULES.md §1` for the rules that keep secrets out of application
+configuration.

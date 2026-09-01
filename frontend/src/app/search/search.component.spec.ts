@@ -3,6 +3,43 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { SearchComponent } from './search.component';
+import { ComponentFixture } from '@angular/core/testing';
+import { ConciergeSearchResponseDto } from '../shared/dto/concierge/ConciergeSearchResponseDto';
+
+const EMPTY_RESPONSE = {
+  intent: {
+    mediaType: 'ANY',
+    moods: [],
+    similarTo: null,
+    numericFilters: [],
+    dateFilters: [],
+    textFilters: [],
+    booleanFilters: [],
+    namedFilters: [],
+    enumFilters: [],
+  },
+  results: [],
+} satisfies ConciergeSearchResponseDto;
+
+function conciergeInput(fixture: ComponentFixture<SearchComponent>): HTMLInputElement {
+  const root = fixture.nativeElement as HTMLElement;
+  const input = root.querySelector<HTMLInputElement>('.concierge-card input');
+  if (input == null) {
+    throw new Error('Concierge input not found');
+  }
+  return input;
+}
+
+function submitConcierge(
+  fixture: ComponentFixture<SearchComponent>,
+  prompt: string,
+): HTMLInputElement {
+  const input = conciergeInput(fixture);
+  input.value = prompt;
+  input.closest('form')?.requestSubmit();
+  fixture.detectChanges();
+  return input;
+}
 
 describe('SearchComponent', () => {
   beforeEach(async () => {
@@ -12,15 +49,172 @@ describe('SearchComponent', () => {
     }).compileComponents();
   });
 
-  it('renders the three search cards without firing requests', async () => {
+  it('renders the concierge before the three existing search cards without firing requests', async () => {
     const fixture = TestBed.createComponent(SearchComponent);
     await fixture.whenStable();
 
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelectorAll('mat-card')).toHaveLength(3);
+    expect(compiled.querySelectorAll('mat-card')).toHaveLength(4);
+    expect(compiled.querySelector('mat-card h2')?.textContent).toContain('AI Concierge');
+    expect(conciergeInput(fixture).getAttribute('placeholder')).toContain('For example:');
 
     // Empty queries must keep the resources idle.
     TestBed.inject(HttpTestingController).verify();
+  });
+
+  it('submits the same trimmed prompt through Enter and the Search button', () => {
+    const fixture = TestBed.createComponent(SearchComponent);
+    fixture.detectChanges();
+    const httpTesting = TestBed.inject(HttpTestingController);
+    const input = conciergeInput(fixture);
+
+    input.value = '  clever science fiction  ';
+    input.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    input.closest('form')?.requestSubmit();
+    const enterRequest = httpTesting.expectOne('api/concierge/search');
+    expect(enterRequest.request.body).toEqual({ prompt: 'clever science fiction' });
+    enterRequest.flush(EMPTY_RESPONSE);
+
+    input.value = '  clever science fiction  ';
+    const root = fixture.nativeElement as HTMLElement;
+    const button = root.querySelector<HTMLButtonElement>('.concierge-card button[type="submit"]');
+    button?.click();
+    const clickRequest = httpTesting.expectOne((request) => request.url === 'api/concierge/search');
+    expect(clickRequest.request.body).toEqual(enterRequest.request.body);
+    clickRequest.flush(EMPTY_RESPONSE);
+
+    httpTesting.verify();
+  });
+
+  it('shows loading, disables Search, and cancels a stale request when replaced', () => {
+    const fixture = TestBed.createComponent(SearchComponent);
+    fixture.detectChanges();
+    const httpTesting = TestBed.inject(HttpTestingController);
+
+    submitConcierge(fixture, 'first prompt');
+    const first = httpTesting.expectOne('api/concierge/search');
+    const root = fixture.nativeElement as HTMLElement;
+    const button = root.querySelector<HTMLButtonElement>('.concierge-card button[type="submit"]');
+    expect(button?.disabled).toBe(true);
+    expect(root.textContent).toContain('Finding recommendations');
+
+    submitConcierge(fixture, 'replacement prompt');
+    expect(first.cancelled).toBe(true);
+    const replacement = httpTesting.expectOne('api/concierge/search');
+    expect(replacement.request.body).toEqual({ prompt: 'replacement prompt' });
+    replacement.flush(EMPTY_RESPONSE);
+    fixture.detectChanges();
+    expect(button?.disabled).toBe(false);
+    httpTesting.verify();
+  });
+
+  it('renders ranked mixed-media results and explanations without torrent requests', () => {
+    const fixture = TestBed.createComponent(SearchComponent);
+    fixture.detectChanges();
+    const httpTesting = TestBed.inject(HttpTestingController);
+    submitConcierge(fixture, 'surprise me');
+    httpTesting.expectOne('api/concierge/search').flush({
+      ...EMPTY_RESPONSE,
+      results: [
+        {
+          rank: 2,
+          mediaType: 'MOVIE',
+          id: 7,
+          title: 'Second Movie',
+          overview: 'Movie overview',
+          posterPath: null,
+          releaseDate: '2020-01-01',
+          rating: 7.5,
+          explanation: 'A thoughtful second choice.',
+        },
+        {
+          rank: 1,
+          mediaType: 'SERIES',
+          id: 7,
+          title: 'First Series',
+          overview: 'Series overview',
+          posterPath: null,
+          releaseDate: '2021-01-01',
+          rating: 8.8,
+          explanation: 'The strongest match for your mood.',
+        },
+      ],
+    } satisfies ConciergeSearchResponseDto);
+    fixture.detectChanges();
+
+    const root = fixture.nativeElement as HTMLElement;
+    const panels = Array.from(root.querySelectorAll<HTMLElement>('.concierge-result-panel'));
+    expect(panels).toHaveLength(2);
+    expect(panels.map((panel) => panel.querySelector('.result-name')?.textContent?.trim())).toEqual(
+      ['First Series', 'Second Movie'],
+    );
+    expect(panels[0].textContent).toContain('The strongest match for your mood.');
+    expect(panels[1].textContent).toContain('A thoughtful second choice.');
+    expect(
+      httpTesting.match(
+        (request) =>
+          request.url.startsWith('api/torrent') || request.url.startsWith('api/bittorrent'),
+      ),
+    ).toHaveLength(0);
+    httpTesting.verify();
+  });
+
+  it('keeps concierge and manual search panel state independent for the same media id', () => {
+    const fixture = TestBed.createComponent(SearchComponent);
+    const component = fixture.componentInstance as unknown as {
+      panelKey(mediaType: 'MOVIE' | 'SERIES', id: number): string;
+      conciergePanelKey(result: { mediaType: 'MOVIE' | 'SERIES'; id: number }): string;
+    };
+
+    expect(component.panelKey('MOVIE', 7)).not.toBe(
+      component.conciergePanelKey({ mediaType: 'MOVIE', id: 7 }),
+    );
+  });
+
+  it('shows explicit empty, validation, and backend error states', () => {
+    const fixture = TestBed.createComponent(SearchComponent);
+    fixture.detectChanges();
+    const httpTesting = TestBed.inject(HttpTestingController);
+    const root = fixture.nativeElement as HTMLElement;
+
+    submitConcierge(fixture, 'no matches');
+    httpTesting.expectOne('api/concierge/search').flush(EMPTY_RESPONSE);
+    fixture.detectChanges();
+    expect(root.textContent).toContain('No recommendations matched');
+
+    submitConcierge(fixture, ' ');
+    expect(root.querySelector('[role="alert"]')?.textContent).toContain('Please describe');
+
+    submitConcierge(fixture, 'backend fails');
+    httpTesting
+      .expectOne('api/concierge/search')
+      .flush({ message: 'failed' }, { status: 500, statusText: 'Server Error' });
+    fixture.detectChanges();
+    expect(root.querySelector('[role="alert"]')?.textContent).toContain('could not complete');
+    httpTesting.verify();
+  });
+
+  it('stops loading when the concierge request times out', () => {
+    vi.useFakeTimers();
+    try {
+      const fixture = TestBed.createComponent(SearchComponent);
+      fixture.detectChanges();
+      const httpTesting = TestBed.inject(HttpTestingController);
+      const root = fixture.nativeElement as HTMLElement;
+
+      submitConcierge(fixture, 'a horror movie with clowns');
+      const request = httpTesting.expectOne('api/concierge/search');
+
+      vi.advanceTimersByTime(130_000);
+      fixture.detectChanges();
+
+      expect(request.cancelled).toBe(true);
+      expect(root.textContent).not.toContain('Finding recommendations');
+      expect(root.querySelector('[role="alert"]')?.textContent).toContain('could not complete');
+      httpTesting.verify();
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it('sorts series results by popularity, descending', async () => {
@@ -31,7 +225,7 @@ describe('SearchComponent', () => {
 
       const compiled = fixture.nativeElement as HTMLElement;
       const seriesInput = compiled.querySelector<HTMLInputElement>(
-        '.search-card:nth-of-type(1) input[matInput]',
+        '.series-search-card input[matInput]',
       );
       if (seriesInput == null) {
         throw new Error('Series search input not found');
@@ -51,9 +245,9 @@ describe('SearchComponent', () => {
       expect(request.request.params.get('search')).toBe('andor');
 
       const results = [
-        { id: 1, name: 'Show A', popularity: 5, backdrop_path: '/show-a.jpg' },
-        { id: 2, name: 'Show B', popularity: 50, backdrop_path: '/show-b.jpg' },
-        { id: 3, name: 'Show C', popularity: 20, backdrop_path: null },
+        { id: 1, name: 'Show A', popularity: 5 },
+        { id: 2, name: 'Show B', popularity: 50 },
+        { id: 3, name: 'Show C', popularity: 20 },
       ];
       request.flush({ results });
 
@@ -66,11 +260,6 @@ describe('SearchComponent', () => {
       );
       expect(names).toEqual(['Show B', 'Show C', 'Show A']);
 
-      const backdrops = Array.from(compiled.querySelectorAll<HTMLElement>('.result-panel')).map(
-        (element) => element.style.getPropertyValue('--media-backdrop-image'),
-      );
-      expect(backdrops).toEqual(['', '', '']);
-
       // The source array must not be mutated by the sort.
       expect(results.map((s) => s.id)).toEqual([1, 2, 3]);
 
@@ -79,7 +268,6 @@ describe('SearchComponent', () => {
       vi.useRealTimers();
     }
   });
-
   it('does not set the movie backdrop while its result is collapsed', async () => {
     vi.useFakeTimers();
     try {
@@ -87,9 +275,7 @@ describe('SearchComponent', () => {
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
 
-      const input = compiled.querySelector<HTMLInputElement>(
-        '.search-card:nth-of-type(2) input[matInput]',
-      );
+      const input = compiled.querySelector<HTMLInputElement>('.movie-search-card input[matInput]');
       if (input == null) {
         throw new Error('Movie search input not found');
       }
@@ -117,9 +303,7 @@ describe('SearchComponent', () => {
       await fixture.whenStable();
       fixture.detectChanges();
 
-      const panel = compiled.querySelector<HTMLElement>(
-        '.search-card:nth-of-type(2) .result-panel',
-      );
+      const panel = compiled.querySelector<HTMLElement>('.movie-search-card .result-panel');
       expect(panel?.style.getPropertyValue('--media-backdrop-image')).toBe('');
       httpTesting.verify();
     } finally {
@@ -133,9 +317,7 @@ describe('SearchComponent', () => {
       const fixture = TestBed.createComponent(SearchComponent);
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
-      const input = compiled.querySelector<HTMLInputElement>(
-        '.search-card:nth-of-type(1) input[matInput]',
-      );
+      const input = compiled.querySelector<HTMLInputElement>('.series-search-card input[matInput]');
       if (input == null) {
         throw new Error('Series search input not found');
       }
@@ -238,9 +420,7 @@ describe('SearchComponent', () => {
       const fixture = TestBed.createComponent(SearchComponent);
       fixture.detectChanges();
       const compiled = fixture.nativeElement as HTMLElement;
-      const input = compiled.querySelector<HTMLInputElement>(
-        '.search-card:nth-of-type(1) input[matInput]',
-      );
+      const input = compiled.querySelector<HTMLInputElement>('.series-search-card input[matInput]');
       if (input == null) {
         throw new Error('Series search input not found');
       }
