@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -40,6 +41,16 @@ export class SearchComponent {
 
   protected readonly seriesSearch = this.searchService.searchSeriesResource(this.seriesQuery);
   protected readonly movieSearch = this.searchService.searchMoviesResource(this.movieQuery);
+
+  protected readonly seriesError = computed(() => {
+    const err = this.seriesSearch.error();
+    return err instanceof HttpErrorResponse && err.status === 412 ? err : null;
+  });
+
+  protected readonly movieError = computed(() => {
+    const err = this.movieSearch.error();
+    return err instanceof HttpErrorResponse && err.status === 412 ? err : null;
+  });
 
   /**
    * Sorted copies, computed with `toSorted` so the underlying resource value
