@@ -19,6 +19,7 @@ public class DownloadDto {
     /** Null only for an invalid record whose stored request could not be decoded. */
     private final DownloadRequest downloadRequest;
     private final long startTimeInMs;
+    private final long activeDownloadTimeInMs;
     private final long connectedPeers;
     private final long totalBytes;
     private final double downloadSpeedInBytesPerSecond;

@@ -103,6 +103,7 @@ class BittorrentControllerTest {
                 0.5,
                 request,
                 1234L,
+                1000L,
                 8L,
                 4096L,
                 512.5,

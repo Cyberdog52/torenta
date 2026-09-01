@@ -162,13 +162,14 @@ class DownloadTest {
     @Test
     void recovered_usesPersistedProgressAndTotalBytesWithoutLiveState() {
         Download download = Download.recovered("1", new DownloadRequest(), Path.of("staging"), Path.of("final"),
-                1234L, DownloadRecordState.PAUSED, null, null, 0.5, 2048L, List.of());
+                1234L, DownloadRecordState.PAUSED, null, null, 0.5, 2048L, 5000L, List.of());
 
         DownloadDto dto = download.mapToDownloadDto();
 
         assertEquals(DownloadState.PAUSED, dto.getState());
         assertEquals(0.5, dto.getProgress());
         assertEquals(2048L, dto.getTotalBytes());
+        assertEquals(5000L, dto.getActiveDownloadTimeInMs());
         assertEquals(0, dto.getConnectedPeers());
         assertEquals(0, dto.getDownloadSpeedInBytesPerSecond());
         assertTrue(download.isPaused());
@@ -178,7 +179,7 @@ class DownloadTest {
     void recovered_invalidRecordHasNoRequestAndOnlyCleanupCapability() {
         Download download = Download.recovered("1", null, Path.of("staging"), null,
                 0L, DownloadRecordState.FAILED, DownloadFailureKind.CLEANUP_ONLY, "Invalid download record", 0, 0,
-                List.of());
+                0, List.of());
 
         DownloadDto dto = download.mapToDownloadDto();
 
@@ -269,6 +270,40 @@ class DownloadTest {
         DownloadDto dto = download.mapToDownloadDto();
         assertEquals(DownloadState.STARTED, dto.getState());
         assertNull(dto.getErrorMessage());
+    }
+
+    @Test
+    void restart_keepsRecoveredProgressUntilBitfieldIsInitialized() {
+        Download download = download("1");
+        download.setRecoveredMetrics(0.42, 1_000);
+        download.restart(mock(BtClient.class), new CompletableFuture<>());
+        download.setState(state(0, 1, 0));
+
+        DownloadDto whileInitializing = download.mapToDownloadDto();
+
+        assertEquals(0.42, whileInitializing.getProgress());
+        assertEquals(1_000, whileInitializing.getTotalBytes());
+
+        download.setState(state(2, 4, 250));
+        DownloadDto initialized = download.mapToDownloadDto();
+
+        assertEquals(0.5, initialized.getProgress());
+        assertEquals(1_000, initialized.getTotalBytes());
+    }
+
+    @Test
+    void restart_doesNotRegressWhileBitfieldIsBeingReverified() {
+        Download download = download("1");
+        download.setState(state(74, 100, 250));
+        download.restart(mock(BtClient.class), new CompletableFuture<>());
+
+        download.setState(state(16, 100, 250));
+
+        assertEquals(0.74, download.mapToDownloadDto().getProgress());
+
+        download.setState(state(75, 100, 250));
+
+        assertEquals(0.75, download.mapToDownloadDto().getProgress());
     }
 
     private Download download(String id) {

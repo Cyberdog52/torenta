@@ -11,6 +11,7 @@ const download: DownloadDto = {
   progress: 0.42,
   downloadRequest: null,
   startTimeInMs: 1,
+  activeDownloadTimeInMs: 0,
   connectedPeers: 0,
   totalBytes: 100,
   downloadSpeedInBytesPerSecond: 0,
@@ -58,5 +59,50 @@ describe('DownloadDetailComponent', () => {
     expect(restart?.disabled).toBe(true);
     restart?.click();
     expect(actions).toEqual([]);
+  });
+
+  it('shows Not started instead of Never remaining before data starts', () => {
+    const fixture = TestBed.createComponent(DownloadDetailComponent);
+    fixture.componentRef.setInput('downloadDto', {
+      ...download,
+      state: DownloadState.STARTED,
+      capabilities: { ...download.capabilities, canPause: true },
+    });
+    fixture.detectChanges();
+    const text = (fixture.nativeElement as HTMLElement).textContent;
+
+    expect(text).toContain('Not started');
+    expect(text).not.toContain('Never remaining');
+  });
+
+  it('keeps stats visible while paused and summarizes finished performance', () => {
+    const fixture = TestBed.createComponent(DownloadDetailComponent);
+    fixture.componentRef.setInput('downloadDto', download);
+    fixture.detectChanges();
+
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('No source information');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain('No speed information');
+    expect((fixture.nativeElement as HTMLElement).textContent).toContain(
+      'No time estimate while paused',
+    );
+
+    fixture.componentRef.setInput('downloadDto', {
+      ...download,
+      state: DownloadState.FINISHED,
+      progress: 1,
+      totalBytes: 125_000_000,
+      activeDownloadTimeInMs: 100_000,
+      capabilities: {
+        canPause: false,
+        canRestart: false,
+        canStopAndDelete: false,
+        canRemove: true,
+      },
+    });
+    fixture.detectChanges();
+    const finishedText = (fixture.nativeElement as HTMLElement).textContent;
+
+    expect(finishedText).toContain('10.00 Mbps average');
+    expect(finishedText).toContain('Downloaded in 00:01:40');
   });
 });

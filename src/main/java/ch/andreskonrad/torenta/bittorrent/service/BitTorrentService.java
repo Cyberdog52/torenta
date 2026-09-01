@@ -113,7 +113,7 @@ public class BitTorrentService {
         if (!entry.isValid()) {
             return Download.recovered(entry.getId(), null, stagingDirectory, null, 0L,
                     DownloadRecordState.FAILED, DownloadFailureKind.CLEANUP_ONLY,
-                    "Invalid download record: " + entry.getInvalidReason(), 0, 0, List.of());
+                    "Invalid download record: " + entry.getInvalidReason(), 0, 0, 0, List.of());
         }
         DownloadRecord record = entry.getRecord();
         Path finalTargetDirectory;
@@ -125,11 +125,13 @@ public class BitTorrentService {
             return Download.recovered(record.getId(), record.getDownloadRequest(), stagingDirectory, null,
                     record.getStartTimeInMs(), DownloadRecordState.FAILED, DownloadFailureKind.CLEANUP_ONLY,
                     "Invalid final target path: " + e.getMessage(), record.getLastProgress(),
-                    record.getLastTotalBytes(), record.getFinalPayloadManifest());
+                    record.getLastTotalBytes(), activeDownloadTime(record),
+                    record.getFinalPayloadManifest());
         }
         return Download.recovered(record.getId(), record.getDownloadRequest(), stagingDirectory, finalTargetDirectory,
                 record.getStartTimeInMs(), record.getState(), record.getFailureKind(), record.getErrorMessage(),
-                record.getLastProgress(), record.getLastTotalBytes(), record.getFinalPayloadManifest());
+                record.getLastProgress(), record.getLastTotalBytes(), activeDownloadTime(record),
+                record.getFinalPayloadManifest());
     }
 
     public synchronized void startDownload(DownloadRequest downloadRequest, Path finalTargetDirectory) throws IllegalStateException {
@@ -164,6 +166,7 @@ public class BitTorrentService {
                 .downloadRequest(downloadRequest)
                 .finalTargetRelativePath(finalTargetRelativePath)
                 .startTimeInMs(startTimeInMs)
+                .activeDownloadTimeInMs(0L)
                 .lastProgress(0)
                 .lastTotalBytes(0)
                 .finalPayloadManifest(List.of())
@@ -176,7 +179,7 @@ public class BitTorrentService {
         } catch (RuntimeException | Error exception) {
             Download failedDownload = Download.recovered(id, downloadRequest, stagingDirectory,
                     validatedFinalTarget, startTimeInMs, DownloadRecordState.FAILED,
-                    DownloadFailureKind.RESTARTABLE, rootCauseMessage(exception), 0, 0, List.of());
+                    DownloadFailureKind.RESTARTABLE, rootCauseMessage(exception), 0, 0, 0, List.of());
             downloads.put(id, failedDownload);
             persistLifecycle(root, failedDownload);
             throw exception;
@@ -463,6 +466,7 @@ public class BitTorrentService {
                 .downloadRequest(download.getDownloadRequest())
                 .finalTargetRelativePath(finalTargetRelative)
                 .startTimeInMs(download.getStartTimeInMs())
+                .activeDownloadTimeInMs(download.getActiveDownloadTimeInMs())
                 .lastProgress(dto.getProgress())
                 .lastTotalBytes(dto.getTotalBytes())
                 .finalPayloadManifest(download.getFinalPayloadManifest())
@@ -477,6 +481,10 @@ public class BitTorrentService {
         }
         String message = cause.getMessage();
         return message == null ? cause.getClass().getName() : cause.getClass().getSimpleName() + ": " + message;
+    }
+
+    private long activeDownloadTime(DownloadRecord record) {
+        return record.getActiveDownloadTimeInMs() == null ? 0 : record.getActiveDownloadTimeInMs();
     }
 
     private Integer getReleaseYear(TmdbMovieDetailDto movieDetailDto) {

@@ -139,7 +139,7 @@ public class LibraryServiceTest {
         TmdbEpisodeDto[] seasonTwelveEpisodes = {};
         DownloadRequest request = new DownloadRequest(seasonOneEpisode, null, null, null);
         DownloadDto download = new DownloadDto(
-                "1", DownloadState.STARTED, null, null, 0.5, request, 0L, 0L, 0L, 0.0, null,
+                "1", DownloadState.STARTED, null, null, 0.5, request, 0L, 0L, 0L, 0L, 0.0, null,
                 new ch.andreskonrad.torenta.bittorrent.dto.DownloadActionCapabilities(true, false, true, false));
         TmdbSeriesDetailDto detail = detail();
         stubSuccessfulLookup(seriesDirectory, List.of(overview(42, "The Show", 1.0)), detail, Set.of(download));

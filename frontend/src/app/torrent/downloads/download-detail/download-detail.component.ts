@@ -82,11 +82,22 @@ export class DownloadDetailComponent {
   });
 
   protected readonly speed = computed(() => {
-    const bytesPerSecond = this.downloadDto().downloadSpeedInBytesPerSecond;
-    if (!this.isRunning() || bytesPerSecond == null || bytesPerSecond < 0.1) {
-      return '0 Mbps';
+    const download = this.downloadDto();
+    if (download.state === DownloadState.FINISHED) {
+      const activeSeconds = download.activeDownloadTimeInMs / 1000;
+      if (activeSeconds <= 0 || download.totalBytes <= 0) {
+        return 'No average speed information';
+      }
+      return `${formatSpeed(download.totalBytes / activeSeconds)} average`;
     }
-    return `${(bytesPerSecond / BYTES_PER_SECOND_IN_MBIT).toFixed(2)} Mbps`;
+    if (!this.isRunning()) {
+      return 'No speed information';
+    }
+    const bytesPerSecond = download.downloadSpeedInBytesPerSecond;
+    if (bytesPerSecond == null || bytesPerSecond < 0.1) {
+      return 'No speed information yet';
+    }
+    return formatSpeed(bytesPerSecond);
   });
 
   /**
@@ -95,20 +106,36 @@ export class DownloadDetailComponent {
    */
   protected readonly estimatedTimeFinished = computed(() => {
     const download = this.downloadDto();
+    if (download.state === DownloadState.FINISHED) {
+      return download.activeDownloadTimeInMs > 0
+        ? `Downloaded in ${formatDuration(download.activeDownloadTimeInMs / 1000)}`
+        : 'No duration information';
+    }
+    if (download.state === DownloadState.PAUSED) {
+      return 'No time estimate while paused';
+    }
+    if (download.state === DownloadState.FAILED) {
+      return 'No time information';
+    }
     const bytesPerSecond = download.downloadSpeedInBytesPerSecond;
     if (bytesPerSecond == null || bytesPerSecond < 0.1) {
-      return 'Never';
+      return 'Not started';
     }
     const secondsLeft = (download.totalBytes * (1 - download.progress)) / bytesPerSecond;
     if (!Number.isFinite(secondsLeft) || secondsLeft < 0) {
       return 'Unknown';
     }
-    return formatDuration(secondsLeft);
+    return `${formatDuration(secondsLeft)} remaining`;
   });
 
   protected readonly peers = computed(() => {
     const connectedPeers = this.downloadDto().connectedPeers;
-    return !connectedPeers ? 'No connections' : `${connectedPeers} sources`;
+    if (connectedPeers) {
+      return this.isRunning()
+        ? `${connectedPeers} sources`
+        : `${connectedPeers} sources at last update`;
+    }
+    return this.isRunning() ? 'No connections' : 'No source information';
   });
 
   /**
@@ -122,7 +149,7 @@ export class DownloadDetailComponent {
       case DownloadState.PAUSED:
         return `${this.progressPercent().toFixed(1)}% downloaded, paused`;
       case DownloadState.STARTED:
-        return `${this.progressPercent().toFixed(1)}% downloaded, ${this.estimatedTimeFinished()} remaining`;
+        return `${this.progressPercent().toFixed(1)}% downloaded, ${this.estimatedTimeFinished()}`;
       default:
         return this.downloadDto().state;
     }
@@ -175,4 +202,8 @@ function formatDuration(totalSeconds: number): string {
   const pad = (value: number) => String(value).padStart(2, '0');
   const hhmmss = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   return days > 0 ? `${days}:${hhmmss}` : hhmmss;
+}
+
+function formatSpeed(bytesPerSecond: number): string {
+  return `${(bytesPerSecond / BYTES_PER_SECOND_IN_MBIT).toFixed(2)} Mbps`;
 }

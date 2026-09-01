@@ -29,6 +29,8 @@ public class DownloadRecord {
     /** Final media destination directory, relative to the configured download root. */
     private String finalTargetRelativePath;
     private long startTimeInMs;
+    /** Accumulated time spent actively running; paused and offline time is excluded. */
+    private Long activeDownloadTimeInMs;
     private double lastProgress;
     private long lastTotalBytes;
     /** Root-relative paths of files copied into the final destination once finished. */

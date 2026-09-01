@@ -30,6 +30,7 @@ public class Download {
     private final Path finalTargetDirectory;
     private final long startTimeInMs;
     private volatile long sessionStartTimeInMs;
+    private volatile long accumulatedActiveTimeInMs;
 
     private volatile DownloadRequest downloadRequest;
     private volatile BtClient client;
@@ -66,9 +67,11 @@ public class Download {
     static Download recovered(String id, DownloadRequest downloadRequest, Path stagingDirectory, Path finalTargetDirectory,
                                long startTimeInMs, DownloadRecordState recordState, DownloadFailureKind failureKind,
                                String errorMessage, double recoveredProgress, long recoveredTotalBytes,
-                               List<String> finalPayloadManifest) {
+                               long activeDownloadTimeInMs, List<String> finalPayloadManifest) {
         Download download = new Download(id, downloadRequest, stagingDirectory, finalTargetDirectory, null,
                 CompletableFuture.completedFuture(null), startTimeInMs);
+        download.sessionStartTimeInMs = 0;
+        download.accumulatedActiveTimeInMs = activeDownloadTimeInMs;
         download.recordState = recordState;
         download.failureKind = failureKind;
         download.errorMessage = errorMessage;
@@ -147,12 +150,14 @@ public class Download {
 
     /** Marks this download as pausing before its client is stopped, so the resulting future
      * completion/cancellation is never mistaken for a failure. */
-    public void beginPause() {
+    public synchronized void beginPause() {
+        stopActiveTimer();
         this.paused = true;
     }
 
-    public void cancelPause() {
+    public synchronized void cancelPause() {
         this.paused = false;
+        this.sessionStartTimeInMs = System.currentTimeMillis();
     }
 
     public void markPaused() {
@@ -160,13 +165,15 @@ public class Download {
         this.recordState = DownloadRecordState.PAUSED;
     }
 
-    public void fail(String errorMessage, DownloadFailureKind failureKind) {
+    public synchronized void fail(String errorMessage, DownloadFailureKind failureKind) {
+        stopActiveTimer();
         this.recordState = DownloadRecordState.FAILED;
         this.failureKind = failureKind;
         this.errorMessage = errorMessage;
     }
 
-    public void markFinished(List<String> manifest) {
+    public synchronized void markFinished(List<String> manifest) {
+        stopActiveTimer();
         this.recordState = DownloadRecordState.FINISHED;
         this.finalPayloadManifest = manifest;
         this.errorMessage = null;
@@ -174,7 +181,9 @@ public class Download {
     }
 
     /** Rebinds this download to a freshly created engine client/future, e.g. for a restart. */
-    public void restart(BtClient newClient, CompletableFuture<?> newFuture) {
+    public synchronized void restart(BtClient newClient, CompletableFuture<?> newFuture) {
+        this.recoveredProgress = getProgress();
+        this.recoveredTotalBytes = getTotalBytes();
         this.client = newClient;
         this.paused = false;
         this.recordState = DownloadRecordState.STARTED;
@@ -215,7 +224,24 @@ public class Download {
                 : null;
         DownloadActionCapabilities capabilities = computeCapabilities();
         return new DownloadDto(id, downloadState, effectiveFailureKind, computeDisplayTitle(), progress,
-                downloadRequest, startTimeInMs, connectedPeers, totalBytes, speed, effectiveErrorMessage, capabilities);
+                downloadRequest, startTimeInMs, getActiveDownloadTimeInMs(), connectedPeers, totalBytes, speed,
+                effectiveErrorMessage, capabilities);
+    }
+
+    public synchronized long getActiveDownloadTimeInMs() {
+        long activeTime = accumulatedActiveTimeInMs;
+        if (sessionStartTimeInMs > 0 && recordState == DownloadRecordState.STARTED && !paused) {
+            activeTime += Math.max(0, System.currentTimeMillis() - sessionStartTimeInMs);
+        }
+        return activeTime;
+    }
+
+    private void stopActiveTimer() {
+        if (sessionStartTimeInMs <= 0) {
+            return;
+        }
+        accumulatedActiveTimeInMs += Math.max(0, System.currentTimeMillis() - sessionStartTimeInMs);
+        sessionStartTimeInMs = 0;
     }
 
     /** Derives a human-readable title from the download request; null only for an undecodable record. */
@@ -285,18 +311,25 @@ public class Download {
             return 1.0;
         }
         TorrentSessionState currentState = state;
-        if (currentState != null && currentState.getPiecesTotal() > 0) {
-            return ((double) currentState.getPiecesComplete()) / currentState.getPiecesTotal();
+        if (hasInitializedBitfield(currentState)) {
+            double verifiedProgress = ((double) currentState.getPiecesComplete()) / currentState.getPiecesTotal();
+            return Math.max(recoveredProgress, verifiedProgress);
         }
         return recoveredProgress;
     }
 
     private long getTotalBytes() {
         TorrentSessionState currentState = state;
-        if (currentState != null) {
+        if (hasInitializedBitfield(currentState)) {
             return currentState.getChunksSizeInBytes() * currentState.getPiecesTotal();
         }
         return recoveredTotalBytes;
+    }
+
+    private boolean hasInitializedBitfield(TorrentSessionState currentState) {
+        return currentState != null
+                && currentState.getChunksSizeInBytes() > 0
+                && currentState.getPiecesTotal() > 0;
     }
 
     private long getConnectedPeers() {
