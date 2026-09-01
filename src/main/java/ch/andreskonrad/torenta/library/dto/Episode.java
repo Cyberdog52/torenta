@@ -92,7 +92,7 @@ public class Episode {
             if (downloadDto.getState() == DownloadState.STARTED) {
                 return DownloadStatus.DOWNLOADING;
             }
-            if (downloadDto.getState() == DownloadState.CANCELLED || downloadDto.getState() == DownloadState.FAILED) {
+            if (downloadDto.getState() == DownloadState.PAUSED || downloadDto.getState() == DownloadState.FAILED) {
                 return DownloadStatus.NOT_DOWNLOADED;
             }
         }

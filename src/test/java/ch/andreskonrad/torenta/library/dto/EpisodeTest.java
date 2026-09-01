@@ -75,10 +75,10 @@ public class EpisodeTest {
                 episodeDto(1, 1, null),
                 directoryWithEpisode,
                 downloadDto(DownloadState.STARTED));
-        Episode cancelled = new Episode(
+        Episode paused = new Episode(
                 episodeDto(1, 1, null),
                 directoryWithEpisode,
-                downloadDto(DownloadState.CANCELLED));
+                downloadDto(DownloadState.PAUSED));
         Episode failed = new Episode(
                 episodeDto(1, 1, null),
                 directoryWithEpisode,
@@ -89,7 +89,7 @@ public class EpisodeTest {
                 downloadDto(DownloadState.FINISHED));
 
         assertEquals(DownloadStatus.DOWNLOADING, started.getDownloadStatus());
-        assertEquals(DownloadStatus.NOT_DOWNLOADED, cancelled.getDownloadStatus());
+        assertEquals(DownloadStatus.NOT_DOWNLOADED, paused.getDownloadStatus());
         assertEquals(DownloadStatus.NOT_DOWNLOADED, failed.getDownloadStatus());
         assertEquals(DownloadStatus.DOWNLOADED, finished.getDownloadStatus());
     }
