@@ -1,5 +1,5 @@
 package ch.andreskonrad.torenta.bittorrent.dto;
 
 public enum DownloadState {
-    STARTED, FINISHED, CANCELLED, FAILED
+    STARTED, PAUSED, FINISHED, FAILED
 }

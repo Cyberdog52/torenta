@@ -5,18 +5,70 @@
   <div class="foreground">
     <div class="header-row">
       <p class="title">{{ title() }}</p>
-      <span class="status-chip">
-        <mat-icon aria-hidden="true">{{ status().icon }}</mat-icon>
-        {{ status().label }}
-      </span>
+      <div class="header-actions">
+        <span class="status-chip">
+          <mat-icon aria-hidden="true">{{ status().icon }}</mat-icon>
+          {{ status().label }}
+        </span>
+        <div class="action-buttons">
+          @if (downloadDto().capabilities.canPause) {
+            <button
+              mat-icon-button
+              type="button"
+              matTooltip="Pause download"
+              aria-label="Pause download"
+              [disabled]="busy()"
+              (click)="actionRequested.emit('pause')"
+            >
+              <mat-icon>pause</mat-icon>
+            </button>
+          }
+          @if (downloadDto().capabilities.canRestart) {
+            <button
+              mat-icon-button
+              type="button"
+              matTooltip="Restart download"
+              aria-label="Restart download"
+              [disabled]="busy()"
+              (click)="actionRequested.emit('restart')"
+            >
+              <mat-icon>play_arrow</mat-icon>
+            </button>
+          }
+          @if (downloadDto().capabilities.canStopAndDelete) {
+            <button
+              mat-icon-button
+              type="button"
+              matTooltip="Stop and delete files"
+              aria-label="Stop and delete files"
+              [disabled]="busy()"
+              (click)="actionRequested.emit('stopAndDelete')"
+            >
+              <mat-icon>delete_forever</mat-icon>
+            </button>
+          }
+          @if (downloadDto().capabilities.canRemove) {
+            <button
+              mat-icon-button
+              type="button"
+              matTooltip="Remove from downloads"
+              aria-label="Remove from downloads"
+              [disabled]="busy()"
+              (click)="actionRequested.emit('remove')"
+            >
+              <mat-icon>close</mat-icon>
+            </button>
+          }
+        </div>
+      </div>
     </div>
-    <p class="meta-line"><mat-icon aria-hidden="true">link</mat-icon>{{ peers() }}</p>
-    @if (isRunning()) {
+    <div class="stats">
+      <p class="meta-line"><mat-icon aria-hidden="true">link</mat-icon>{{ peers() }}</p>
       <p class="meta-line"><mat-icon aria-hidden="true">network_check</mat-icon>{{ speed() }}</p>
       <p class="meta-line">
-        <mat-icon aria-hidden="true">timelapse</mat-icon>{{ estimatedTimeFinished() }} remaining
+        <mat-icon aria-hidden="true">timelapse</mat-icon>{{ estimatedTimeFinished() }}
       </p>
-    }
+    </div>
     @if (isFailed()) {
       <p class="meta-line error-line"><mat-icon>error_outline</mat-icon>{{ errorMessage() }}</p>
     }
@@ -32,7 +84,7 @@
       >
         <div class="progress-fill" [style.width.%]="progressPercent()"></div>
       </div>
-      @if (isRunning()) {
+      @if (isRunning() || isPaused()) {
         <span>{{ progressString() }}</span>
       } @else {
         <mat-icon class="progress-icon" aria-hidden="true">{{ status().icon }}</mat-icon>

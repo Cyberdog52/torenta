@@ -7,7 +7,11 @@
       {{ downloads().length }} download{{ downloads().length === 1 ? '' : 's' }}.
     </p>
     @for (downloadDto of downloads(); track downloadDto.id) {
-      <app-download-detail [downloadDto]="downloadDto" />
+      <app-download-detail
+        [downloadDto]="downloadDto"
+        [busy]="pendingActions().has(downloadDto.id)"
+        (actionRequested)="requestAction(downloadDto, $event)"
+      />
     } @empty {
       <div class="empty">
         <mat-icon aria-hidden="true">inbox</mat-icon>

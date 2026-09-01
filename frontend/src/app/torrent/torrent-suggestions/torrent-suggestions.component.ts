@@ -78,7 +78,7 @@ export class TorrentSuggestionsComponent {
 
   protected hasStartedDownload(torrentEntry: TorrentEntry): boolean {
     return this.downloads().some(
-      (download) => download.downloadRequest.torrentEntry.magnetLink === torrentEntry.magnetLink,
+      (download) => download.downloadRequest?.torrentEntry.magnetLink === torrentEntry.magnetLink,
     );
   }
 

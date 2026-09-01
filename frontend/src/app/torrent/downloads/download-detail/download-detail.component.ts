@@ -1,5 +1,7 @@
-import { ChangeDetectionStrategy, Component, computed, input } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output } from '@angular/core';
+import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { DownloadDto } from '../../../shared/dto/torrent/DownloadDto';
 import { DownloadState } from '../../../shared/dto/torrent/DownloadState';
 import {
@@ -13,22 +15,27 @@ const BYTES_PER_SECOND_IN_MBIT = 125_000;
 /** Label + icon shown on the status chip and the progress row for each state. */
 const STATUS_META: Record<DownloadState, { label: string; icon: string }> = {
   [DownloadState.STARTED]: { label: 'Downloading', icon: 'downloading' },
+  [DownloadState.PAUSED]: { label: 'Paused', icon: 'pause_circle' },
   [DownloadState.FINISHED]: { label: 'Finished', icon: 'check_circle' },
-  [DownloadState.CANCELLED]: { label: 'Cancelled', icon: 'cancel' },
   [DownloadState.FAILED]: { label: 'Failed', icon: 'error' },
 };
 
+export type DownloadAction = 'pause' | 'restart' | 'stopAndDelete' | 'remove';
+
 @Component({
   selector: 'app-download-detail',
-  imports: [MatIconModule],
+  imports: [MatButtonModule, MatIconModule, MatTooltipModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './download-detail.component.scss',
   templateUrl: './download-detail.component.html',
 })
 export class DownloadDetailComponent {
   readonly downloadDto = input.required<DownloadDto>();
+  readonly busy = input(false);
+  readonly actionRequested = output<DownloadAction>();
 
   protected readonly isRunning = computed(() => this.downloadDto().state === DownloadState.STARTED);
+  protected readonly isPaused = computed(() => this.downloadDto().state === DownloadState.PAUSED);
 
   protected readonly isFailed = computed(() => this.downloadDto().state === DownloadState.FAILED);
 
@@ -42,7 +49,15 @@ export class DownloadDetailComponent {
 
   protected readonly status = computed(() => STATUS_META[this.downloadDto().state]);
 
-  protected readonly title = computed(() => getDownloadTitle(this.downloadDto().downloadRequest));
+  protected readonly title = computed(() => {
+    const download = this.downloadDto();
+    return (
+      download.displayTitle ??
+      (download.downloadRequest == null
+        ? `Unknown download (${download.id})`
+        : getDownloadTitle(download.downloadRequest))
+    );
+  });
 
   protected readonly backgroundImage = computed(() =>
     backdropUrl(backdropPathOf(this.downloadDto().downloadRequest)),
@@ -55,8 +70,8 @@ export class DownloadDetailComponent {
     switch (this.downloadDto().state) {
       case DownloadState.FINISHED:
         return 'Successfully downloaded';
-      case DownloadState.CANCELLED:
-        return 'Cancelled';
+      case DownloadState.PAUSED:
+        return `${this.progressPercent().toFixed(1)} % paused`;
       case DownloadState.FAILED:
         return `Failed: ${this.errorMessage()}`;
       case DownloadState.STARTED:
@@ -67,11 +82,22 @@ export class DownloadDetailComponent {
   });
 
   protected readonly speed = computed(() => {
-    const bytesPerSecond = this.downloadDto().downloadSpeedInBytesPerSecond;
-    if (!this.isRunning() || bytesPerSecond == null || bytesPerSecond < 0.1) {
-      return '0 Mbps';
+    const download = this.downloadDto();
+    if (download.state === DownloadState.FINISHED) {
+      const activeSeconds = download.activeDownloadTimeInMs / 1000;
+      if (activeSeconds <= 0 || download.totalBytes <= 0) {
+        return 'No average speed information';
+      }
+      return `${formatSpeed(download.totalBytes / activeSeconds)} average`;
     }
-    return `${(bytesPerSecond / BYTES_PER_SECOND_IN_MBIT).toFixed(2)} Mbps`;
+    if (!this.isRunning()) {
+      return 'No speed information';
+    }
+    const bytesPerSecond = download.downloadSpeedInBytesPerSecond;
+    if (bytesPerSecond == null || bytesPerSecond < 0.1) {
+      return 'No speed information yet';
+    }
+    return formatSpeed(bytesPerSecond);
   });
 
   /**
@@ -80,20 +106,36 @@ export class DownloadDetailComponent {
    */
   protected readonly estimatedTimeFinished = computed(() => {
     const download = this.downloadDto();
+    if (download.state === DownloadState.FINISHED) {
+      return download.activeDownloadTimeInMs > 0
+        ? `Downloaded in ${formatDuration(download.activeDownloadTimeInMs / 1000)}`
+        : 'No duration information';
+    }
+    if (download.state === DownloadState.PAUSED) {
+      return 'No time estimate while paused';
+    }
+    if (download.state === DownloadState.FAILED) {
+      return 'No time information';
+    }
     const bytesPerSecond = download.downloadSpeedInBytesPerSecond;
     if (bytesPerSecond == null || bytesPerSecond < 0.1) {
-      return 'Never';
+      return 'Not started';
     }
     const secondsLeft = (download.totalBytes * (1 - download.progress)) / bytesPerSecond;
     if (!Number.isFinite(secondsLeft) || secondsLeft < 0) {
       return 'Unknown';
     }
-    return formatDuration(secondsLeft);
+    return `${formatDuration(secondsLeft)} remaining`;
   });
 
   protected readonly peers = computed(() => {
     const connectedPeers = this.downloadDto().connectedPeers;
-    return !connectedPeers ? 'No connections' : `${connectedPeers} sources`;
+    if (connectedPeers) {
+      return this.isRunning()
+        ? `${connectedPeers} sources`
+        : `${connectedPeers} sources at last update`;
+    }
+    return this.isRunning() ? 'No connections' : 'No source information';
   });
 
   /**
@@ -104,10 +146,10 @@ export class DownloadDetailComponent {
     switch (this.downloadDto().state) {
       case DownloadState.FINISHED:
         return 'Finished';
-      case DownloadState.CANCELLED:
-        return 'Cancelled';
+      case DownloadState.PAUSED:
+        return `${this.progressPercent().toFixed(1)}% downloaded, paused`;
       case DownloadState.STARTED:
-        return `${this.progressPercent().toFixed(1)}% downloaded, ${this.estimatedTimeFinished()} remaining`;
+        return `${this.progressPercent().toFixed(1)}% downloaded, ${this.estimatedTimeFinished()}`;
       default:
         return this.downloadDto().state;
     }
@@ -124,8 +166,8 @@ export class DownloadDetailComponent {
     switch (download.state) {
       case DownloadState.FINISHED:
         return `${this.title()} finished downloading.`;
-      case DownloadState.CANCELLED:
-        return `${this.title()} download cancelled.`;
+      case DownloadState.PAUSED:
+        return `${this.title()} download paused at ${this.progressPercent().toFixed(1)}%.`;
       case DownloadState.STARTED: {
         const roundedPercent = Math.floor(this.progressPercent() / 10) * 10;
         return `${this.title()}: ${roundedPercent}% downloaded.`;
@@ -136,7 +178,10 @@ export class DownloadDetailComponent {
   });
 }
 
-function backdropPathOf(downloadRequest: DownloadRequestDto): string | null {
+function backdropPathOf(downloadRequest: DownloadRequestDto | null): string | null {
+  if (downloadRequest == null) {
+    return null;
+  }
   return (
     downloadRequest.seriesDetail?.backdrop_path ??
     downloadRequest.movieDetail?.backdrop_path ??
@@ -157,4 +202,8 @@ function formatDuration(totalSeconds: number): string {
   const pad = (value: number) => String(value).padStart(2, '0');
   const hhmmss = `${pad(hours)}:${pad(minutes)}:${pad(seconds)}`;
   return days > 0 ? `${days}:${hhmmss}` : hhmmss;
+}
+
+function formatSpeed(bytesPerSecond: number): string {
+  return `${(bytesPerSecond / BYTES_PER_SECOND_IN_MBIT).toFixed(2)} Mbps`;
 }

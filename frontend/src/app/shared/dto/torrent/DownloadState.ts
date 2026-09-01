@@ -1,6 +1,6 @@
 export enum DownloadState {
   STARTED = 'STARTED',
+  PAUSED = 'PAUSED',
   FINISHED = 'FINISHED',
-  CANCELLED = 'CANCELLED',
   FAILED = 'FAILED',
 }
