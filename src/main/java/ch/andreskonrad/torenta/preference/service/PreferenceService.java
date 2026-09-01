@@ -11,7 +11,7 @@ import java.util.prefs.Preferences;
 public class PreferenceService {
 
     //do not change these keys
-    //by changing the following static strings users may loose preferences
+    //by changing the following static strings users may lose preferences
     private static final String PREFERENCE_NODE_NAME = "ch/andreskonrad/torenta/preference";
     private static final String PREFERENCE_DOWNLOAD_DIRECTORY = "downloadDirectory";
     private static final String PREFERENCE_TMDB_SERVICE_KEY = "tmdbServiceKey";
@@ -40,6 +40,8 @@ public class PreferenceService {
         }
         if (preferences.getTmdbServiceKey() != null) {
             userPreferenceRoot.put(PREFERENCE_TMDB_SERVICE_KEY, preferences.getTmdbServiceKey());
+        } else {
+            userPreferenceRoot.remove(PREFERENCE_TMDB_SERVICE_KEY);
         }
 
         if (this.directoryService != null) {

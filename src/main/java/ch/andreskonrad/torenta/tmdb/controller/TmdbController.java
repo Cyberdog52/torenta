@@ -23,6 +23,8 @@ public class TmdbController {
         TmdbSeriesSearchResultDto result;
         try {
             result = this.tmdbService.searchSeries(searchString);
+        } catch (IllegalStateException exception) {
+            return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         } catch (Exception exception) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -34,6 +36,8 @@ public class TmdbController {
         TmdbMoviesSearchResultDto result;
         try {
             result = this.tmdbService.searchMovies(searchString);
+        } catch (IllegalStateException exception) {
+            return new ResponseEntity<>(HttpStatus.PRECONDITION_FAILED);
         } catch (Exception exception) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

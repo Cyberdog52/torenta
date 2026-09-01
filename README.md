@@ -1,5 +1,18 @@
 # torenta
 
+## Running Torenta from prebuilt archive
+1. Download the latest `torenta-portable-<version>.zip` from a developer.
+2. Unzip it.
+3. Start the backend:
+   - macOS/Linux: `./run-torenta.sh`
+   - Windows: `run-torenta.bat`
+4. Open the torenta.url shortcut or navigate to http://localhost:8080 in your browser.
+5. Go to Settings and enter your TMDB API key.
+
+### Well known issue on macOS
+On macOS the run-torenta.sh script may open as a text file in the default editor. 
+In that case, right-click on the file and select "Open With" -> "Other" -> "Utilities". In the dropdown select "All Applications" and then select "Terminal". Check the box "Always Open With" and click "Open".
+
 ## Setup
 
 #### Java (only needed for source builds)

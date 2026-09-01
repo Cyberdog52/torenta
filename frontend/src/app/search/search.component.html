@@ -31,7 +31,9 @@
       <div class="search-status">
         <mat-progress-spinner mode="indeterminate" diameter="32" aria-label="Searching TV shows" />
       </div>
-    } @else if (seriesQuery().length > 0 && seriesOverviews().length === 0) {
+    } @else if (
+      seriesQuery().length > 0 && seriesOverviews().length === 0 && !seriesSearch.error()
+    ) {
       <p class="search-empty" aria-live="polite">No TV shows found for "{{ seriesQuery() }}".</p>
     }
 
@@ -142,7 +144,7 @@
       <div class="search-status">
         <mat-progress-spinner mode="indeterminate" diameter="32" aria-label="Searching movies" />
       </div>
-    } @else if (movieQuery().length > 0 && movieOverviews().length === 0) {
+    } @else if (movieQuery().length > 0 && movieOverviews().length === 0 && !movieSearch.error()) {
       <p class="search-empty" aria-live="polite">No movies found for "{{ movieQuery() }}".</p>
     }
 

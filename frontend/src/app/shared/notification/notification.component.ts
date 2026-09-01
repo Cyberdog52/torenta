@@ -42,6 +42,14 @@ export class NotificationComponent {
         this.errors.update((errors) => [...errors, notification].slice(-MAX_ERRORS));
         return;
       }
+      if (notification.type === NotificationType.WARNING) {
+        this.snackBar.open(notification.content, notification.action?.label, {
+          duration: 10000,
+          politeness: 'assertive',
+          panelClass: ['warning-snackbar'],
+        });
+        return;
+      }
       const snackBarRef = this.snackBar.open(notification.content, notification.action?.label, {
         duration: 5000,
       });
