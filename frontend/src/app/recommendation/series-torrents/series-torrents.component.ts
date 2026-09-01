@@ -1,79 +1,59 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { Router } from '@angular/router';
-import { MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { TorrentService } from '../../torrent/torrent.service';
 import { TorrentEntry } from '../../shared/dto/pirateBay/TorrentEntry';
-import { TorrentService } from '../torrent.service';
+import { SeriesRecommendation } from '../../shared/dto/recommendation/SeriesRecommendation';
+import { RecommendedEpisode } from '../../shared/dto/recommendation/RecommendedEpisode';
 import {
   DownloadRequestDto,
   dropFranchisePrefix,
   getDownloadTitle,
   getEpisodeString,
 } from '../../shared/dto/torrent/DownloadRequestDto';
-import { TmdbEpisodeDto } from '../../shared/dto/tmdb/TmdbEpisodeDto';
-import { TmdbSeriesDetailDto } from '../../shared/dto/tmdb/TmdbSeriesDetailDto';
-import { TmdbMovieDetailDto } from '../../shared/dto/tmdb/TmdbMovieDetailDto';
 import { NotificationService } from '../../shared/notification/notification.service';
 import { NotificationType } from '../../shared/dto/notification/Notification';
 import { safeValue } from '../../shared/resource';
 
+const TOP_TORRENT_COUNT = 3;
+
 @Component({
-  selector: 'app-torrent-suggestions',
-  imports: [MatTableModule, MatButtonModule, MatIconModule, MatProgressSpinnerModule],
+  selector: 'app-series-torrents',
+  imports: [MatButtonModule, MatIconModule, MatProgressSpinnerModule],
   changeDetection: ChangeDetectionStrategy.OnPush,
-  styleUrl: './torrent-suggestions.component.scss',
-  templateUrl: './torrent-suggestions.component.html',
+  styleUrl: './series-torrents.component.scss',
+  templateUrl: './series-torrents.component.html',
 })
-export class TorrentSuggestionsComponent {
+export class SeriesTorrentsComponent {
   private readonly torrentService = inject(TorrentService);
   private readonly notificationService = inject(NotificationService);
   private readonly router = inject(Router);
 
-  readonly seriesDetail = input<TmdbSeriesDetailDto | null>(null);
-  readonly tmdbEpisodeDto = input<TmdbEpisodeDto | null>(null);
-  readonly movieDetail = input<TmdbMovieDetailDto | null>(null);
-  readonly searchString = input<string | null>(null);
+  readonly seriesDetail = input.required<SeriesRecommendation['seriesDetail']>();
+  readonly episode = input.required<RecommendedEpisode>();
 
-  protected readonly displayedColumns = [
-    'name',
-    'seeders',
-    'time',
-    'size',
-    'trusted',
-    'startDownload',
-  ];
+  /** Same query convention as the Search page: "<series name> S0xE0y", franchise prefix dropped. */
+  private readonly query = computed(() =>
+    dropFranchisePrefix(
+      `${this.seriesDetail().name} ${getEpisodeString(this.episode().tmdbEpisodeDto)}`,
+    ),
+  );
 
-  /**
-   * The effective query: either what the user typed, or one derived from the
-   * selected episode / movie.
-   */
-  private readonly query = computed(() => {
-    const explicit = this.searchString();
-    if (explicit) {
-      return explicit;
-    }
-    const seriesDetail = this.seriesDetail();
-    if (seriesDetail) {
-      const title = `${seriesDetail.name} ${getEpisodeString(this.tmdbEpisodeDto())}`;
-      // 'Star Wars: Andor S01E01' -> 'Andor S01E01'
-      return dropFranchisePrefix(title);
-    }
-    const movieTitle = this.movieDetail()?.title;
-    return movieTitle != null ? dropFranchisePrefix(movieTitle) : undefined;
-  });
+  private readonly torrentsResource = this.torrentService.torrentSearchResource(this.query);
 
-  private readonly suggestionsResource = this.torrentService.torrentSearchResource(this.query);
+  protected readonly isLoading = this.torrentsResource.isLoading;
 
-  protected readonly suggestions = computed(() => safeValue(this.suggestionsResource) ?? []);
-  protected readonly isLoading = this.suggestionsResource.isLoading;
+  /** Only trusted/VIP-uploaded torrents, best-seeded first, capped to the top few. */
+  protected readonly topTorrents = computed(() =>
+    (safeValue(this.torrentsResource) ?? [])
+      .filter((torrent) => torrent.uploaderIsTrusted || torrent.uploaderIsVIP)
+      .toSorted((a, b) => b.numberOfSeeders - a.numberOfSeeders)
+      .slice(0, TOP_TORRENT_COUNT),
+  );
 
-  /**
-   * Only polls while this component is on screen: `toSignal` subscribes here
-   * and unsubscribes on destroy, which stops the shared refCounted poll.
-   */
   private readonly downloads = toSignal(this.torrentService.downloads$, { initialValue: [] });
   private readonly pendingDownloads = signal<ReadonlySet<string>>(new Set());
 
@@ -94,10 +74,10 @@ export class TorrentSuggestionsComponent {
     this.setDownloadPending(torrentEntry.magnetLink, true);
 
     const downloadRequest: DownloadRequestDto = {
-      tmdbEpisode: this.tmdbEpisodeDto(),
+      tmdbEpisode: this.episode().tmdbEpisodeDto,
       seriesDetail: this.seriesDetail(),
       torrentEntry,
-      movieDetail: this.movieDetail(),
+      movieDetail: null,
     };
     this.torrentService.startTorrent(downloadRequest).subscribe({
       next: () =>

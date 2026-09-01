@@ -131,7 +131,8 @@ ch.andreskonrad.torenta.<feature>.service      # @Service, business logic
 ch.andreskonrad.torenta.<feature>.dto          # request/response data objects
 ```
 
-Existing features: `bittorrent`, `directory`, `library`, `preference`, `tmdb`, `torrent`.
+Existing features: `bittorrent`, `directory`, `library`, `preference`, `recommendation`, `tmdb`,
+`torrent`.
 Add new functionality as a new feature slice following this pattern; do not create cross-cutting
 "utils"/"helpers" dumping grounds.
 
