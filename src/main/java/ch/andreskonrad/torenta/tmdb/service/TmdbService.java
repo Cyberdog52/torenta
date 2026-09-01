@@ -1,12 +1,12 @@
 package ch.andreskonrad.torenta.tmdb.service;
 
 import ch.andreskonrad.torenta.CustomCacheConfig;
+import ch.andreskonrad.torenta.preference.service.PreferenceService;
 import ch.andreskonrad.torenta.tmdb.dto.*;
 import tools.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cache.annotation.CacheConfig;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
@@ -23,17 +23,17 @@ public class TmdbService {
     private static final String HOST = "api.themoviedb.org";
     private static final String SCHEME = "https";
 
-    private final String apiKey;
+    private final PreferenceService preferenceService;
     private final TmdbHttpTransport httpTransport;
     private final ObjectMapper objectMapper;
 
     @Autowired
     public TmdbService(
-            @Value("${ch.andreskonrad.torenta.tmdb.service.key}") String apiKey,
+            PreferenceService preferenceService,
             TmdbHttpTransport httpTransport,
             ObjectMapper objectMapper
     ) {
-        this.apiKey = apiKey;
+        this.preferenceService = preferenceService;
         this.httpTransport = httpTransport;
         this.objectMapper = objectMapper;
     }
@@ -107,7 +107,7 @@ public class TmdbService {
         return UriComponentsBuilder.newInstance()
                 .scheme(SCHEME)
                 .host(HOST)
-                .queryParam("api_key", apiKey)
+                .queryParam("api_key", preferenceService.loadPreferences().getTmdbServiceKey())
                 .queryParam("language", "en-US");
     }
 

@@ -2,8 +2,8 @@
 
 ## Setup
 
-#### Java
-Install Java OpenJDK 25 (the build uses the Java 25 toolchain configured in `build.gradle`).
+#### Java (only needed for source builds)
+Install Java OpenJDK 25 only if you build/run from source (the build uses the Java 25 toolchain configured in `build.gradle`).
 Make sure it is also in the system's path, because gradlew will use the java version that is on the path.
 To see which java version is used, type the following in the terminal:
 
@@ -16,12 +16,11 @@ which java
 ```
 
 
-#### IntelliJ
-Install new version of IntelliJ Idea (minimum 2018.3) from [here](https://www.jetbrains.com/idea/download/).
-The enterprise version is recommended.
+#### IntelliJ (optional)
+IntelliJ IDEA is optional and only needed if you prefer running/debugging from the IDE.
 
 #### TMDB-Key
-First, you need to get an API key from [TMDB](https://developers.themoviedb.org/3/getting-started/introduction). Create an `application.properties` from the template and add the key. Do not check in the `application.properties` file.
+First, you need to get an API key from [TMDB](https://developers.themoviedb.org/3/getting-started/introduction). Configure the key in the application's user preferences (Preferences in the UI).
 
 #### NodeJs
 The frontend runs on **Angular 22** and requires **Node.js 24 LTS** (>= 24.15.0).
@@ -46,6 +45,15 @@ npm install
 npx playwright install chromium
 ```
 
+To build the portable application archive from the repository root:
+
+```bash
+./gradlew createPortableArchive
+```
+
+The Gradle task installs the locked frontend dependencies with `npm ci`, builds the Angular
+application, and writes the ZIP to `build/distributions/`.
+
 ## Frontend stack
 
 | | |
@@ -58,11 +66,27 @@ npx playwright install chromium
 
 ## Run
 
+#### Run prebuilt backend (no local Java required)
+
+1. Download the latest `torenta-portable-<version>.zip` from GitHub Releases.
+2. Unzip it.
+3. Start the backend:
+   - macOS/Linux: `./run-torenta.sh`
+   - Windows: `run-torenta.bat`
+
+The backend starts at http://localhost:8080/
+
 #### Run Backend:
 
 
 
-Execute TorentaApplication through RunConfigurations
+From source (requires Java 25), run the backend with Gradle:
+
+```bash
+./gradlew bootRun
+```
+
+Or execute `TorentaApplication` through IntelliJ run configurations.
 
 Will start at http://localhost:8080/
 

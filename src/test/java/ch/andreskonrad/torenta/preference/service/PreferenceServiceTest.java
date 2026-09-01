@@ -34,28 +34,32 @@ public class PreferenceServiceTest {
 
     @Test
     public void saveDownloadDirectory_customFolder_stored() {
-        UserPreference userPreferences = new UserPreference("C:/");
+        UserPreference userPreferences = new UserPreference("C:/", "tmdb-key");
         when(preferences.get(eq("downloadDirectory"), anyString())).thenReturn("C:/");
+        when(preferences.get(eq("tmdbServiceKey"), eq(null))).thenReturn("tmdb-key");
 
         preferenceService.save(userPreferences);
 
         UserPreference storedPreferences = preferenceService.loadPreferences();
         assertEquals(userPreferences, storedPreferences);
         verify(preferences).put("downloadDirectory", "C:/");
+        verify(preferences).put("tmdbServiceKey", "tmdb-key");
     }
 
     @Test
     public void saveDownloadDirectory_null_notStored() {
-        UserPreference oldPreferences = new UserPreference("C:/old");
+        UserPreference oldPreferences = new UserPreference("C:/old", "tmdb-old");
         preferenceService.save(oldPreferences);
 
-        UserPreference newPreferences = new UserPreference(null);
+        UserPreference newPreferences = new UserPreference(null, null);
         preferenceService.save(newPreferences);
         when(preferences.get(eq("downloadDirectory"), anyString())).thenReturn("C:/old");
+        when(preferences.get(eq("tmdbServiceKey"), eq(null))).thenReturn("tmdb-old");
 
         UserPreference storedPreferences = preferenceService.loadPreferences();
         assertEquals(oldPreferences, storedPreferences);
         verify(preferences, times(1)).put("downloadDirectory", "C:/old");
+        verify(preferences, times(1)).put("tmdbServiceKey", "tmdb-old");
     }
 
 }

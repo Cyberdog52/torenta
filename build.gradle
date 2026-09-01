@@ -3,10 +3,15 @@ plugins {
     id 'io.spring.dependency-management' version '1.1.7'
     id 'java'
     id 'jacoco'
+    id 'application'
 }
 
 group = 'ch.andreskonrad'
 version = '0.0.1-SNAPSHOT'
+
+application {
+    mainClass = 'ch.andreskonrad.torenta.TorentaApplication'
+}
 
 java {
     toolchain {
@@ -83,4 +88,190 @@ tasks.named('jacocoTestCoverageVerification') {
 
 tasks.named('check') {
     dependsOn tasks.named('jacocoTestCoverageVerification')
+}
+
+tasks.register('downloadJRE') {
+    def osName = System.getProperty('os.name').toLowerCase()
+    def osArch = System.getProperty('os.arch').toLowerCase()
+
+    def jreFileName
+    def jreUrl
+
+    // Using JDK 26.0.2.1 GA release (JDK 25 binaries are no longer available)
+    if (osName.contains('win')) {
+        jreFileName = 'openjdk-26.0.2.1_windows-x64_bin.zip'
+    } else if (osName.contains('mac')) {
+        if (osArch.contains('aarch64') || osArch.contains('arm')) {
+            jreFileName = 'openjdk-26.0.2.1_macos-aarch64_bin.tar.gz'
+        } else {
+            jreFileName = 'openjdk-26.0.2.1_macos-x64_bin.tar.gz'
+        }
+    } else {
+        jreFileName = 'openjdk-26.0.2.1_linux-x64_bin.tar.gz'
+    }
+
+    jreUrl = "https://download.java.net/java/GA/jdk26.0.2.1/3b8e6c7ec6274148a7aa15e7e7dfb53c/1/GPL/${jreFileName}"
+
+    def jreDir = layout.buildDirectory.dir('jre').get().asFile
+    def jreFile = new File(jreDir, jreFileName)
+
+    outputs.file(jreFile)
+
+    doLast {
+        if (!jreFile.exists()) {
+            jreDir.mkdirs()
+            println("Downloading JRE from ${jreUrl}")
+            new URL(jreUrl).openStream().with { input ->
+                jreFile.withOutputStream { output ->
+                    output << input
+                }
+            }
+            println("Downloaded JRE to ${jreFile}")
+        } else {
+            println("JRE already exists at ${jreFile}")
+        }
+    }
+}
+
+tasks.register('extractJRE') {
+    dependsOn tasks.named('downloadJRE')
+
+    def osName = System.getProperty('os.name').toLowerCase()
+    def osArch = System.getProperty('os.arch').toLowerCase()
+
+    def jreFileName
+    if (osName.contains('win')) {
+        jreFileName = 'openjdk-26.0.2.1_windows-x64_bin.zip'
+    } else if (osName.contains('mac')) {
+        if (osArch.contains('aarch64') || osArch.contains('arm')) {
+            jreFileName = 'openjdk-26.0.2.1_macos-aarch64_bin.tar.gz'
+        } else {
+            jreFileName = 'openjdk-26.0.2.1_macos-x64_bin.tar.gz'
+        }
+    } else {
+        jreFileName = 'openjdk-26.0.2.1_linux-x64_bin.tar.gz'
+    }
+
+    def jreDir = layout.buildDirectory.dir('jre').get().asFile
+    def jreSource = new File(jreDir, jreFileName)
+    def extractedDir = layout.buildDirectory.dir('jre-extracted').get().asFile
+    def portableRuntimeDir = layout.buildDirectory.dir('portable/runtime').get().asFile
+
+    outputs.dir(portableRuntimeDir)
+
+    doLast {
+        def javaBinary = osName.contains('win') ?
+            new File(portableRuntimeDir, 'bin/java.exe') :
+            new File(portableRuntimeDir, 'bin/java')
+
+        if (!javaBinary.exists()) {
+            println("Extracting JRE from ${jreSource.name}")
+            extractedDir.mkdirs()
+            portableRuntimeDir.mkdirs()
+
+            if (jreFileName.endsWith('.zip')) {
+                copy {
+                    from(zipTree(jreSource))
+                    into(extractedDir)
+                }
+            } else {
+                copy {
+                    from(tarTree(jreSource))
+                    into(extractedDir)
+                }
+            }
+
+            def jdkDir = extractedDir.listFiles().find { it.isDirectory() && (it.name.startsWith('jdk') || it.name.contains('jdk')) }
+            if (jdkDir) {
+                println("Found JDK directory: ${jdkDir.name}")
+
+                // On macOS, the actual JDK is in .jdk/Contents/Home
+                def actualJdkDir = jdkDir
+                def contentsHome = new File(jdkDir, 'Contents/Home')
+                if (contentsHome.exists()) {
+                    actualJdkDir = contentsHome
+                    println("Using macOS JDK at ${actualJdkDir}")
+                }
+
+                copy {
+                    from(actualJdkDir)
+                    into(portableRuntimeDir)
+                }
+                println("JRE extracted to ${portableRuntimeDir}")
+            } else {
+                throw new GradleException("JDK directory not found in extracted archive. Contents: ${extractedDir.listFiles()?.collect { it.name }?.join(', ')}")
+            }
+        } else {
+            println("Java binary already exists at ${javaBinary}")
+        }
+    }
+}
+
+def frontendDirectory = layout.projectDirectory.dir('frontend')
+
+tasks.register('installFrontend', Exec) {
+    workingDir frontendDirectory
+    inputs.files(
+        frontendDirectory.file('package.json'),
+        frontendDirectory.file('package-lock.json')
+    )
+    outputs.file(frontendDirectory.file('node_modules/.package-lock.json'))
+    def isWindows = System.getProperty('os.name').toLowerCase().contains('win')
+    commandLine isWindows ? 'npm.cmd' : 'npm', 'ci'
+}
+
+tasks.register('buildFrontend', Exec) {
+    dependsOn tasks.named('installFrontend')
+    workingDir frontendDirectory
+    inputs.dir(layout.projectDirectory.dir('frontend/src'))
+    inputs.file(layout.projectDirectory.file('frontend/package.json'))
+    inputs.file(layout.projectDirectory.file('frontend/package-lock.json'))
+    outputs.dir(layout.projectDirectory.dir('frontend/dist/frontend/browser'))
+    def isWindows = System.getProperty('os.name').toLowerCase().contains('win')
+    if (isWindows) {
+        commandLine 'cmd', '/c', 'npm run build'
+    } else {
+        commandLine 'sh', '-c', 'npm run build'
+    }
+}
+
+tasks.register('copyFrontendToResources', Copy) {
+    dependsOn tasks.named('buildFrontend')
+    from('frontend/dist/frontend/browser')
+    into('src/main/resources/static')
+}
+
+tasks.named('processResources') {
+    dependsOn tasks.named('copyFrontendToResources')
+}
+
+tasks.register('assemblePortableApp', Copy) {
+    dependsOn tasks.named('bootJar'), tasks.named('extractJRE')
+    from(tasks.named('bootJar').flatMap { it.archiveFile })
+    into(layout.buildDirectory.dir('portable/app'))
+}
+
+tasks.register('preparePortableLayout', Sync) {
+    dependsOn tasks.named('assemblePortableApp')
+    from(layout.buildDirectory.dir('portable'))
+    into(layout.buildDirectory.dir('portable-dist'))
+    from('scripts/run-torenta.sh')
+    from('scripts/run-torenta.bat')
+}
+
+tasks.register('createPortableArchive', Zip) {
+    dependsOn tasks.named('preparePortableLayout')
+    archiveBaseName = 'torenta-portable'
+    archiveVersion = project.version.toString()
+    destinationDirectory = layout.buildDirectory.dir('distributions')
+    from(layout.buildDirectory.dir('portable-dist'))
+    // Preserve executable bit for launcher script and bundled runtime binaries in the zip.
+    eachFile { fileCopyDetails ->
+        def relativePath = fileCopyDetails.relativePath.pathString
+        if (relativePath == 'run-torenta.sh' || relativePath.startsWith('runtime/')) {
+            fileCopyDetails.permissions {
+                unix(0755)
+            }
+        }
+    }
 }

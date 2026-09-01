@@ -19,10 +19,7 @@ You do **not** need a local Gradle install — use the wrapper (`./gradlew`, `.\
 
 ## First-time setup
 
-1. **TMDB API key.** Copy `src/main/resources/application-template.properties` to
-   `application.properties` and set `ch.andreskonrad.torenta.tmdb.service.key`. **Never commit
-   `application.properties`** — it is a protected file (see `AI_RULES.md §1`).
-2. **Frontend dependencies:**
+1. **Frontend dependencies:**
    ```bash
    cd frontend
    nvm use
@@ -40,6 +37,7 @@ You do **not** need a local Gradle install — use the wrapper (`./gradlew`, `.\
 ./gradlew jacocoTestReport # application coverage report
 ./gradlew jacocoTestCoverageVerification # enforce application coverage thresholds
 ./gradlew bootRun    # run API at http://localhost:8080
+./gradlew createPortableArchive # build portable ZIP (runs npm ci for the frontend)
 ```
 
 Coverage reports and thresholds apply to `ch.andreskonrad.torenta/**`; the vendored `bt/**`

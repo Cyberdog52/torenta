@@ -1,5 +1,7 @@
 package ch.andreskonrad.torenta.tmdb.service;
 
+import ch.andreskonrad.torenta.preference.dto.UserPreference;
+import ch.andreskonrad.torenta.preference.service.PreferenceService;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbMovieDetailDto;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbMoviesSearchResultDto;
@@ -15,6 +17,8 @@ import java.util.concurrent.atomic.AtomicReference;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 class TmdbServiceTest {
 
@@ -141,10 +145,10 @@ class TmdbServiceTest {
 
     @Test
     void transportFailure_returnsNull() {
-        TmdbHttpTransport failingTransport = uri -> {
+        TmdbHttpTransport failingTransport = _ -> {
             throw new IOException("Offline transport failure");
         };
-        TmdbService service = new TmdbService(API_KEY, failingTransport, new ObjectMapper());
+        TmdbService service = new TmdbService(preferenceService(), failingTransport, new ObjectMapper());
 
         assertNull(service.getMovie(550));
     }
@@ -168,6 +172,12 @@ class TmdbServiceTest {
             requestedUri.set(uri);
             return response;
         };
-        return new TmdbService(API_KEY, transport, new ObjectMapper());
+        return new TmdbService(preferenceService(), transport, new ObjectMapper());
+    }
+
+    private PreferenceService preferenceService() {
+        PreferenceService preferenceService = mock(PreferenceService.class);
+        when(preferenceService.loadPreferences()).thenReturn(new UserPreference(null, API_KEY));
+        return preferenceService;
     }
 }
