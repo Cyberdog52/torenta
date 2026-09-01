@@ -4,6 +4,7 @@ plugins {
     id 'java'
     id 'jacoco'
     id 'application'
+    id 'com.github.node-gradle.node' version '7.1.0'
 }
 
 group = 'ch.andreskonrad'
@@ -209,34 +210,32 @@ tasks.register('extractJRE') {
 
 def frontendDirectory = layout.projectDirectory.dir('frontend')
 
-tasks.register('installFrontend', Exec) {
-    workingDir frontendDirectory
+node {
+    download = true
+    version = '24.20.0'
+    npmInstallCommand = 'ci'
+    nodeProjectDir = frontendDirectory.asFile
+}
+
+tasks.named('npmInstall') {
     inputs.files(
         frontendDirectory.file('package.json'),
         frontendDirectory.file('package-lock.json')
     )
     outputs.file(frontendDirectory.file('node_modules/.package-lock.json'))
-    def isWindows = System.getProperty('os.name').toLowerCase().contains('win')
-    if (isWindows) {
-        commandLine 'cmd', '/c', 'npm ci'
-    } else {
-        commandLine 'sh', '-c', 'npm ci'
-    }
 }
 
-tasks.register('buildFrontend', Exec) {
+tasks.register('installFrontend') {
+    dependsOn tasks.named('npmInstall')
+}
+
+tasks.register('buildFrontend', NpmTask) {
     dependsOn tasks.named('installFrontend')
-    workingDir frontendDirectory
     inputs.dir(layout.projectDirectory.dir('frontend/src'))
     inputs.file(layout.projectDirectory.file('frontend/package.json'))
     inputs.file(layout.projectDirectory.file('frontend/package-lock.json'))
     outputs.dir(layout.projectDirectory.dir('frontend/dist/frontend/browser'))
-    def isWindows = System.getProperty('os.name').toLowerCase().contains('win')
-    if (isWindows) {
-        commandLine 'cmd', '/c', 'npm run build'
-    } else {
-        commandLine 'sh', '-c', 'npm run build'
-    }
+    args = ['run', 'build']
 }
 
 tasks.register('copyFrontendToResources', Copy) {
