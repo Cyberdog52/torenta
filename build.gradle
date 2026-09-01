@@ -217,7 +217,11 @@ tasks.register('installFrontend', Exec) {
     )
     outputs.file(frontendDirectory.file('node_modules/.package-lock.json'))
     def isWindows = System.getProperty('os.name').toLowerCase().contains('win')
-    commandLine isWindows ? 'npm.cmd' : 'npm', 'ci'
+    if (isWindows) {
+        commandLine 'cmd', '/c', 'npm ci'
+    } else {
+        commandLine 'sh', '-c', 'npm ci'
+    }
 }
 
 tasks.register('buildFrontend', Exec) {
