@@ -15,6 +15,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -215,6 +218,48 @@ public class DirectoryServiceTest {
                 .map(DirectoryDto::getAbsolutePath)
                 .map(Path::of)
                 .allMatch(path -> path.normalize().startsWith(rootFolder.toAbsolutePath().normalize())));
+    }
+
+    @Test
+    public void getSeriesNamesModifiedWithin_recentlyModifiedSeries_isIncluded() throws IOException {
+        Path seriesPath = rootFolder.resolve("Series").resolve("Recent Show");
+        Files.createDirectory(seriesPath);
+
+        List<String> seriesNames = directoryService.getSeriesNamesModifiedWithin(Duration.ofDays(14));
+
+        assertEquals(List.of("Recent Show"), seriesNames);
+    }
+
+    @Test
+    public void getSeriesNamesModifiedWithin_staleSeries_isExcluded() throws IOException {
+        Path seriesPath = rootFolder.resolve("Series").resolve("Old Show");
+        Files.createDirectory(seriesPath);
+        setLastModifiedRecursively(seriesPath, Instant.now().minus(Duration.ofDays(30)));
+
+        List<String> seriesNames = directoryService.getSeriesNamesModifiedWithin(Duration.ofDays(14));
+
+        assertTrue(seriesNames.isEmpty());
+    }
+
+    @Test
+    public void getSeriesNamesModifiedWithin_recentFileInStaleSeriesFolder_isIncluded() throws IOException {
+        Path seriesPath = rootFolder.resolve("Series").resolve("Old Show");
+        Path seasonPath = Files.createDirectories(seriesPath.resolve("S03"));
+        Path newEpisode = Files.createFile(seasonPath.resolve("episode-S03E01.mp4"));
+        setLastModifiedRecursively(seriesPath, Instant.now().minus(Duration.ofDays(30)));
+        Files.setLastModifiedTime(newEpisode, FileTime.from(Instant.now()));
+
+        List<String> seriesNames = directoryService.getSeriesNamesModifiedWithin(Duration.ofDays(14));
+
+        assertEquals(List.of("Old Show"), seriesNames);
+    }
+
+    private static void setLastModifiedRecursively(Path root, Instant instant) throws IOException {
+        try (var paths = Files.walk(root)) {
+            for (Path path : paths.collect(Collectors.toList())) {
+                Files.setLastModifiedTime(path, FileTime.from(instant));
+            }
+        }
     }
 
     private static DirectoryDto directoryNamed(DirectoryDto parent, String name) {

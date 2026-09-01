@@ -1,0 +1,88 @@
+.weeks-field {
+  width: 100%;
+  max-width: 420px;
+}
+
+.recommendation-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(min(420px, 100%), 1fr));
+  gap: 16px;
+}
+
+.series-card {
+  display: flex;
+  gap: 12px;
+  padding: 12px;
+}
+
+.poster {
+  width: 92px;
+  height: 138px;
+  object-fit: cover;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.series-body {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.series-name {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+}
+
+.episode-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.episode-string {
+  font-weight: 500;
+  margin-right: 6px;
+}
+
+.episode-air-date {
+  color: var(--mat-sys-on-surface-variant);
+  margin-left: 6px;
+}
+
+.empty {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 240px;
+  padding: 32px 16px;
+  text-align: center;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 48px;
+    width: 48px;
+    height: 48px;
+    margin-bottom: 8px;
+    opacity: 0.6;
+  }
+}
+
+.empty-title {
+  margin: 0;
+  font-size: 1.125rem;
+  font-weight: 500;
+  color: var(--mat-sys-on-surface);
+}
+
+.empty-subtitle {
+  margin: 0;
+}

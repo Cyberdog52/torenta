@@ -34,6 +34,7 @@ Root package `ch.andreskonrad.torenta`. Each feature is a vertical slice
 | `library`    | Model & manage the local media library (series/seasons/episodes)     | `LibraryService`, `Series`/`Season`/`Episode`    |
 | `directory`  | Browse local directories/files                                        | `DirectoryService`                               |
 | `preference` | Persist user preferences                                             | `PreferenceService`, `UserPreference`            |
+| `recommendation` | Recommend the next un-downloaded aired episode(s) per series in the library | `RecommendationService`                     |
 
 Cross-cutting config lives at the package root: `TorentaApplication` (entry point) and
 `CustomCacheConfig` + `CacheCustomizer` (Spring Cache). Springdoc auto-configures OpenAPI.
@@ -60,6 +61,12 @@ reformat, or clean it up** — only touch it for a deliberate, user-approved int
    `RoutableAddressResolver`, because the vendored default picks the first non-loopback IPv4
    address of any interface (often a Hyper-V/WSL/VPN adapter with no internet route).
 4. **Library** — completed media is surfaced through `LibraryService`/`DirectoryService`.
+5. **Recommend** — the Recommendations page calls `RecommendationController` →
+   `RecommendationService`, which lists series folders recently modified under
+   `<download-root>/Series` (`DirectoryService.getSeriesNamesModifiedWithin`), resolves each via
+   `LibraryService`, and returns up to 3 missing aired episodes per series (chronologically,
+   spanning into the next TMDB season even if it has no local folder yet). Results are cached
+   (`CustomCacheConfig.RECOMMENDATION_CACHE_NAME`) and evicted every 5 minutes.
 
 ## Frontend
 

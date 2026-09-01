@@ -21,6 +21,12 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./preference/preferences.component').then((m) => m.PreferencesComponent),
   },
+  {
+    path: 'recommendations',
+    title: 'Torenta – Recommendations',
+    loadComponent: () =>
+      import('./recommendation/recommendation.component').then((m) => m.RecommendationComponent),
+  },
   { path: '', redirectTo: '/search', pathMatch: 'full' },
   {
     path: '**',

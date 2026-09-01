@@ -12,8 +12,12 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Duration;
+import java.time.Instant;
+import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @Service
 public class DirectoryService {
@@ -132,6 +136,37 @@ public class DirectoryService {
             }
         }
         return true;
+    }
+
+    public List<String> getSeriesNamesModifiedWithin(Duration duration) {
+        try (Stream<Path> seriesFolders = Files.list(tvDirectoryPath)) {
+            Instant cutoff = Instant.now().minus(duration);
+            return seriesFolders
+                    .filter(Files::isDirectory)
+                    .filter(seriesFolder -> wasModifiedAfter(seriesFolder, cutoff))
+                    .map(seriesFolder -> seriesFolder.getFileName().toString())
+                    .collect(Collectors.toList());
+        } catch (IOException e) {
+            LOGGER.warn("Couldn't list series directories under " + tvDirectoryPath, e);
+            return List.of();
+        }
+    }
+
+    private boolean wasModifiedAfter(Path path, Instant cutoff) {
+        try (Stream<Path> allPaths = Files.walk(path)) {
+            return allPaths.anyMatch(p -> isModifiedAfter(p, cutoff));
+        } catch (IOException e) {
+            LOGGER.warn("Couldn't determine last modified time for " + path, e);
+            return false;
+        }
+    }
+
+    private boolean isModifiedAfter(Path path, Instant cutoff) {
+        try {
+            return Files.getLastModifiedTime(path).toInstant().isAfter(cutoff);
+        } catch (IOException e) {
+            return false;
+        }
     }
 
     public DirectoryDto getSeriesDirectory(String seriesTitle) {

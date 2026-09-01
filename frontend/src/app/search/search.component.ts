@@ -6,6 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { MatCardModule } from '@angular/material/card';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
@@ -98,6 +99,16 @@ export class SearchComponent {
 
   protected readonly posterUrl = posterUrl;
   protected readonly backdropUrl = backdropUrl;
+
+  constructor() {
+    // Lets other pages (e.g. Recommendations) deep-link into a series search,
+    // for example `/search?series=The%20Office`.
+    const seriesName = inject(ActivatedRoute).snapshot.queryParamMap.get('series');
+    if (seriesName) {
+      this.seriesInputValue.set(seriesName);
+      this.seriesQuery.set(seriesName);
+    }
+  }
 
   protected updateInputValue(value: WritableSignal<string>, input: HTMLInputElement): void {
     value.set(input.value);

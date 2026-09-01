@@ -1,0 +1,63 @@
+<mat-card>
+  <mat-card-header>
+    <h1 mat-card-title>Recommendations</h1>
+  </mat-card-header>
+  <mat-card-content>
+    <mat-form-field appearance="outline" class="weeks-field">
+      <mat-label>Only consider series watched in the last (weeks)</mat-label>
+      <input
+        matInput
+        name="weeks"
+        type="number"
+        min="1"
+        [value]="weeks()"
+        (change)="setWeeks($any($event.target))"
+      />
+    </mat-form-field>
+
+    <p class="visually-hidden" aria-live="polite">
+      {{ recommendations().length }} series with missing episodes.
+    </p>
+
+    <div class="recommendation-list">
+      @for (recommendation of recommendations(); track recommendation.tmdbSeriesId) {
+        <mat-card class="series-card" appearance="outlined">
+          <img
+            class="poster"
+            [src]="posterUrl(recommendation.posterPath)"
+            [alt]="recommendation.seriesName + ' poster'"
+          />
+          <div class="series-body">
+            <h2 class="series-name">{{ recommendation.seriesName }}</h2>
+            <ul class="episode-list">
+              @for (episode of recommendation.recommendedEpisodes; track episode.episodeString) {
+                <li>
+                  <span class="episode-string">{{ episode.episodeString }}</span>
+                  <span class="episode-name">{{ episode.name }}</span>
+                  <span class="episode-air-date">({{ episode.airDate }})</span>
+                </li>
+              }
+            </ul>
+            <a
+              matButton="elevated"
+              [routerLink]="['/search']"
+              [queryParams]="{ series: recommendation.seriesName }"
+            >
+              <mat-icon>search</mat-icon>Find torrents
+            </a>
+          </div>
+        </mat-card>
+      } @empty {
+        <div class="empty">
+          <mat-icon aria-hidden="true">check_circle</mat-icon>
+          <p class="empty-title">You're all caught up</p>
+          <p class="empty-subtitle">
+            No missing aired episodes found in series watched in the last {{ weeks() }} week{{
+              weeks() === 1 ? '' : 's'
+            }}.
+          </p>
+        </div>
+      }
+    </div>
+  </mat-card-content>
+</mat-card>

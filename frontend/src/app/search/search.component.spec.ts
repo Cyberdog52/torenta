@@ -1,13 +1,14 @@
 import { TestBed } from '@angular/core/testing';
 import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
+import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
 import { SearchComponent } from './search.component';
 
 describe('SearchComponent', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [SearchComponent],
-      providers: [provideHttpClient(), provideHttpClientTesting()],
+      providers: [provideHttpClient(), provideHttpClientTesting(), provideRouter([])],
     }).compileComponents();
   });
 
@@ -207,6 +208,28 @@ describe('SearchComponent', () => {
     } finally {
       vi.useRealTimers();
     }
+  });
+
+  it('prefills the series search from a "series" query param', async () => {
+    TestBed.overrideProvider(ActivatedRoute, {
+      useValue: {
+        snapshot: { queryParamMap: convertToParamMap({ series: 'The Office' }) },
+      },
+    });
+
+    const fixture = TestBed.createComponent(SearchComponent);
+    fixture.detectChanges();
+    const compiled = fixture.nativeElement as HTMLElement;
+
+    const input = compiled.querySelector<HTMLInputElement>(
+      '.search-card:nth-of-type(1) input[matInput]',
+    );
+    expect(input?.value).toBe('The Office');
+
+    const httpTesting = TestBed.inject(HttpTestingController);
+    httpTesting.expectOne((r) => r.url === 'api/tmdb/tv').flush({ results: [] });
+    await fixture.whenStable();
+    httpTesting.verify();
   });
 
   it('clears a search input and removes its result list', async () => {
