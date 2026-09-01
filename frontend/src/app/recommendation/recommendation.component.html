@@ -20,6 +20,26 @@
       {{ recommendations().length }} series with missing episodes.
     </p>
 
+    @if (seriesConsidered() > 0) {
+      <p class="scan-summary">
+        Scanned {{ seriesConsidered() }} series folder{{ seriesConsidered() === 1 ? '' : 's' }}.
+      </p>
+    }
+    @if (unresolvedSeriesNames().length > 0) {
+      <div class="unresolved-warning" role="alert">
+        <mat-icon aria-hidden="true">warning</mat-icon>
+        <div>
+          <p class="unresolved-title">
+            {{ unresolvedSeriesNames().length }} folder{{
+              unresolvedSeriesNames().length === 1 ? '' : 's'
+            }}
+            couldn't be matched to a TMDB show and were skipped:
+          </p>
+          <p class="unresolved-list">{{ unresolvedSeriesNames().join(', ') }}</p>
+        </div>
+      </div>
+    }
+
     <div class="recommendation-list">
       @for (recommendation of recommendations(); track recommendation.tmdbSeriesId) {
         <mat-card class="series-card" appearance="outlined">
@@ -53,12 +73,22 @@
           <mat-icon aria-hidden="true">check_circle</mat-icon>
           <p class="empty-title">You're all caught up</p>
           <p class="empty-subtitle">
-            @if (weeks() === 0) {
-              No missing aired episodes found across your whole library.
+            @if (seriesConsidered() === 0) {
+              No series folders were found to scan.
+              @if (weeks() !== 0) {
+                Set the weeks field to 0 to scan your entire library.
+              }
+            } @else if (weeks() === 0) {
+              No missing aired episodes found across the {{ seriesConsidered() }} series folder{{
+                seriesConsidered() === 1 ? '' : 's'
+              }}
+              scanned.
             } @else {
-              No missing aired episodes found in series touched in the last {{ weeks() }} week{{
-                weeks() === 1 ? '' : 's'
-              }}. Set the weeks field to 0 to scan your entire library.
+              No missing aired episodes found in the {{ seriesConsidered() }} series folder{{
+                seriesConsidered() === 1 ? '' : 's'
+              }}
+              touched in the last {{ weeks() }} week{{ weeks() === 1 ? '' : 's' }}. Set the weeks
+              field to 0 to scan your entire library.
             }
           </p>
         </div>

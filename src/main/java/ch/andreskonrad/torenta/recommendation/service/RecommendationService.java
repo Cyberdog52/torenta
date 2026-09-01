@@ -8,6 +8,7 @@ import ch.andreskonrad.torenta.library.dto.Episode;
 import ch.andreskonrad.torenta.library.dto.Season;
 import ch.andreskonrad.torenta.library.dto.Series;
 import ch.andreskonrad.torenta.library.service.LibraryService;
+import ch.andreskonrad.torenta.recommendation.dto.RecommendationResultDto;
 import ch.andreskonrad.torenta.recommendation.dto.RecommendedEpisodeDto;
 import ch.andreskonrad.torenta.recommendation.dto.SeriesRecommendationDto;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
@@ -56,42 +57,36 @@ public class RecommendationService {
      *                  feature meant to surface it.
      */
     @Cacheable
-    public List<SeriesRecommendationDto> getRecommendations(int weeksBack) {
+    public RecommendationResultDto getRecommendations(int weeksBack) {
         List<String> seriesNames = weeksBack <= 0
                 ? directoryService.getAllSeriesNames()
                 : directoryService.getSeriesNamesModifiedWithin(Duration.ofDays(weeksBack * 7L));
 
         List<SeriesRecommendationDto> recommendations = new ArrayList<>();
+        List<String> unresolvedSeriesNames = new ArrayList<>();
         for (String seriesName : seriesNames) {
-            SeriesRecommendationDto recommendation = getRecommendationForSeries(seriesName);
-            if (recommendation != null) {
-                recommendations.add(recommendation);
+            Series series;
+            try {
+                series = libraryService.getSeriesInLibrary(seriesName);
+            } catch (Exception e) {
+                LOGGER.warn("Could not resolve series in library for recommendations: {}", seriesName, e);
+                unresolvedSeriesNames.add(seriesName);
+                continue;
+            }
+
+            List<RecommendedEpisodeDto> missingEpisodes = getMissingAiredEpisodes(series);
+            if (!missingEpisodes.isEmpty()) {
+                recommendations.add(new SeriesRecommendationDto(
+                        seriesName,
+                        series.getSeriesDetail().getId(),
+                        series.getSeriesDetail().getPoster_path(),
+                        missingEpisodes));
             }
         }
 
         recommendations.sort(Comparator.comparing(SeriesRecommendationDto::getSeriesName, String.CASE_INSENSITIVE_ORDER));
-        return recommendations;
-    }
-
-    private SeriesRecommendationDto getRecommendationForSeries(String seriesName) {
-        Series series;
-        try {
-            series = libraryService.getSeriesInLibrary(seriesName);
-        } catch (Exception e) {
-            LOGGER.warn("Could not resolve series in library for recommendations: {}", seriesName);
-            return null;
-        }
-
-        List<RecommendedEpisodeDto> missingEpisodes = getMissingAiredEpisodes(series);
-        if (missingEpisodes.isEmpty()) {
-            return null;
-        }
-
-        return new SeriesRecommendationDto(
-                seriesName,
-                series.getSeriesDetail().getId(),
-                series.getSeriesDetail().getPoster_path(),
-                missingEpisodes);
+        unresolvedSeriesNames.sort(String.CASE_INSENSITIVE_ORDER);
+        return new RecommendationResultDto(seriesNames.size(), unresolvedSeriesNames, recommendations);
     }
 
     private List<RecommendedEpisodeDto> getMissingAiredEpisodes(Series series) {

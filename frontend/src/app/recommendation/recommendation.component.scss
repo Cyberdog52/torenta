@@ -3,6 +3,35 @@
   max-width: 420px;
 }
 
+.scan-summary {
+  margin: 0 0 12px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.unresolved-warning {
+  display: flex;
+  gap: 8px;
+  align-items: flex-start;
+  margin: 0 0 16px;
+  padding: 12px;
+  border-radius: 4px;
+  background: var(--mat-sys-error-container);
+  color: var(--mat-sys-on-error-container);
+
+  mat-icon {
+    flex-shrink: 0;
+  }
+}
+
+.unresolved-title {
+  margin: 0;
+  font-weight: 500;
+}
+
+.unresolved-list {
+  margin: 4px 0 0;
+}
+
 .recommendation-list {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(min(420px, 100%), 1fr));

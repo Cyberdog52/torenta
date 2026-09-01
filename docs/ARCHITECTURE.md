@@ -69,8 +69,11 @@ reformat, or clean it up** — only touch it for a deliberate, user-approved int
    that many weeks (`DirectoryService.getSeriesNamesModifiedWithin`), trading completeness for
    speed on very large libraries. Each candidate series is resolved via `LibraryService`, and up
    to 3 missing aired episodes are returned per series (chronologically, spanning into the next
-   TMDB season even if it has no local folder yet). Results are cached
-   (`CustomCacheConfig.RECOMMENDATION_CACHE_NAME`) and evicted every 5 minutes.
+   TMDB season even if it has no local folder yet). The response (`RecommendationResultDto`)
+   also reports how many series folders were scanned and lists any that could not be resolved to
+   a TMDB show, so a user can tell "nothing missing" apart from "couldn't check this" from the UI
+   alone. Results are cached (`CustomCacheConfig.RECOMMENDATION_CACHE_NAME`) and evicted every 5
+   minutes.
 
 ## Frontend
 

@@ -5,6 +5,7 @@ import ch.andreskonrad.torenta.directory.dto.FileDto;
 import ch.andreskonrad.torenta.directory.service.DirectoryService;
 import ch.andreskonrad.torenta.library.dto.Series;
 import ch.andreskonrad.torenta.library.service.LibraryService;
+import ch.andreskonrad.torenta.recommendation.dto.RecommendationResultDto;
 import ch.andreskonrad.torenta.recommendation.dto.SeriesRecommendationDto;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbSeasonDto;
@@ -65,10 +66,11 @@ public class RecommendationServiceTest {
     public void getRecommendations_zeroWeeks_scansEntireLibraryIgnoringRecency() {
         when(directoryService.getAllSeriesNames()).thenReturn(List.of());
 
-        recommendationService.getRecommendations(0);
+        RecommendationResultDto result = recommendationService.getRecommendations(0);
 
         verify(directoryService).getAllSeriesNames();
         verify(directoryService, never()).getSeriesNamesModifiedWithin(any());
+        assertEquals(0, result.getSeriesConsidered());
     }
 
     @Test
@@ -82,14 +84,16 @@ public class RecommendationServiceTest {
     }
 
     @Test
-    public void getRecommendations_seriesFullyCaughtUp_isExcluded() {
+    public void getRecommendations_seriesFullyCaughtUp_isExcludedButStillCounted() {
         when(directoryService.getSeriesNamesModifiedWithin(any())).thenReturn(List.of("Caught Up Show"));
         Series series = series(detail(1, "Caught Up Show"), season(1, episode(1, 1, past(), true)));
         when(libraryService.getSeriesInLibrary("Caught Up Show")).thenReturn(series);
 
-        List<SeriesRecommendationDto> recommendations = recommendationService.getRecommendations(2);
+        RecommendationResultDto result = recommendationService.getRecommendations(2);
 
-        assertTrue(recommendations.isEmpty());
+        assertTrue(result.getRecommendations().isEmpty());
+        assertTrue(result.getUnresolvedSeriesNames().isEmpty());
+        assertEquals(1, result.getSeriesConsidered());
     }
 
     @Test
@@ -106,7 +110,8 @@ public class RecommendationServiceTest {
                         episode(3, 4, past(), false)));
         when(libraryService.getSeriesInLibrary("The Office")).thenReturn(series);
 
-        List<SeriesRecommendationDto> recommendations = recommendationService.getRecommendations(2);
+        List<SeriesRecommendationDto> recommendations =
+                recommendationService.getRecommendations(2).getRecommendations();
 
         assertEquals(1, recommendations.size());
         SeriesRecommendationDto recommendation = recommendations.get(0);
@@ -118,13 +123,15 @@ public class RecommendationServiceTest {
     }
 
     @Test
-    public void getRecommendations_unresolvableSeries_isSkippedWithoutThrowing() {
+    public void getRecommendations_unresolvableSeries_isReportedNotThrown() {
         when(directoryService.getSeriesNamesModifiedWithin(any())).thenReturn(List.of("Unknown"));
         when(libraryService.getSeriesInLibrary("Unknown")).thenThrow(new IllegalStateException("boom"));
 
-        List<SeriesRecommendationDto> recommendations = recommendationService.getRecommendations(2);
+        RecommendationResultDto result = recommendationService.getRecommendations(2);
 
-        assertTrue(recommendations.isEmpty());
+        assertTrue(result.getRecommendations().isEmpty());
+        assertEquals(List.of("Unknown"), result.getUnresolvedSeriesNames());
+        assertEquals(1, result.getSeriesConsidered());
     }
 
     @Test
@@ -139,7 +146,8 @@ public class RecommendationServiceTest {
         TmdbEpisodeDto nextSeasonEpisode = episode(2, 1, past(), false);
         when(tmdbService.getEpisodes(1, 2)).thenReturn(new TmdbEpisodeDto[]{ nextSeasonEpisode });
 
-        List<SeriesRecommendationDto> recommendations = recommendationService.getRecommendations(2);
+        List<SeriesRecommendationDto> recommendations =
+                recommendationService.getRecommendations(2).getRecommendations();
 
         assertEquals(1, recommendations.size());
         assertEquals("S02E01", recommendations.get(0).getRecommendedEpisodes().get(0).getEpisodeString());
@@ -157,9 +165,9 @@ public class RecommendationServiceTest {
         TmdbEpisodeDto notYetAiredEpisode = episode(2, 1, future(), false);
         when(tmdbService.getEpisodes(eq(1), eq(2))).thenReturn(new TmdbEpisodeDto[]{ notYetAiredEpisode });
 
-        List<SeriesRecommendationDto> recommendations = recommendationService.getRecommendations(2);
+        RecommendationResultDto result = recommendationService.getRecommendations(2);
 
-        assertTrue(recommendations.isEmpty());
+        assertTrue(result.getRecommendations().isEmpty());
         verify(tmdbService, never()).getEpisodes(eq(1), eq(3));
     }
 

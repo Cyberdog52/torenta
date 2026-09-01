@@ -47,8 +47,14 @@ export class RecommendationComponent {
     this.weeks,
   );
 
-  protected readonly recommendations = computed(
-    () => safeValue(this.recommendationsResource) ?? [],
+  protected readonly result = computed(() => safeValue(this.recommendationsResource));
+
+  protected readonly recommendations = computed(() => this.result()?.recommendations ?? []);
+
+  protected readonly seriesConsidered = computed(() => this.result()?.seriesConsidered ?? 0);
+
+  protected readonly unresolvedSeriesNames = computed(
+    () => this.result()?.unresolvedSeriesNames ?? [],
   );
 
   protected readonly posterUrl = posterUrl;

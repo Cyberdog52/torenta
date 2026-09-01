@@ -4,6 +4,16 @@ import { HttpTestingController, provideHttpClientTesting } from '@angular/common
 import { provideRouter } from '@angular/router';
 import { RecommendationComponent } from './recommendation.component';
 import { DEFAULT_RECOMMENDATION_WEEKS } from './recommendation.service';
+import { RecommendationResult } from '../shared/dto/recommendation/RecommendationResult';
+
+function result(overrides: Partial<RecommendationResult> = {}): RecommendationResult {
+  return {
+    seriesConsidered: 0,
+    unresolvedSeriesNames: [],
+    recommendations: [],
+    ...overrides,
+  };
+}
 
 describe('RecommendationComponent', () => {
   beforeEach(async () => {
@@ -22,7 +32,7 @@ describe('RecommendationComponent', () => {
       (r) => r.url === 'api/recommendation' && r.params.get('weeks') !== null,
     );
     expect(request.request.params.get('weeks')).toBe(String(DEFAULT_RECOMMENDATION_WEEKS));
-    request.flush([]);
+    request.flush(result());
     await fixture.whenStable();
 
     httpTesting.verify();
@@ -35,23 +45,28 @@ describe('RecommendationComponent', () => {
     const httpTesting = TestBed.inject(HttpTestingController);
     httpTesting
       .expectOne((r) => r.url === 'api/recommendation')
-      .flush([
-        {
-          seriesName: 'The Office',
-          tmdbSeriesId: 1,
-          posterPath: '/office.jpg',
-          recommendedEpisodes: [
+      .flush(
+        result({
+          seriesConsidered: 1,
+          recommendations: [
             {
-              seasonNumber: 3,
-              episodeNumber: 5,
-              episodeString: 'S03E05',
-              name: 'Initiation',
-              airDate: '2006-11-30',
-              stillPath: null,
+              seriesName: 'The Office',
+              tmdbSeriesId: 1,
+              posterPath: '/office.jpg',
+              recommendedEpisodes: [
+                {
+                  seasonNumber: 3,
+                  episodeNumber: 5,
+                  episodeString: 'S03E05',
+                  name: 'Initiation',
+                  airDate: '2006-11-30',
+                  stillPath: null,
+                },
+              ],
             },
           ],
-        },
-      ]);
+        }),
+      );
 
     await fixture.whenStable();
     fixture.detectChanges();
@@ -59,8 +74,27 @@ describe('RecommendationComponent', () => {
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.series-name')?.textContent).toContain('The Office');
     expect(compiled.querySelector('.episode-string')?.textContent).toContain('S03E05');
+    expect(compiled.querySelector('.scan-summary')?.textContent).toContain('1 series folder');
     const link = compiled.querySelector<HTMLAnchorElement>('.series-card a');
     expect(link?.getAttribute('href')).toContain('The%20Office');
+
+    httpTesting.verify();
+  });
+
+  it('surfaces series that could not be matched to TMDB', async () => {
+    const fixture = TestBed.createComponent(RecommendationComponent);
+    fixture.detectChanges();
+
+    const httpTesting = TestBed.inject(HttpTestingController);
+    httpTesting
+      .expectOne((r) => r.url === 'api/recommendation')
+      .flush(result({ seriesConsidered: 1, unresolvedSeriesNames: ['Ambiguous Show'] }));
+
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.unresolved-warning')?.textContent).toContain('Ambiguous Show');
 
     httpTesting.verify();
   });
@@ -70,7 +104,7 @@ describe('RecommendationComponent', () => {
     fixture.detectChanges();
 
     const httpTesting = TestBed.inject(HttpTestingController);
-    httpTesting.expectOne((r) => r.url === 'api/recommendation').flush([]);
+    httpTesting.expectOne((r) => r.url === 'api/recommendation').flush(result());
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -85,7 +119,7 @@ describe('RecommendationComponent', () => {
 
     const request = httpTesting.expectOne((r) => r.url === 'api/recommendation');
     expect(request.request.params.get('weeks')).toBe('4');
-    request.flush([]);
+    request.flush(result());
     await fixture.whenStable();
 
     httpTesting.verify();
@@ -96,7 +130,7 @@ describe('RecommendationComponent', () => {
     fixture.detectChanges();
 
     const httpTesting = TestBed.inject(HttpTestingController);
-    httpTesting.expectOne((r) => r.url === 'api/recommendation').flush([]);
+    httpTesting.expectOne((r) => r.url === 'api/recommendation').flush(result());
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -108,7 +142,7 @@ describe('RecommendationComponent', () => {
     input.value = '4';
     input.dispatchEvent(new Event('change'));
     fixture.detectChanges();
-    httpTesting.expectOne((r) => r.url === 'api/recommendation').flush([]);
+    httpTesting.expectOne((r) => r.url === 'api/recommendation').flush(result());
     await fixture.whenStable();
     fixture.detectChanges();
 
@@ -118,7 +152,7 @@ describe('RecommendationComponent', () => {
 
     const request = httpTesting.expectOne((r) => r.url === 'api/recommendation');
     expect(request.request.params.get('weeks')).toBe('0');
-    request.flush([]);
+    request.flush(result());
     await fixture.whenStable();
 
     httpTesting.verify();
@@ -129,12 +163,32 @@ describe('RecommendationComponent', () => {
     fixture.detectChanges();
 
     const httpTesting = TestBed.inject(HttpTestingController);
-    httpTesting.expectOne((r) => r.url === 'api/recommendation').flush([]);
+    httpTesting
+      .expectOne((r) => r.url === 'api/recommendation')
+      .flush(result({ seriesConsidered: 5 }));
     await fixture.whenStable();
     fixture.detectChanges();
 
     const compiled = fixture.nativeElement as HTMLElement;
     expect(compiled.querySelector('.empty-title')?.textContent).toContain('caught up');
+    expect(compiled.querySelector('.empty-subtitle')?.textContent).toContain('5 series folder');
+
+    httpTesting.verify();
+  });
+
+  it('tells the user no series folders were found when nothing was scanned', async () => {
+    const fixture = TestBed.createComponent(RecommendationComponent);
+    fixture.detectChanges();
+
+    const httpTesting = TestBed.inject(HttpTestingController);
+    httpTesting.expectOne((r) => r.url === 'api/recommendation').flush(result());
+    await fixture.whenStable();
+    fixture.detectChanges();
+
+    const compiled = fixture.nativeElement as HTMLElement;
+    expect(compiled.querySelector('.empty-subtitle')?.textContent).toContain(
+      'No series folders were found',
+    );
 
     httpTesting.verify();
   });
