@@ -44,10 +44,23 @@
           } @else {
             <button
               matButton="elevated"
-              [attr.aria-label]="'Download ' + element.name"
+              [disabled]="isDownloadPending(element)"
+              [attr.aria-label]="
+                (isDownloadPending(element) ? 'Starting download of ' : 'Download ') + element.name
+              "
               (click)="startDownload(element)"
             >
-              Download
+              @if (isDownloadPending(element)) {
+                <mat-progress-spinner
+                  class="download-spinner"
+                  mode="indeterminate"
+                  diameter="18"
+                  aria-hidden="true"
+                />
+                Starting…
+              } @else {
+                Download
+              }
             </button>
           }
         </td>

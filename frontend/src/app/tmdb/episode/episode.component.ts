@@ -4,10 +4,11 @@ import { TmdbEpisodeDto } from '../../shared/dto/tmdb/TmdbEpisodeDto';
 import { TmdbSeriesDetailDto } from '../../shared/dto/tmdb/TmdbSeriesDetailDto';
 import { DownloadStatus } from '../../shared/dto/library/DownloadStatus';
 import { TorrentSuggestionsComponent } from '../../torrent/torrent-suggestions/torrent-suggestions.component';
+import { OverviewPopoverComponent } from '../overview-popover/overview-popover.component';
 
 @Component({
   selector: 'app-episode',
-  imports: [MatIconModule, TorrentSuggestionsComponent],
+  imports: [MatIconModule, TorrentSuggestionsComponent, OverviewPopoverComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   styleUrl: './episode.component.scss',
   templateUrl: './episode.component.html',

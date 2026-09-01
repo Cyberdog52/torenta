@@ -22,6 +22,8 @@
 }
 
 .result-header {
+  min-height: 86px;
+  padding-right: 16px;
   background: transparent !important;
 
   // Material's own keyboard-focus indicator is a background state-layer,
@@ -65,8 +67,9 @@
 .result-title {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   min-width: 0;
+  flex: 0 1 auto;
 }
 
 .poster {
@@ -81,4 +84,73 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.result-summary {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  min-width: 0;
+  margin-left: 16px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.header-meta,
+.download-indicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  flex: none;
+  white-space: nowrap;
+
+  mat-icon {
+    width: 18px;
+    height: 18px;
+    font-size: 18px;
+  }
+}
+
+.download-indicator {
+  color: var(--mat-sys-primary);
+}
+
+.header-genres {
+  min-width: 0;
+
+  mat-chip {
+    --mat-chip-container-height: 30px;
+  }
+}
+
+@container (max-width: 980px) {
+  .header-genres {
+    display: none;
+  }
+}
+
+@container (max-width: 720px) {
+  .header-meta--runtime {
+    display: none;
+  }
+}
+
+@container (max-width: 580px) {
+  .header-meta--date {
+    display: none;
+  }
+
+  .result-summary {
+    margin-left: 8px;
+  }
+}
+
+@container (max-width: 430px) {
+  .result-summary {
+    margin-left: 4px;
+  }
+
+  .download-indicator {
+    display: none;
+  }
 }

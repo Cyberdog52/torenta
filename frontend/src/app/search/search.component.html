@@ -6,8 +6,25 @@
   <mat-card-content>
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>TV show title</mat-label>
-      <input matInput (appDelayedKeyup)="seriesQuery.set($event)" autocomplete="off" />
+      <input
+        #seriesInput
+        matInput
+        (input)="updateInputValue(seriesInputValue, seriesInput)"
+        (appDelayedKeyup)="seriesQuery.set($event)"
+        autocomplete="off"
+      />
       <mat-icon matPrefix>search</mat-icon>
+      @if (seriesInputValue()) {
+        <button
+          matIconButton
+          matSuffix
+          type="button"
+          aria-label="Clear TV show search"
+          (click)="clearSearch(seriesInputValue, seriesQuery, seriesInput)"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      }
     </mat-form-field>
 
     @if (seriesSearch.isLoading()) {
@@ -27,17 +44,17 @@
           <mat-expansion-panel
             class="result-panel"
             [style.--media-backdrop-image]="
-              isPanelBackdropVisible(seriesOverview.id)
+              isPanelBackdropVisible('series', seriesOverview.id)
                 ? 'url(' + backdropUrl(seriesOverview.backdrop_path) + ')'
                 : null
             "
-            (opened)="setPanelOpen(seriesOverview.id, true)"
-            (closed)="setPanelOpen(seriesOverview.id, false)"
+            (opened)="setPanelOpen('series', seriesOverview.id, true)"
+            (closed)="setPanelOpen('series', seriesOverview.id, false)"
           >
             <mat-expansion-panel-header
               class="result-header"
-              (focus)="setPanelFocused(seriesOverview.id, true)"
-              (blur)="setPanelFocused(seriesOverview.id, false)"
+              (focus)="setPanelFocused('series', seriesOverview.id, true)"
+              (blur)="setPanelFocused('series', seriesOverview.id, false)"
             >
               <mat-panel-title class="result-title">
                 <img
@@ -50,10 +67,43 @@
                   aria-hidden="true"
                 />
                 <span class="result-name">{{ seriesOverview.name }}</span>
+                @if (seriesDetails().get(seriesOverview.id); as seriesDetail) {
+                  <app-overview-popover
+                    [title]="seriesDetail.name"
+                    [overview]="seriesDetail.overview"
+                  />
+                }
               </mat-panel-title>
+              @if (seriesDetails().get(seriesOverview.id); as seriesDetail) {
+                <mat-panel-description class="result-summary">
+                  <span class="header-meta header-meta--rating">
+                    <mat-icon aria-hidden="true">star</mat-icon>
+                    <span class="visually-hidden">Rating:</span>{{ seriesDetail.vote_average }}
+                  </span>
+                  <span class="header-meta header-meta--date">
+                    <mat-icon aria-hidden="true">date_range</mat-icon>
+                    <span class="visually-hidden">First aired:</span
+                    >{{ seriesDetail.first_air_date }}
+                  </span>
+                  @if (seriesRuntime(seriesDetail); as runtime) {
+                    <span class="header-meta header-meta--runtime">
+                      <mat-icon aria-hidden="true">timer</mat-icon>
+                      <span class="visually-hidden">Episode runtime:</span>{{ runtime }} min
+                    </span>
+                  }
+                  <mat-chip-set class="header-genres" aria-label="Genres">
+                    @for (genre of seriesDetail.genres; track genre.id) {
+                      <mat-chip>{{ genre.name }}</mat-chip>
+                    }
+                  </mat-chip-set>
+                </mat-panel-description>
+              }
             </mat-expansion-panel-header>
-            @if (isPanelOpen(seriesOverview.id)) {
-              <app-series-detail [id]="seriesOverview.id" />
+            @if (isPanelOpen('series', seriesOverview.id)) {
+              <app-series-detail
+                [id]="seriesOverview.id"
+                (detailLoaded)="setSeriesDetail($event)"
+              />
             }
           </mat-expansion-panel>
         }
@@ -69,8 +119,25 @@
   <mat-card-content>
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>Movie title</mat-label>
-      <input matInput (appDelayedKeyup)="movieQuery.set($event)" autocomplete="off" />
+      <input
+        #movieInput
+        matInput
+        (input)="updateInputValue(movieInputValue, movieInput)"
+        (appDelayedKeyup)="movieQuery.set($event)"
+        autocomplete="off"
+      />
       <mat-icon matPrefix>search</mat-icon>
+      @if (movieInputValue()) {
+        <button
+          matIconButton
+          matSuffix
+          type="button"
+          aria-label="Clear movie search"
+          (click)="clearSearch(movieInputValue, movieQuery, movieInput)"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      }
     </mat-form-field>
 
     @if (movieSearch.isLoading()) {
@@ -90,17 +157,17 @@
           <mat-expansion-panel
             class="result-panel"
             [style.--media-backdrop-image]="
-              isPanelBackdropVisible(movieOverview.id)
+              isPanelBackdropVisible('movie', movieOverview.id)
                 ? 'url(' + backdropUrl(movieOverview.backdrop_path) + ')'
                 : null
             "
-            (opened)="setPanelOpen(movieOverview.id, true)"
-            (closed)="setPanelOpen(movieOverview.id, false)"
+            (opened)="setPanelOpen('movie', movieOverview.id, true)"
+            (closed)="setPanelOpen('movie', movieOverview.id, false)"
           >
             <mat-expansion-panel-header
               class="result-header"
-              (focus)="setPanelFocused(movieOverview.id, true)"
-              (blur)="setPanelFocused(movieOverview.id, false)"
+              (focus)="setPanelFocused('movie', movieOverview.id, true)"
+              (blur)="setPanelFocused('movie', movieOverview.id, false)"
             >
               <mat-panel-title class="result-title">
                 <img
@@ -113,10 +180,50 @@
                   aria-hidden="true"
                 />
                 <span class="result-name">{{ movieOverview.original_title }}</span>
+                @if (movieDetails().get(movieOverview.id); as movieDetail) {
+                  <app-overview-popover
+                    [title]="movieDetail.title"
+                    [overview]="movieDetail.overview"
+                  />
+                }
               </mat-panel-title>
+              @if (movieDetails().get(movieOverview.id); as movieDetail) {
+                <mat-panel-description class="result-summary">
+                  <span class="header-meta header-meta--rating">
+                    <mat-icon aria-hidden="true">star</mat-icon>
+                    <span class="visually-hidden">Rating:</span>{{ movieDetail.vote_average }}
+                  </span>
+                  <span class="header-meta header-meta--date">
+                    <mat-icon aria-hidden="true">date_range</mat-icon>
+                    <span class="visually-hidden">Release date:</span>{{ movieDetail.release_date }}
+                  </span>
+                  <span class="header-meta header-meta--runtime">
+                    <mat-icon aria-hidden="true">timer</mat-icon>
+                    <span class="visually-hidden">Runtime:</span>{{ movieDetail.runtime }} min
+                  </span>
+                  @if (movieDirectories().get(movieOverview.id); as movieDirectory) {
+                    <span
+                      class="download-indicator"
+                      [matTooltip]="movieDirectory.absolutePath"
+                      [attr.aria-label]="'Downloaded to ' + movieDirectory.absolutePath"
+                    >
+                      <mat-icon aria-hidden="true">download_done</mat-icon>
+                    </span>
+                  }
+                  <mat-chip-set class="header-genres" aria-label="Genres">
+                    @for (genre of movieDetail.genres; track genre.id) {
+                      <mat-chip>{{ genre.name }}</mat-chip>
+                    }
+                  </mat-chip-set>
+                </mat-panel-description>
+              }
             </mat-expansion-panel-header>
-            @if (isPanelOpen(movieOverview.id)) {
-              <app-movie-detail [id]="movieOverview.id" />
+            @if (isPanelOpen('movie', movieOverview.id)) {
+              <app-movie-detail
+                [id]="movieOverview.id"
+                (detailLoaded)="setMovieDetail($event)"
+                (directoryLoaded)="setMovieDirectory(movieOverview.id, $event)"
+              />
             }
           </mat-expansion-panel>
         }
@@ -132,8 +239,25 @@
   <mat-card-content>
     <mat-form-field appearance="outline" class="search-field">
       <mat-label>Torrent search</mat-label>
-      <input matInput (appDelayedKeyup)="torrentQuery.set($event)" autocomplete="off" />
+      <input
+        #torrentInput
+        matInput
+        (input)="updateInputValue(torrentInputValue, torrentInput)"
+        (appDelayedKeyup)="torrentQuery.set($event)"
+        autocomplete="off"
+      />
       <mat-icon matPrefix>search</mat-icon>
+      @if (torrentInputValue()) {
+        <button
+          matIconButton
+          matSuffix
+          type="button"
+          aria-label="Clear torrent search"
+          (click)="clearSearch(torrentInputValue, torrentQuery, torrentInput)"
+        >
+          <mat-icon>close</mat-icon>
+        </button>
+      }
     </mat-form-field>
 
     @if (torrentQuery().length > 0) {
