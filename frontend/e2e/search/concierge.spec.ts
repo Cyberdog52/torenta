@@ -19,6 +19,19 @@ test('uses the real concierge backend flow with protocol-mocked providers', asyn
       downloadRequests.push(`${browserRequest.method()} ${pathname}`);
     }
   });
+  await page.route('**/api/preference', async (route) => {
+    if (route.request().method() === 'GET') {
+      await route.fulfill({
+        json: {
+          downloadDirectoryPath: '/tmp',
+          tmdbServiceKey: 'test-key',
+          openAiApiKey: null,
+        },
+      });
+    } else {
+      await route.continue();
+    }
+  });
 
   await page.goto('/search');
   const prompt = page.getByLabel('What would you like to watch?');
