@@ -1,14 +1,14 @@
-import { Injectable } from '@angular/core';
-import { Observable, Subject } from 'rxjs';
+import { Injectable, signal } from '@angular/core';
 import { Notification } from '../dto/notification/Notification';
 
 @Injectable({ providedIn: 'root' })
 export class NotificationService {
-  private readonly notifications = new Subject<Notification>();
+  private readonly lastNotification = signal<Notification | null>(null);
 
-  readonly notifications$: Observable<Notification> = this.notifications.asObservable();
+  /** The most recently raised notification, or `null` before the first one. */
+  readonly notification = this.lastNotification.asReadonly();
 
   notify(notification: Notification): void {
-    this.notifications.next(notification);
+    this.lastNotification.set(notification);
   }
 }

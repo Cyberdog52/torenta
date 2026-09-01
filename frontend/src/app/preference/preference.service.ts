@@ -1,5 +1,5 @@
 import { inject, Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, httpResource } from '@angular/common/http';
 import { Observable } from 'rxjs';
 import { UserPreference } from '../shared/dto/preference/UserPreference';
 
@@ -9,11 +9,9 @@ const BACKEND_URL = 'api/preference';
 export class PreferenceService {
   private readonly httpClient = inject(HttpClient);
 
+  readonly preferenceResource = httpResource<UserPreference>(() => BACKEND_URL);
+
   save(preferences: UserPreference): Observable<void> {
     return this.httpClient.post<void>(BACKEND_URL, preferences);
-  }
-
-  load(): Observable<UserPreference> {
-    return this.httpClient.get<UserPreference>(BACKEND_URL);
   }
 }

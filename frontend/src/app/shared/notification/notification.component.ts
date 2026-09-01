@@ -1,5 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, effect, inject, signal } from '@angular/core';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -34,7 +33,11 @@ export class NotificationComponent {
   protected readonly errors = signal<Notification[]>([]);
 
   constructor() {
-    this.notificationService.notifications$.pipe(takeUntilDestroyed()).subscribe((notification) => {
+    effect(() => {
+      const notification = this.notificationService.notification();
+      if (notification == null) {
+        return;
+      }
       if (notification.type === NotificationType.ERROR) {
         this.errors.update((errors) => [...errors, notification].slice(-MAX_ERRORS));
         return;

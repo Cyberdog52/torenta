@@ -1,5 +1,5 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { takeUntilDestroyed, toSignal } from '@angular/core/rxjs-interop';
 import { MatCardModule } from '@angular/material/card';
 import { MatIconModule } from '@angular/material/icon';
 import { TorrentService } from '../torrent.service';
@@ -21,12 +21,18 @@ export class DownloadsComponent {
   private readonly torrentService = inject(TorrentService);
   private readonly notificationService = inject(NotificationService);
 
-  protected readonly downloads = signal<DownloadDto[]>([]);
+  /**
+   * Only polls while this component is on screen: `toSignal` subscribes here
+   * and unsubscribes on destroy, which stops the shared refCounted poll.
+   */
+  protected readonly downloads = toSignal(this.torrentService.downloads$, { initialValue: [] });
+
+  private previousDownloads: DownloadDto[] = [];
 
   constructor() {
     this.torrentService.downloads$.pipe(takeUntilDestroyed()).subscribe((downloads) => {
-      this.notifyNewlyFinished(this.downloads(), downloads);
-      this.downloads.set(downloads);
+      this.notifyNewlyFinished(this.previousDownloads, downloads);
+      this.previousDownloads = downloads;
     });
   }
 
