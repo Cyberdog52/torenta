@@ -196,7 +196,7 @@
 }
 
 .download-indicator {
-  color: rgb(145 196 255);
+  color: rgb(143 189 150);
 }
 
 .header-genres {
@@ -204,6 +204,7 @@
 
   mat-chip {
     --mat-chip-container-height: 30px;
+    --mat-chip-label-text-color: rgb(245 247 251);
   }
 }
 

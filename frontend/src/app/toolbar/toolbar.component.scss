@@ -6,6 +6,47 @@ mat-toolbar {
   z-index: 1000; /* Ensure that your app's content doesn't overlap the toolbar */
 }
 
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  color: inherit;
+  text-decoration: none;
+}
+
+.brand-logo {
+  width: 44px;
+  height: 44px;
+  border: 1px solid color-mix(in srgb, var(--mat-sys-primary) 55%, transparent);
+  border-radius: 13px;
+  object-fit: cover;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--mat-sys-primary) 24%, transparent);
+  transition:
+    transform 0.15s ease,
+    box-shadow 0.15s ease;
+}
+
+.brand:hover .brand-logo {
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--mat-sys-primary) 32%, transparent);
+  transform: translateY(-1px);
+}
+
+.brand-name {
+  background: linear-gradient(100deg, var(--mat-sys-primary), var(--mat-sys-tertiary));
+  background-clip: text;
+  color: transparent;
+  font-size: 1.55rem;
+  font-weight: 800;
+  letter-spacing: -0.04em;
+  line-height: 1;
+}
+
+.brand:focus-visible {
+  border-radius: 12px;
+  outline: 2px solid var(--mat-sys-primary);
+  outline-offset: 4px;
+}
+
 .navigationButtonContainer {
   /* This fills the remaining space, by using flexbox.
      Every toolbar row uses a flexbox row layout. */
@@ -35,4 +76,22 @@ mat-icon {
 button.active {
   background-color: var(--mat-sys-surface-container-highest);
   outline: 1px solid var(--mat-sys-outline-variant);
+}
+
+@media (forced-colors: active) {
+  .brand-name {
+    background: none;
+    color: LinkText;
+  }
+
+  .brand-logo {
+    border: 1px solid ButtonText;
+    box-shadow: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .brand-logo {
+    transition: none;
+  }
 }

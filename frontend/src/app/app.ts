@@ -1,7 +1,6 @@
 import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
-import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, NavigationEnd, Router, RouterOutlet } from '@angular/router';
-import { filter, map, skip, tap } from 'rxjs';
+import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
+import { filter, skip, tap } from 'rxjs';
 import { ToolbarComponent } from './toolbar/toolbar.component';
 import { NotificationComponent } from './shared/notification/notification.component';
 import { PreferenceService } from './preference/preference.service';
@@ -17,7 +16,7 @@ import { safeValue } from './shared/resource';
   template: `
     <a class="skip-link" href="#main-content">Skip to content</a>
     <app-toolbar />
-    <main id="main-content" tabindex="-1" class="page" [class.page--wide]="wide()">
+    <main id="main-content" tabindex="-1" class="page">
       <router-outlet />
     </main>
     <app-notifications />
@@ -29,20 +28,6 @@ export class App {
   private readonly notificationService = inject(NotificationService);
   private tmdbKeyChecked = false;
   private readonly preferenceResource = this.preferenceService.preferenceResource;
-
-  /**
-   * Most pages read comfortably at the default max-width, but a route can
-   * opt into a wider page container via `data: { wide: true }` (see
-   * `app.routes.ts`) — currently only /search, which shows three side-by-side
-   * result panels.
-   */
-  protected readonly wide = toSignal(
-    this.router.events.pipe(
-      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
-      map(() => isWideRoute(this.router.routerState.root)),
-    ),
-    { initialValue: false },
-  );
 
   constructor() {
     this.router.events
@@ -87,12 +72,4 @@ export class App {
     });
     void this.router.navigate(['/preferences']);
   }
-}
-
-function isWideRoute(route: ActivatedRoute): boolean {
-  let current = route;
-  while (current.firstChild) {
-    current = current.firstChild;
-  }
-  return current.snapshot.data['wide'] === true;
 }

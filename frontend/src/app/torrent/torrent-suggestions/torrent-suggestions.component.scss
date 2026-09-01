@@ -53,5 +53,5 @@ td {
 }
 
 .no-results {
-  color: var(--mat-sys-on-surface-variant);
+  color: var(--torrent-suggestions-empty-color, var(--mat-sys-on-surface-variant));
 }

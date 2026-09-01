@@ -8,7 +8,7 @@ plugins {
 }
 
 group = 'ch.andreskonrad'
-version = '0.0.1-SNAPSHOT'
+version = '1.0.0'
 
 application {
     mainClass = 'ch.andreskonrad.torenta.TorentaApplication'

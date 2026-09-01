@@ -4,9 +4,6 @@ export const routes: Routes = [
   {
     path: 'search',
     title: 'Torenta – Search',
-    // Search shows three side-by-side result panels, so it needs more room
-    // than the default reading-width page container (see `app.ts`).
-    data: { wide: true },
     loadComponent: () => import('./search/search.component').then((m) => m.SearchComponent),
   },
   {
