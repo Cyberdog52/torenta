@@ -14,10 +14,10 @@
       "installMaven": false,
       "installGradle": false
     },
-    // Node.js for the Angular 6 frontend, which requires Node 10-16.
-    // 16 is pinned here to match the ".nvmrc use"/"nvm install 16" instructions.
+    // Node.js for the Angular 22 frontend, which requires Node 24 LTS
+    // (>= 24.15.0), matching the ".nvmrc"/frontend/package.json "engines".
     "ghcr.io/devcontainers/features/node:1": {
-      "version": "16"
+      "version": "24"
     },
     "ghcr.io/devcontainers/features/git:1": {
       "version": "latest"
@@ -38,7 +38,7 @@
   },
 
   // Make gradlew executable and install frontend deps on first create.
-  // NOTE: You must still create backend/src/main/resources/application.properties
+  // NOTE: You must still create src/main/resources/application.properties
   // from the template and add your own TMDB API key - it is intentionally
   // NOT committed and NOT auto-generated here.
   "onCreateCommand": "chmod +x ./gradlew || true",
