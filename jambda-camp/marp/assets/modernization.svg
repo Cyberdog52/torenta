@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1120 360" role="img" aria-labelledby="title description">
+  <title id="title">Technology modernization</title>
+  <desc id="description">The legacy stack moves through an AI-assisted migration to the modern stack.</desc>
+  <defs>
+    <linearGradient id="brand-gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#aa41af"/>
+      <stop offset="0.52" stop-color="#834fb8"/>
+      <stop offset="0.8" stop-color="#3c69c8"/>
+      <stop offset="1" stop-color="#00a5e6"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0 0 12 6 0 12Z" fill="#575469"/>
+    </marker>
+    <style>
+      .title { fill: #302b43; font: 500 30px Lato, Arial, sans-serif; }
+      .heading { font: 700 23px Lato, Arial, sans-serif; }
+      .body { font: 500 18px Lato, Arial, sans-serif; }
+      .light { fill: #fff; }
+      .dark { fill: #302b43; }
+    </style>
+  </defs>
+  <text class="title" x="560" y="40" text-anchor="middle">Technology modernization</text>
+  <rect x="30" y="82" width="300" height="210" fill="#f4f4fb"/>
+  <rect x="30" y="82" width="12" height="210" fill="#965b9a"/>
+  <text class="heading dark" x="70" y="128">Legacy stack</text>
+  <text class="body dark" x="70" y="170">Java 11 · Spring Boot 2.2</text>
+  <text class="body dark" x="70" y="205">Angular 6 · TypeScript 2.9</text>
+  <text class="body dark" x="70" y="240">Karma · Protractor · TSLint</text>
+  <path d="M342 187H400" fill="none" stroke="#575469" stroke-width="4" marker-end="url(#arrow)"/>
+  <rect x="410" y="98" width="300" height="178" fill="url(#brand-gradient)"/>
+  <text class="heading light" x="560" y="145" text-anchor="middle">AI-assisted migration</text>
+  <text class="body light" x="560" y="190" text-anchor="middle">Research · Translate</text>
+  <text class="body light" x="560" y="225" text-anchor="middle">Compile · Test · Review</text>
+  <path d="M722 187H780" fill="none" stroke="#575469" stroke-width="4" marker-end="url(#arrow)"/>
+  <rect x="790" y="82" width="300" height="210" fill="#e0f4ff"/>
+  <rect x="1078" y="82" width="12" height="210" fill="#1ab3ff"/>
+  <text class="heading dark" x="830" y="128">Modern stack</text>
+  <text class="body dark" x="830" y="170">Java 25 · Spring Boot 4.1</text>
+  <text class="body dark" x="830" y="205">Angular 22 · TypeScript 6</text>
+  <text class="body dark" x="830" y="240">Vitest · Playwright · ESLint</text>
+</svg>
