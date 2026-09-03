@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" viewBox="0 0 1120 430" role="img" aria-labelledby="title description">
+  <title id="title">AI-assisted engineering feedback loop</title>
+  <desc id="description">AI-assisted work cycles through research, migration, testing, human review, and integration, supported by human judgment and automated guardrails.</desc>
+  <defs>
+    <linearGradient id="brand-gradient" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#aa41af"/>
+      <stop offset="0.52" stop-color="#834fb8"/>
+      <stop offset="0.8" stop-color="#3c69c8"/>
+      <stop offset="1" stop-color="#00a5e6"/>
+    </linearGradient>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
+      <path d="M0 0 10 5 0 10Z" fill="#575469"/>
+    </marker>
+    <style>
+      .title { fill: #302b43; font: 500 29px Lato, Arial, sans-serif; }
+      .node { font: 700 17px Lato, Arial, sans-serif; text-anchor: middle; }
+      .support-title { fill: #302b43; font: 700 17px Lato, Arial, sans-serif; }
+      .support-body { fill: #575469; font: 500 15px Lato, Arial, sans-serif; }
+      .light { fill: #fff; }
+      .dark { fill: #302b43; }
+      .flow { fill: none; stroke: #575469; stroke-width: 3; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <text class="title" x="560" y="36" text-anchor="middle">AI-assisted engineering feedback loop</text>
+  <path class="flow" d="M190 145H245"/>
+  <path class="flow" d="M405 145H460"/>
+  <path class="flow" d="M620 145H675"/>
+  <path class="flow" d="M835 145H890"/>
+  <path class="flow" d="M985 190C985 265 895 293 560 293S135 265 135 190"/>
+  <text class="support-body" x="560" y="276" text-anchor="middle">fast feedback</text>
+  <rect x="30" y="92" width="160" height="106" fill="#f4f4fb"/>
+  <rect x="30" y="92" width="8" height="106" fill="#965b9a"/>
+  <text class="node dark" x="110" y="137">Understand</text>
+  <text class="node dark" x="110" y="163">&amp; research</text>
+  <rect x="245" y="92" width="160" height="106" fill="#f4f4fb"/>
+  <rect x="245" y="92" width="8" height="106" fill="#965b9a"/>
+  <text class="node dark" x="325" y="137">Draft</text>
+  <text class="node dark" x="325" y="163">&amp; migrate</text>
+  <rect x="460" y="92" width="160" height="106" fill="url(#brand-gradient)"/>
+  <text class="node light" x="540" y="137">Build</text>
+  <text class="node light" x="540" y="163">&amp; test</text>
+  <rect x="675" y="92" width="160" height="106" fill="#e0f4ff"/>
+  <rect x="827" y="92" width="8" height="106" fill="#1ab3ff"/>
+  <text class="node dark" x="755" y="137">Review</text>
+  <text class="node dark" x="755" y="163">&amp; challenge</text>
+  <rect x="890" y="92" width="160" height="106" fill="#f4f4fb"/>
+  <rect x="1042" y="92" width="8" height="106" fill="#965b9a"/>
+  <text class="node dark" x="970" y="137">Correct</text>
+  <text class="node dark" x="970" y="163">&amp; integrate</text>
+  <rect x="210" y="326" width="320" height="76" fill="#f4f4fb"/>
+  <rect x="210" y="326" width="8" height="76" fill="#965b9a"/>
+  <text class="support-title" x="238" y="356">Human judgment</text>
+  <text class="support-body" x="238" y="382">Product · Architecture · Safety</text>
+  <rect x="590" y="326" width="320" height="76" fill="#e0f4ff"/>
+  <rect x="902" y="326" width="8" height="76" fill="#1ab3ff"/>
+  <text class="support-title" x="618" y="356">Guardrails</text>
+  <text class="support-body" x="618" y="382">Rules · Types · Tests · CI</text>
+</svg>
