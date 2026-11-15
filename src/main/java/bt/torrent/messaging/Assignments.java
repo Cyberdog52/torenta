@@ -36,15 +36,21 @@ public class Assignments {
     private Bitfield bitfield;
     private PieceSelector selector;
     private BitfieldBasedStatistics pieceStatistics;
+    private PieceIntegrityTracker integrityTracker;
 
     private Set<Integer> assignedPieces;
     private Map<ConnectionKey, Assignment> assignments;
 
-    public Assignments(Bitfield bitfield, PieceSelector selector, BitfieldBasedStatistics pieceStatistics, Config config) {
+    public Assignments(Bitfield bitfield,
+                       PieceSelector selector,
+                       BitfieldBasedStatistics pieceStatistics,
+                       Config config,
+                       PieceIntegrityTracker integrityTracker) {
         this.bitfield = bitfield;
         this.selector = selector;
         this.pieceStatistics = pieceStatistics;
         this.config = config;
+        this.integrityTracker = integrityTracker;
 
         this.assignedPieces = new HashSet<>();
         this.assignments = new HashMap<>();
@@ -76,8 +82,10 @@ public class Assignments {
         return Optional.of(assignment);
     }
 
-    public boolean claim(int pieceIndex) {
-        boolean claimed = !bitfield.isComplete(pieceIndex) && (isEndgame() ||  !assignedPieces.contains(pieceIndex));
+    public boolean claim(int pieceIndex, ConnectionKey connectionKey) {
+        boolean claimed = !bitfield.isComplete(pieceIndex)
+                && !integrityTracker.shouldAvoid(pieceIndex, connectionKey, pieceStatistics.getCount(pieceIndex))
+                && (isEndgame() || !assignedPieces.contains(pieceIndex));
         if (claimed) {
             assignedPieces.add(pieceIndex);
         }

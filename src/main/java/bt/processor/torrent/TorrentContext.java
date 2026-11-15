@@ -27,6 +27,7 @@ import bt.torrent.TrackerAnnouncer;
 import bt.torrent.fileselector.TorrentFileSelector;
 import bt.torrent.messaging.Assignments;
 import bt.torrent.messaging.MessageRouter;
+import bt.torrent.messaging.PieceIntegrityTracker;
 import bt.torrent.selector.PieceSelector;
 
 import java.util.Optional;
@@ -51,6 +52,7 @@ public class TorrentContext implements ProcessingContext {
     private volatile MessageRouter router;
     private volatile Bitfield bitfield;
     private volatile Assignments assignments;
+    private volatile PieceIntegrityTracker pieceIntegrityTracker;
     private volatile BitfieldBasedStatistics pieceStatistics;
     private volatile TrackerAnnouncer announcer;
 
@@ -137,6 +139,14 @@ public class TorrentContext implements ProcessingContext {
 
     public void setAssignments(Assignments assignments) {
         this.assignments = assignments;
+    }
+
+    public PieceIntegrityTracker getPieceIntegrityTracker() {
+        return pieceIntegrityTracker;
+    }
+
+    public void setPieceIntegrityTracker(PieceIntegrityTracker pieceIntegrityTracker) {
+        this.pieceIntegrityTracker = pieceIntegrityTracker;
     }
 
     public BitfieldBasedStatistics getPieceStatistics() {

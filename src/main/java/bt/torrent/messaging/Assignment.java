@@ -84,7 +84,7 @@ class Assignment {
 
             for (int i = 0; i < requiredPieces.length && pieces.size() < 3; i++) {
                 int pieceIndex = requiredPieces[i];
-                if (peerBitfield.isVerified(pieceIndex) && assignments.claim(pieceIndex)) {
+                if (peerBitfield.isVerified(pieceIndex) && assignments.claim(pieceIndex, connectionKey)) {
                     pieces.add(pieceIndex);
                 }
             }

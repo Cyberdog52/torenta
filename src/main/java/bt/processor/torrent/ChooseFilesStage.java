@@ -78,7 +78,8 @@ public class ChooseFilesStage<C extends TorrentContext> extends TerminateOnError
         Set<Integer> validPieces = getValidPieces(descriptor.getDataDescriptor(), selectedFiles);
         PieceSelector selector = createSelector(context.getPieceSelector(), bitfield, validPieces);
         BitfieldBasedStatistics pieceStatistics = context.getPieceStatistics();
-        Assignments assignments = new Assignments(bitfield, selector, pieceStatistics, config);
+        Assignments assignments = new Assignments(
+                bitfield, selector, pieceStatistics, config, context.getPieceIntegrityTracker());
 
         updateSkippedPieces(bitfield, validPieces);
         context.setAssignments(assignments);

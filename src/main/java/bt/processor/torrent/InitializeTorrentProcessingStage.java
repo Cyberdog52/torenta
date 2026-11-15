@@ -36,6 +36,7 @@ import bt.torrent.messaging.GenericConsumer;
 import bt.torrent.messaging.MetadataProducer;
 import bt.torrent.messaging.PeerRequestConsumer;
 import bt.torrent.messaging.PieceConsumer;
+import bt.torrent.messaging.PieceIntegrityTracker;
 import bt.torrent.messaging.RequestProducer;
 
 public class InitializeTorrentProcessingStage<C extends TorrentContext> extends TerminateOnErrorProcessingStage<C> {
@@ -71,17 +72,20 @@ public class InitializeTorrentProcessingStage<C extends TorrentContext> extends 
         TorrentId torrentId = torrent.getTorrentId();
         Bitfield bitfield = descriptor.getDataDescriptor().getBitfield();
         BitfieldBasedStatistics pieceStatistics = createPieceStatistics(bitfield);
+        PieceIntegrityTracker integrityTracker = new PieceIntegrityTracker(torrentId);
 
         context.getRouter().registerMessagingAgent(GenericConsumer.consumer());
         context.getRouter().registerMessagingAgent(new BitfieldConsumer(bitfield, pieceStatistics, eventSink));
         context.getRouter().registerMessagingAgent(new ExtendedHandshakeConsumer(connectionPool));
-        context.getRouter().registerMessagingAgent(new PieceConsumer(torrentId, bitfield, dataWorker, bufferedPieceRegistry, eventSink));
+        context.getRouter().registerMessagingAgent(
+                new PieceConsumer(torrentId, bitfield, dataWorker, bufferedPieceRegistry, eventSink, integrityTracker));
         context.getRouter().registerMessagingAgent(new PeerRequestConsumer(torrentId, dataWorker));
         context.getRouter().registerMessagingAgent(new RequestProducer(descriptor.getDataDescriptor(), config.getMaxOutstandingRequests()));
         context.getRouter().registerMessagingAgent(new MetadataProducer(() -> context.getTorrent().orElse(null), config));
 
         context.setBitfield(bitfield);
         context.setPieceStatistics(pieceStatistics);
+        context.setPieceIntegrityTracker(integrityTracker);
     }
 
     private BitfieldBasedStatistics createPieceStatistics(Bitfield bitfield) {

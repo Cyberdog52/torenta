@@ -135,12 +135,10 @@ public class RequestProducer {
                         return false;
                     }
 
-                    BlockWrite block = future.getNow(null);
-                    boolean failed = block.getError().isPresent();
-                    if (failed) {
-                        connectionState.getPendingWrites().remove(key);
-                    }
-                    return failed;
+                    // The request was built only because this block is absent. A completed write
+                    // therefore belongs to an earlier verification attempt that was discarded.
+                    connectionState.getPendingWrites().remove(key);
+                    return true;
                 }).collect(Collectors.toList());
 
         Collections.shuffle(requests);

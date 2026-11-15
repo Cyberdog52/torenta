@@ -52,18 +52,21 @@ public class PieceConsumer {
     private final DataWorker dataWorker;
     private final IBufferedPieceRegistry bufferedPieceRegistry;
     private final EventSink eventSink;
+    private final PieceIntegrityTracker integrityTracker;
     private final Queue<Integer> completedPieces;
 
     public PieceConsumer(TorrentId torrentId,
                          Bitfield bitfield,
                          DataWorker dataWorker,
                          IBufferedPieceRegistry bufferedPieceRegistry,
-                         EventSink eventSink) {
+                         EventSink eventSink,
+                         PieceIntegrityTracker integrityTracker) {
         this.torrentId = torrentId;
         this.bitfield = bitfield;
         this.dataWorker = dataWorker;
         this.bufferedPieceRegistry = bufferedPieceRegistry;
         this.eventSink = eventSink;
+        this.integrityTracker = integrityTracker;
         this.completedPieces = new LinkedBlockingQueue<>();
     }
 
@@ -99,7 +102,9 @@ public class PieceConsumer {
             future.whenComplete((block, error) -> {
                 if (error != null) {
                     LOGGER.warn("Failed to perform request to write block: {}", error.toString());
-                } else if (block.getError().isPresent()) {
+                    return;
+                }
+                if (block.getError().isPresent()) {
                     LOGGER.warn("Failed to perform request to write block: {}", block.getError().get().toString());
                 }
                 if (block.isRejected()) {
@@ -107,18 +112,30 @@ public class PieceConsumer {
                         LOGGER.trace("Request to write block could not be completed: " + piece);
                     }
                 } else {
+                    if (!block.getError().isPresent()) {
+                        integrityTracker.recordBlock(piece.getPieceIndex(), context.getConnectionKey());
+                    }
                     Optional<CompletableFuture<Boolean>> verificationFuture = block.getVerificationFuture();
                     verificationFuture.ifPresent(booleanCompletableFuture -> booleanCompletableFuture.whenComplete((verified, error1) -> {
                         if (error1 != null) {
+                            integrityTracker.verificationAborted(piece.getPieceIndex());
                             LOGGER.warn("Failed to verify piece index {}. Exception: {}", piece.getPieceIndex(), error1.toString());
                         } else if (verified) {
+                            integrityTracker.verificationSucceeded(piece.getPieceIndex());
                             completedPieces.add(piece.getPieceIndex());
                             eventSink.firePieceVerified(context.getTorrentId(), piece.getPieceIndex());
                         } else {
-                            LOGGER.warn("Failed to verify piece index {}." +
-                                    " No error has been provided by I/O worker, " +
-                                    "which means that the data itself might have been corrupted. " +
-                                    "Will re-download.", piece.getPieceIndex());
+                            PieceIntegrityTracker.VerificationFailure failure =
+                                    integrityTracker.verificationFailed(piece.getPieceIndex());
+                            LOGGER.debug(
+                                    "Piece {} failed hash verification for torrent {} (failure count: {}, contributors: {}). " +
+                                            "Discarded and scheduled for download from another peer.",
+                                    failure.getPieceIndex(), failure.getTorrentId(), failure.getFailureCount(),
+                                    failure.getContributors());
+                            failure.getSummary().ifPresent(summary -> LOGGER.warn(
+                                    "Detected {} piece hash verification failures across {} pieces for torrent {}. " +
+                                            "Corrupt data was discarded and scheduled for re-download.",
+                                    summary.getFailureCount(), summary.getDistinctPieceCount(), summary.getTorrentId()));
                         }
                     }));
                 }
