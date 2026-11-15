@@ -15,10 +15,10 @@ public class TmdbMovieDetailDto {
 
     private boolean adult;
     private String backdrop_path;
-    private int budget;
+    private long budget;
     private List<TmdbGenreDto> genres;
     private String homepage;
-    private int id;
+    private long id;
     private String imdb_id;
     private String original_language;
     private String original_title;
@@ -27,7 +27,7 @@ public class TmdbMovieDetailDto {
     private String poster_path;
     private List<TmdbProductionCompanyDto> production_companies;
     private String release_date;
-    private int revenue;
+    private long revenue;
     private int runtime;
     private List<TmdbSpokenLanguagesDto> spoken_languages;
     private String status;
@@ -35,5 +35,5 @@ public class TmdbMovieDetailDto {
     private String title;
     private boolean video;
     private double vote_average;
-    private int vote_count;
+    private long vote_count;
 }

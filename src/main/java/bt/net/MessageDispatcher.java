@@ -37,7 +37,7 @@ import java.util.function.Supplier;
 /**
  * Default single-threaded message dispatcher implementation.
  *
- *<p><b>Note that this class implements a service.
+ * <p><b>Note that this class implements a service.
  * Hence, is not a part of the public API and is a subject to change.</b></p>
  */
 public class MessageDispatcher implements IMessageDispatcher {
@@ -77,6 +77,78 @@ public class MessageDispatcher implements IMessageDispatcher {
                 executor.shutdownNow();
             }
         });
+    }
+
+    @Override
+    public void addMessageConsumer(ConnectionKey connectionKey, Consumer<Message> messageConsumer) {
+        synchronized (modificationLock) {
+            Map<ConnectionKey, Collection<Consumer<Message>>> consumerMapByPeer =
+                consumers.computeIfAbsent(connectionKey.getTorrentId(), it -> new ConcurrentHashMap<>());
+
+            Collection<Consumer<Message>> peerConsumers =
+                consumerMapByPeer.computeIfAbsent(connectionKey, it -> ConcurrentHashMap.newKeySet());
+
+            peerConsumers.add(messageConsumer);
+        }
+    }
+
+    @Override
+    public void addMessageSupplier(ConnectionKey connectionKey, Supplier<Message> messageSupplier) {
+        synchronized (modificationLock) {
+            Map<ConnectionKey, Collection<Supplier<Message>>> supplierMapByPeer =
+                suppliers.computeIfAbsent(connectionKey.getTorrentId(), it -> new ConcurrentHashMap<>());
+
+            Collection<Supplier<Message>> peerSuppliers =
+                supplierMapByPeer.computeIfAbsent(connectionKey, it -> ConcurrentHashMap.newKeySet());
+
+            peerSuppliers.add(messageSupplier);
+        }
+    }
+
+    /**
+     * Controls the amount of time to sleep after each iteration of the main message processing loop.
+     * It implements an adaptive strategy and increases the amount of time for the dispatcher to sleep
+     * after each iteration during which no messages were either received or sent.
+     * This strategy greatly reduces CPU load when there is little network activity.
+     */
+    private static class LoopControl {
+
+        private long maxTimeToSleep;
+        private int messagesProcessed;
+        private long timeToSleep;
+
+        LoopControl(long maxTimeToSleep) {
+            this.maxTimeToSleep = maxTimeToSleep;
+            reset();
+        }
+
+        private void reset() {
+            messagesProcessed = 0;
+            timeToSleep = 1;
+        }
+
+        void incrementProcessed() {
+            messagesProcessed++;
+        }
+
+        synchronized void iterationFinished() {
+            if (messagesProcessed > 0) {
+                reset();
+            } else {
+                try {
+                    wait(timeToSleep);
+                } catch (InterruptedException e) {
+                    //will be interrupted once download finishes
+                    //throw new RuntimeException("Unexpectedly interrupted", e);
+                }
+
+                if (timeToSleep < maxTimeToSleep) {
+                    timeToSleep = Math.min(timeToSleep << 1, maxTimeToSleep);
+                } else {
+                    timeToSleep = maxTimeToSleep;
+                }
+            }
+        }
     }
 
     private class MessageDispatchingLoop implements Runnable {
@@ -156,7 +228,7 @@ public class MessageDispatcher implements IMessageDispatcher {
                     PeerConnection connection = pool.getConnection(connectionKey);
                     if (connection != null && !connection.isClosed()) {
                         Message message;
-                        for (;;) {
+                        for (; ; ) {
                             try {
                                 message = connection.readMessageNow();
                             } catch (Exception ex) {
@@ -207,7 +279,7 @@ public class MessageDispatcher implements IMessageDispatcher {
                             try {
                                 message = messageSupplier.get();
                             } catch (Exception ex) {
-                                LOGGER.warn("Error in message supplier " +  ex.toString());
+                                LOGGER.warn("Error in message supplier " + ex.toString());
                                 continue;
                             }
 
@@ -229,78 +301,6 @@ public class MessageDispatcher implements IMessageDispatcher {
 
         public void shutdown() {
             shutdown = true;
-        }
-    }
-
-    /**
-     * Controls the amount of time to sleep after each iteration of the main message processing loop.
-     * It implements an adaptive strategy and increases the amount of time for the dispatcher to sleep
-     * after each iteration during which no messages were either received or sent.
-     * This strategy greatly reduces CPU load when there is little network activity.
-     */
-    private static class LoopControl {
-
-        private long maxTimeToSleep;
-        private int messagesProcessed;
-        private long timeToSleep;
-
-        LoopControl(long maxTimeToSleep) {
-            this.maxTimeToSleep = maxTimeToSleep;
-            reset();
-        }
-
-        private void reset() {
-            messagesProcessed = 0;
-            timeToSleep = 1;
-        }
-
-        void incrementProcessed() {
-            messagesProcessed++;
-        }
-
-        synchronized void iterationFinished() {
-            if (messagesProcessed > 0) {
-                reset();
-            } else {
-                try {
-                    wait(timeToSleep);
-                } catch (InterruptedException e) {
-                    //will be interrupted once download finishes
-                    //throw new RuntimeException("Unexpectedly interrupted", e);
-                }
-
-                if (timeToSleep < maxTimeToSleep) {
-                    timeToSleep = Math.min(timeToSleep << 1, maxTimeToSleep);
-                } else {
-                    timeToSleep = maxTimeToSleep;
-                }
-            }
-        }
-    }
-
-    @Override
-    public void addMessageConsumer(ConnectionKey connectionKey, Consumer<Message> messageConsumer) {
-        synchronized (modificationLock) {
-            Map<ConnectionKey, Collection<Consumer<Message>>> consumerMapByPeer =
-                    consumers.computeIfAbsent(connectionKey.getTorrentId(), it -> new ConcurrentHashMap<>());
-
-            Collection<Consumer<Message>> peerConsumers =
-                    consumerMapByPeer.computeIfAbsent(connectionKey, it -> ConcurrentHashMap.newKeySet());
-
-            peerConsumers.add(messageConsumer);
-        }
-    }
-
-    @Override
-    public void addMessageSupplier(ConnectionKey connectionKey, Supplier<Message> messageSupplier) {
-        synchronized (modificationLock) {
-            Map<ConnectionKey, Collection<Supplier<Message>>> supplierMapByPeer =
-                    suppliers.computeIfAbsent(connectionKey.getTorrentId(), it -> new ConcurrentHashMap<>());
-
-            Collection<Supplier<Message>> peerSuppliers =
-                    supplierMapByPeer.computeIfAbsent(connectionKey, it -> ConcurrentHashMap.newKeySet());
-
-            peerSuppliers.add(messageSupplier);
         }
     }
 }
