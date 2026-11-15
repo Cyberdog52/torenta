@@ -141,10 +141,9 @@ public class PeerExchangePeerSourceFactory implements PeerSourceFactory {
     @Consumes
     public void consume(ExtendedHandshake handshake, MessageContext messageContext) {
         if (handshake.getSupportedMessageTypes().contains("ut_pex")) {
-            // TODO: peer may eventually turn off the PEX extension
-            // moreover the extended handshake message type map is additive,
-            // so we can't learn about the peer turning off extensions solely from the message
             peers.add(messageContext.getConnectionKey());
+        } else if (handshake.getDisabledMessageTypes().contains("ut_pex")) {
+            peers.remove(messageContext.getConnectionKey());
         }
     }
 

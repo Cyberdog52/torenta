@@ -84,10 +84,9 @@ public class MetadataConsumer {
     @Consumes
     public void consume(ExtendedHandshake handshake, MessageContext messageContext) {
         if (handshake.getSupportedMessageTypes().contains("ut_metadata")) {
-            // TODO: peer may eventually turn off the ut_metadata extension
-            // moreover the extended handshake message type map is additive,
-            // so we can't learn about the peer turning off extensions solely from the message
             supportingPeers.add(messageContext.getPeer());
+        } else if (handshake.getDisabledMessageTypes().contains("ut_metadata")) {
+            supportingPeers.remove(messageContext.getPeer());
         }
     }
 

@@ -24,6 +24,7 @@ import bt.bencoding.model.BEObject;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
@@ -60,16 +61,26 @@ public final class ExtendedHandshake extends ExtendedMessage {
 
     private Map<String, BEObject<?>> data;
     private Set<String> supportedMessageTypes;
+    private Set<String> disabledMessageTypes;
 
     ExtendedHandshake(Map<String, BEObject<?>> data) {
         this.data = Collections.unmodifiableMap(data);
 
-        BEMap supportedMessageTypes = (BEMap) data.get(MESSAGE_TYPE_MAPPING_KEY);
-        if (supportedMessageTypes != null) {
-            this.supportedMessageTypes = Collections.unmodifiableSet(supportedMessageTypes.getValue().keySet());
-        } else {
-            this.supportedMessageTypes = Collections.emptySet();
+        Set<String> supported = new HashSet<>();
+        Set<String> disabled = new HashSet<>();
+        BEMap messageTypes = (BEMap) data.get(MESSAGE_TYPE_MAPPING_KEY);
+        if (messageTypes != null) {
+            for (Map.Entry<String, BEObject<?>> e : messageTypes.getValue().entrySet()) {
+                // per BEP-10 a type ID of 0 means that the extension is disabled
+                if (e.getValue() instanceof BEInteger && ((BEInteger) e.getValue()).getValue().signum() == 0) {
+                    disabled.add(e.getKey());
+                } else {
+                    supported.add(e.getKey());
+                }
+            }
         }
+        this.supportedMessageTypes = Collections.unmodifiableSet(supported);
+        this.disabledMessageTypes = Collections.unmodifiableSet(disabled);
     }
 
     /**
@@ -89,12 +100,20 @@ public final class ExtendedHandshake extends ExtendedMessage {
     }
 
     /**
-     * @return Set of message type names, that are specified
+     * @return Set of message type names, that are enabled
      *         in this handshake's message type mapping.
      * @since 1.0
      */
     public Set<String> getSupportedMessageTypes() {
         return supportedMessageTypes;
+    }
+
+    /**
+     * @return Set of message type names, that are explicitly disabled
+     *         (mapped to type ID 0) in this handshake's message type mapping.
+     */
+    public Set<String> getDisabledMessageTypes() {
+        return disabledMessageTypes;
     }
 
     @Override
