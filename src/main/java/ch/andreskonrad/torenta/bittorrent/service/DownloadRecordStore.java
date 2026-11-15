@@ -3,6 +3,8 @@ package ch.andreskonrad.torenta.bittorrent.service;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadFailureKind;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRecord;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRecordState;
+import ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeCheckpoint;
+import jakarta.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,10 +19,17 @@ import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.ScheduledFuture;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.stream.Stream;
 
 /**
@@ -40,14 +49,29 @@ public class DownloadRecordStore {
     static final String RECORD_FILE_NAME = "download.json";
     static final String PAYLOAD_DIR_NAME = "payload";
     static final long PROGRESS_PERSIST_INTERVAL_MS = 1000L;
+    private static final int MAX_PROGRESS_WRITE_ATTEMPTS = 3;
 
     private final ObjectMapper objectMapper;
     private final ConcurrentMap<String, Object> writeLocks = new ConcurrentHashMap<>();
-    private final ConcurrentMap<String, Long> lastProgressPersistAt = new ConcurrentHashMap<>();
+    private final ConcurrentMap<ProgressKey, Long> lastProgressPersistAt = new ConcurrentHashMap<>();
+    private final ConcurrentMap<ProgressKey, PendingProgress> pendingProgress = new ConcurrentHashMap<>();
+    private final ConcurrentMap<ProgressKey, ScheduledFuture<?>> scheduledProgress = new ConcurrentHashMap<>();
+    private final ConcurrentMap<ProgressKey, Long> activeGenerations = new ConcurrentHashMap<>();
+    private final ScheduledExecutorService progressWriter;
+    private final AtomicBoolean shuttingDown = new AtomicBoolean();
 
     @Autowired
     public DownloadRecordStore(ObjectMapper objectMapper) {
+        this(objectMapper, Executors.newSingleThreadScheduledExecutor(runnable -> {
+            Thread thread = new Thread(runnable, "torenta-download-progress-writer");
+            thread.setDaemon(true);
+            return thread;
+        }));
+    }
+
+    DownloadRecordStore(ObjectMapper objectMapper, ScheduledExecutorService progressWriter) {
         this.objectMapper = objectMapper;
+        this.progressWriter = progressWriter;
     }
 
     public String stableId(String magnetLink) {
@@ -133,35 +157,114 @@ public class DownloadRecordStore {
 
     /** Forces an immediate durable write, used for every lifecycle/state transition. */
     public void writeRecord(Path root, DownloadRecord record) {
-        writeInternal(root, record, true);
+        ProgressKey key = ProgressKey.of(root, record.getId());
+        synchronized (lockFor(record.getId())) {
+            pendingProgress.remove(key);
+            cancelScheduled(key);
+            writeInternal(key, record);
+            activeGenerations.put(key, record.getStartTimeInMs());
+        }
     }
 
-    /** Progress-only persistence, throttled to once per second per download unless forced. */
+    /** Coalesces progress updates and writes them off the BitTorrent engine callback thread. */
     public void persistProgress(Path root, DownloadRecord record) {
-        writeInternal(root, record, false);
+        ProgressKey key = ProgressKey.of(root, record.getId());
+        synchronized (lockFor(key.id())) {
+            if (!isActiveGeneration(key, record)) {
+                return;
+            }
+            if (shuttingDown.get()) {
+                writeInternal(key, record);
+                return;
+            }
+            pendingProgress.put(key, new PendingProgress(key, record));
+            if (shuttingDown.get()) {
+                PendingProgress pending = pendingProgress.remove(key);
+                if (pending != null) {
+                    writeInternal(pending.key(), pending.record());
+                }
+                return;
+            }
+            scheduleProgress(key);
+        }
     }
 
-    private void writeInternal(Path root, DownloadRecord record, boolean force) {
-        Object lock = writeLocks.computeIfAbsent(record.getId(), id -> new Object());
-        synchronized (lock) {
-            if (!force) {
-                Long last = lastProgressPersistAt.get(record.getId());
-                long now = System.currentTimeMillis();
-                if (last != null && now - last < PROGRESS_PERSIST_INTERVAL_MS) {
-                    return;
+    private void scheduleProgress(ProgressKey key) {
+        synchronized (lockFor(key.id())) {
+            if (shuttingDown.get() || scheduledProgress.containsKey(key)) {
+                return;
+            }
+            long elapsed = System.currentTimeMillis() - lastProgressPersistAt.getOrDefault(key, 0L);
+            long delay = Math.max(0, PROGRESS_PERSIST_INTERVAL_MS - elapsed);
+            ScheduledFuture<?> future = progressWriter.schedule(
+                    () -> drainProgress(key), delay, TimeUnit.MILLISECONDS);
+            scheduledProgress.put(key, future);
+        }
+    }
+
+    private void drainProgress(ProgressKey key) {
+        boolean retry;
+        synchronized (lockFor(key.id())) {
+            scheduledProgress.remove(key);
+            PendingProgress pending = pendingProgress.remove(key);
+            if (pending != null && isActiveGeneration(key, pending.record())) {
+                try {
+                    writeInternal(pending.key(), pending.record());
+                } catch (DownloadOperationException exception) {
+                    if (pending.attempts() < MAX_PROGRESS_WRITE_ATTEMPTS) {
+                        pendingProgress.putIfAbsent(key, pending.nextAttempt());
+                        if (shuttingDown.get()) {
+                            PendingProgress shutdownPending = pendingProgress.remove(key);
+                            if (shutdownPending != null) {
+                                try {
+                                    writeInternal(shutdownPending.key(), shutdownPending.record());
+                                } catch (DownloadOperationException shutdownException) {
+                                    exception.addSuppressed(shutdownException);
+                                }
+                            }
+                        }
+                    }
+                    LOGGER.error("Failed to persist progress for download {}", key.id(), exception);
                 }
             }
-            lastProgressPersistAt.put(record.getId(), System.currentTimeMillis());
-            try {
-                Path dir = recordDirectory(root, record.getId());
-                Files.createDirectories(dir);
-                Path target = recordFile(root, record.getId());
-                Path tmp = dir.resolve(RECORD_FILE_NAME + "." + UUID.randomUUID() + ".tmp");
-                objectMapper.writeValue(tmp.toFile(), record);
-                Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
-            } catch (IOException e) {
-                throw new DownloadOperationException("Failed to persist download record " + record.getId(), e);
+            retry = !shuttingDown.get() && pendingProgress.containsKey(key);
+        }
+        if (retry) {
+            scheduleProgress(key);
+        }
+    }
+
+    private void writeInternal(ProgressKey key, DownloadRecord record) {
+        lastProgressPersistAt.put(key, System.currentTimeMillis());
+        Path tmp = null;
+        try {
+            Path dir = recordDirectory(key.root(), record.getId());
+            Files.createDirectories(dir);
+            Path target = recordFile(key.root(), record.getId());
+            tmp = dir.resolve(RECORD_FILE_NAME + "." + UUID.randomUUID() + ".tmp");
+            objectMapper.writeValue(tmp.toFile(), record);
+            Files.move(tmp, target, StandardCopyOption.REPLACE_EXISTING, StandardCopyOption.ATOMIC_MOVE);
+        } catch (IOException e) {
+            throw new DownloadOperationException("Failed to persist download record " + record.getId(), e);
+        } finally {
+            if (tmp != null) {
+                try {
+                    Files.deleteIfExists(tmp);
+                } catch (IOException exception) {
+                    LOGGER.warn("Failed to remove temporary download record {}", tmp, exception);
+                }
             }
+        }
+    }
+
+    private Object lockFor(String id) {
+        return writeLocks.computeIfAbsent(id, ignored -> new Object());
+    }
+
+    private void cancelScheduled(ProgressKey key) {
+        ScheduledFuture<?> future = scheduledProgress.remove(key);
+        if (future != null) {
+            future.cancel(false);
         }
     }
 
@@ -175,6 +278,7 @@ public class DownloadRecordStore {
 
     /** Recursively and permanently deletes a download's entire record directory (metadata + staging). */
     public void deleteRecordAndStaging(Path root, String id) throws IOException {
+        discardProgress(ProgressKey.of(root, id));
         deleteRecursively(recordDirectory(root, id));
     }
 
@@ -221,6 +325,53 @@ public class DownloadRecordStore {
         }
     }
 
+    private void discardProgress(ProgressKey key) {
+        synchronized (lockFor(key.id())) {
+            pendingProgress.remove(key);
+            cancelScheduled(key);
+            lastProgressPersistAt.remove(key);
+            activeGenerations.remove(key);
+        }
+    }
+
+    private boolean isActiveGeneration(ProgressKey key, DownloadRecord record) {
+        return Long.valueOf(record.getStartTimeInMs()).equals(activeGenerations.get(key));
+    }
+
+    @PreDestroy
+    public void shutdown() {
+        if (!shuttingDown.compareAndSet(false, true)) {
+            return;
+        }
+        for (ProgressKey key : List.copyOf(scheduledProgress.keySet())) {
+            synchronized (lockFor(key.id())) {
+                cancelScheduled(key);
+            }
+        }
+        progressWriter.shutdown();
+        try {
+            if (!progressWriter.awaitTermination(5, TimeUnit.SECONDS)) {
+                LOGGER.warn("Progress writer did not stop within 5 seconds");
+                progressWriter.shutdownNow();
+            }
+        } catch (InterruptedException exception) {
+            Thread.currentThread().interrupt();
+            progressWriter.shutdownNow();
+        }
+        for (ProgressKey key : List.copyOf(pendingProgress.keySet())) {
+            synchronized (lockFor(key.id())) {
+                PendingProgress pending = pendingProgress.remove(key);
+                if (pending != null) {
+                    try {
+                        writeInternal(pending.key(), pending.record());
+                    } catch (DownloadOperationException exception) {
+                        LOGGER.error("Failed to flush progress for download {} during shutdown", key.id(), exception);
+                    }
+                }
+            }
+        }
+    }
+
     /** Scans every persisted record under the root and applies startup recovery policy to each. */
     public List<RecoveryEntry> recoverAll(Path root) {
         Path downloadsRoot = downloadsRoot(root);
@@ -248,16 +399,55 @@ public class DownloadRecordStore {
     private RecoveryEntry recoverOne(Path root, String id) {
         try {
             DownloadRecord record = readRecord(root, id);
-            if (record.getVersion() != DownloadRecord.CURRENT_VERSION
+            if (record.getVersion() < 1 || record.getVersion() > DownloadRecord.CURRENT_VERSION
                     || record.getId() == null || !record.getId().equals(id)
                     || record.getState() == null || record.getDownloadRequest() == null) {
                 return new RecoveryEntry(id, null, "Record is missing required fields");
             }
-            return new RecoveryEntry(id, reconcile(root, record), null);
+            boolean normalize = record.getVersion() < DownloadRecord.CURRENT_VERSION;
+            if (normalize) {
+                record = record.toBuilder()
+                        .version(DownloadRecord.CURRENT_VERSION)
+                        .resumeCheckpoint(null)
+                        .build();
+            } else if (!isValidResumeCheckpoint(record.getResumeCheckpoint())) {
+                record = record.toBuilder().resumeCheckpoint(null).build();
+                normalize = true;
+            }
+            DownloadRecord reconciled = reconcile(root, record);
+            if (normalize) {
+                writeRecord(root, reconciled);
+            }
+            return new RecoveryEntry(id, reconciled, null);
         } catch (Exception e) {
             LOGGER.warn("Could not load download record {}: {}", id, e.toString());
             return new RecoveryEntry(id, null, e.getMessage());
         }
+    }
+
+    private boolean isValidResumeCheckpoint(DownloadResumeCheckpoint checkpoint) {
+        if (checkpoint == null) {
+            return true;
+        }
+        if (checkpoint.torrentId() == null
+                || !checkpoint.torrentId().matches("[a-fA-F0-9]{40}")
+                || checkpoint.piecesTotal() <= 0
+                || checkpoint.verifiedPieces() == null
+                || checkpoint.files() == null
+                || checkpoint.verifiedPieces().size() > checkpoint.piecesTotal()) {
+            return false;
+        }
+        Set<Integer> seenPieces = new HashSet<>();
+        for (Integer piece : checkpoint.verifiedPieces()) {
+            if (piece == null || piece < 0 || piece >= checkpoint.piecesTotal() || !seenPieces.add(piece)) {
+                return false;
+            }
+        }
+        return checkpoint.files().stream().allMatch(file -> file != null
+                && file.relativePath() != null
+                && !file.relativePath().isBlank()
+                && file.size() >= 0
+                && file.fileKey() != null);
     }
 
     private DownloadRecord reconcile(Path root, DownloadRecord record) {
@@ -329,6 +519,22 @@ public class DownloadRecordStore {
 
         public boolean isValid() {
             return record != null;
+        }
+    }
+
+    private record ProgressKey(Path root, String id) {
+        private static ProgressKey of(Path root, String id) {
+            return new ProgressKey(root.toAbsolutePath().normalize(), id);
+        }
+    }
+
+    private record PendingProgress(ProgressKey key, DownloadRecord record, int attempts) {
+        private PendingProgress(ProgressKey key, DownloadRecord record) {
+            this(key, record, 1);
+        }
+
+        private PendingProgress nextAttempt() {
+            return new PendingProgress(key, record, attempts + 1);
         }
     }
 }

@@ -17,6 +17,7 @@
 package bt.net;
 
 import bt.event.EventSource;
+import bt.metainfo.TorrentId;
 import bt.net.buffer.BorrowedBuffer;
 import bt.net.buffer.IBufferManager;
 import bt.net.crypto.MSEHandshakeProcessor;
@@ -34,9 +35,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 
 import java.io.IOException;
 import java.net.InetAddress;
+import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.nio.ByteBuffer;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
+import java.nio.channels.spi.SelectorProvider;
+import java.time.Duration;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -44,6 +49,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -66,6 +72,7 @@ public class PeerConnectionFactoryTest {
         when(config.getAcceptorAddress()).thenReturn(InetAddress.getLoopbackAddress());
         when(config.getEncryptionPolicy()).thenReturn(EncryptionPolicy.PREFER_PLAINTEXT);
         when(config.getMsePrivateKeySize()).thenReturn(128);
+        when(config.getPeerConnectionTimeout()).thenReturn(Duration.ofSeconds(15));
 
         BorrowedBuffer<ByteBuffer> inboundBuffer = mock(BorrowedBuffer.class);
         BorrowedBuffer<ByteBuffer> outboundBuffer = mock(BorrowedBuffer.class);
@@ -124,6 +131,41 @@ public class PeerConnectionFactoryTest {
         assertFalse(result.isSuccess());
         assertEquals(2, releasedBuffers.get());
         verify(dataReceiver).unregisterChannel(channel);
+        verify(channel).close();
+    }
+
+    @Test
+    @SuppressWarnings("unchecked")
+    public void testOutgoingConnectionUsesConfiguredTimeout() throws IOException {
+        Selector selector = mock(Selector.class);
+        SelectorProvider selectorProvider = mock(SelectorProvider.class);
+        SocketChannel channel = mock(SocketChannel.class);
+        Socket socket = mock(Socket.class);
+        when(selector.provider()).thenReturn(selectorProvider);
+        when(selectorProvider.openSocketChannel()).thenReturn(channel);
+        when(channel.socket()).thenReturn(socket);
+        when(channel.isOpen()).thenReturn(true);
+        doAnswer(invocation -> {
+            throw new SocketTimeoutException("timed out");
+        }).when(socket).connect(any(), eq(15_000));
+
+        Config config = mock(Config.class);
+        when(config.getAcceptorAddress()).thenReturn(InetAddress.getLoopbackAddress());
+        when(config.getEncryptionPolicy()).thenReturn(EncryptionPolicy.PREFER_PLAINTEXT);
+        when(config.getMsePrivateKeySize()).thenReturn(128);
+        when(config.getPeerConnectionTimeout()).thenReturn(Duration.ofSeconds(15));
+        PeerConnectionFactory factory = new PeerConnectionFactory(
+                selector, mock(IConnectionHandlerFactory.class), mock(IChannelPipelineFactory.class),
+                mock(MessageHandler.class), mock(TorrentRegistry.class), mock(IBufferManager.class),
+                mock(DataReceiver.class), mock(EventSource.class), config);
+        Peer peer = mock(Peer.class);
+        when(peer.getInetAddress()).thenReturn(InetAddress.getLoopbackAddress());
+        when(peer.getPort()).thenReturn(6881);
+
+        ConnectionResult result = factory.createOutgoingConnection(peer, mock(TorrentId.class));
+
+        assertFalse(result.isSuccess());
+        verify(socket).connect(any(), eq(15_000));
         verify(channel).close();
     }
 }

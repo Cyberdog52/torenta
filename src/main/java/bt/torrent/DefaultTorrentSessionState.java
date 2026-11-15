@@ -16,6 +16,7 @@
 
 package bt.torrent;
 
+import bt.metainfo.TorrentId;
 import bt.net.ConnectionKey;
 import bt.torrent.messaging.ConnectionState;
 import bt.torrent.messaging.TorrentWorker;
@@ -45,13 +46,15 @@ public class DefaultTorrentSessionState implements TorrentSessionState {
 
     private final TorrentDescriptor descriptor;
     private final TorrentWorker worker;
+    private final TorrentId torrentId;
 
-    public DefaultTorrentSessionState(TorrentDescriptor descriptor, TorrentWorker worker) {
+    public DefaultTorrentSessionState(TorrentDescriptor descriptor, TorrentWorker worker, TorrentId torrentId) {
         this.recentAmountsForConnectedPeers = new HashMap<>();
         this.downloadedFromDisconnected = new AtomicLong();
         this.uploadedToDisconnected = new AtomicLong();
         this.descriptor = descriptor;
         this.worker = worker;
+        this.torrentId = torrentId;
     }
 
     @Override
@@ -175,6 +178,24 @@ public class DefaultTorrentSessionState implements TorrentSessionState {
         } else {
             return 0;
         }
+    }
+
+    @Override
+    public String getTorrentId() {
+        return torrentId.toString();
+    }
+
+    @Override
+    public Set<Integer> getVerifiedPieces() {
+        if (descriptor.getDataDescriptor() == null) {
+            return Set.of();
+        }
+        BitSet verified = descriptor.getDataDescriptor().getBitfield().getBitmask();
+        Set<Integer> pieces = new HashSet<>(verified.cardinality());
+        for (int piece = verified.nextSetBit(0); piece >= 0; piece = verified.nextSetBit(piece + 1)) {
+            pieces.add(piece);
+        }
+        return Set.copyOf(pieces);
     }
 
     private static class TransferAmounts {

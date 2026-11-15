@@ -54,4 +54,9 @@ public interface DataWorker {
      * @since 1.9
      */
     CompletableFuture<BlockWrite> addBlock(TorrentId torrentId, Peer peer, int pieceIndex, int offset, BufferedData buffer);
+
+    /**
+     * Complete after all previously accepted data operations have finished.
+     */
+    CompletableFuture<Void> awaitIdle();
 }

@@ -19,6 +19,8 @@ package bt.data;
 import bt.metainfo.Torrent;
 import bt.metainfo.TorrentFile;
 
+import java.util.Set;
+
 /**
  * Data back-end. Provides storage for torrent files.
  *
@@ -35,4 +37,8 @@ public interface Storage {
      * @since 1.0
      */
     StorageUnit getUnit(Torrent torrent, TorrentFile torrentFile);
+
+    default Set<Integer> getVerifiedPieces(Torrent torrent) {
+        return Set.of();
+    }
 }

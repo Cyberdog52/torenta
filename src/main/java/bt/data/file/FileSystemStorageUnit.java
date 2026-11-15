@@ -24,7 +24,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.ByteBuffer;
-import java.nio.channels.SeekableByteChannel;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
@@ -34,7 +34,7 @@ class FileSystemStorageUnit implements StorageUnit {
     private static final Logger LOGGER = LoggerFactory.getLogger(FileSystemStorageUnit.class);
 
     private Path parent, file;
-    private SeekableByteChannel sbc;
+    private FileChannel sbc;
     private long capacity;
 
     private volatile boolean closed;
@@ -44,6 +44,10 @@ class FileSystemStorageUnit implements StorageUnit {
         this.parent = file.getParent();
         this.capacity = capacity;
         this.closed = true;
+    }
+
+    FileSystemStorageUnit(FileSystemStorage.ResolvedFile file) {
+        this(file.root(), file.path(), file.capacity());
     }
 
     // TODO: this is temporary fix for verification upon app start
@@ -72,7 +76,9 @@ class FileSystemStorageUnit implements StorageUnit {
             }
 
             try {
-                sbc = Files.newByteChannel(file, StandardOpenOption.READ, StandardOpenOption.WRITE, StandardOpenOption.DSYNC);
+                // Unclean restarts rehash payload pieces, so forcing every 16 KiB block is unnecessary
+                // and severely limits throughput. Closing the channel still flushes graceful pauses.
+                sbc = FileChannel.open(file, StandardOpenOption.READ, StandardOpenOption.WRITE);
             } catch (IOException e) {
                 throw new UncheckedIOException("Unexpected I/O error", e);
             }
@@ -201,14 +207,28 @@ class FileSystemStorageUnit implements StorageUnit {
     }
 
     @Override
-    public void close() {
+    public synchronized void close() throws IOException {
         if (!closed) {
+            IOException failure = null;
             try {
-                sbc.close();
+                sbc.force(true);
             } catch (IOException e) {
-                LOGGER.warn("Failed to close file: {}. Exception: {} ", file, e.toString());
+                failure = e;
             } finally {
-                closed = true;
+                try {
+                    sbc.close();
+                } catch (IOException e) {
+                    if (failure == null) {
+                        failure = e;
+                    } else {
+                        failure.addSuppressed(e);
+                    }
+                } finally {
+                    closed = true;
+                }
+            }
+            if (failure != null) {
+                throw failure;
             }
         }
     }

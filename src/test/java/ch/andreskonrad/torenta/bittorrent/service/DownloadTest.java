@@ -162,7 +162,7 @@ class DownloadTest {
     @Test
     void recovered_usesPersistedProgressAndTotalBytesWithoutLiveState() {
         Download download = Download.recovered("1", new DownloadRequest(), Path.of("staging"), Path.of("final"),
-                1234L, DownloadRecordState.PAUSED, null, null, 0.5, 2048L, 5000L, List.of());
+                1234L, DownloadRecordState.PAUSED, null, null, 0.5, 2048L, 5000L, List.of(), null);
 
         DownloadDto dto = download.mapToDownloadDto();
 
@@ -179,7 +179,7 @@ class DownloadTest {
     void recovered_invalidRecordHasNoRequestAndOnlyCleanupCapability() {
         Download download = Download.recovered("1", null, Path.of("staging"), null,
                 0L, DownloadRecordState.FAILED, DownloadFailureKind.CLEANUP_ONLY, "Invalid download record", 0, 0,
-                0, List.of());
+                0, List.of(), null);
 
         DownloadDto dto = download.mapToDownloadDto();
 

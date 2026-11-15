@@ -22,7 +22,7 @@ export class ThemeService {
     effect(() => {
       const value = this.preference();
       document.documentElement.style.colorScheme = value === 'system' ? 'light dark' : value;
-      localStorage.setItem(STORAGE_KEY, value);
+      globalThis.localStorage?.setItem(STORAGE_KEY, value);
     });
   }
 
@@ -42,6 +42,6 @@ export class ThemeService {
 }
 
 function readStoredPreference(): ThemePreference {
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = globalThis.localStorage?.getItem(STORAGE_KEY);
   return stored === 'light' || stored === 'dark' || stored === 'system' ? stored : 'system';
 }

@@ -22,7 +22,16 @@ import bt.metainfo.Torrent;
 import bt.metainfo.TorrentFile;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.LinkOption;
 import java.nio.file.Path;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Provides file-system based storage for torrent files.
@@ -68,6 +77,7 @@ public class FileSystemStorage implements Storage {
 
     private final Path rootDirectory;
     private final PathNormalizer pathNormalizer;
+    private final FileSystemResumeData resumeData;
 
     /**
      * Create a file-system based storage inside a given directory.
@@ -80,13 +90,21 @@ public class FileSystemStorage implements Storage {
     }
 
     public FileSystemStorage(Path rootDirectory) {
+        this(rootDirectory, null);
+    }
+
+    public FileSystemStorage(Path rootDirectory, FileSystemResumeData resumeData) {
         this.rootDirectory = rootDirectory;
         this.pathNormalizer = new PathNormalizer(rootDirectory.getFileSystem());
+        this.resumeData = resumeData;
     }
 
     @Override
     public StorageUnit getUnit(Torrent torrent, TorrentFile torrentFile) {
+        return new FileSystemStorageUnit(resolveFile(torrent, torrentFile));
+    }
 
+    private ResolvedFile resolveFile(Torrent torrent, TorrentFile torrentFile) {
         Path torrentDirectory;
         if (torrent.getFiles().size() == 1) {
             torrentDirectory = rootDirectory;
@@ -95,6 +113,81 @@ public class FileSystemStorage implements Storage {
             torrentDirectory = rootDirectory.resolve(normalizedName);
         }
         String normalizedPath = pathNormalizer.normalize(torrentFile.getPathElements());
-        return new FileSystemStorageUnit(torrentDirectory, normalizedPath, torrentFile.getSize());
+        return new ResolvedFile(torrentDirectory, normalizedPath, torrentFile.getSize());
+    }
+
+    @Override
+    public Set<Integer> getVerifiedPieces(Torrent torrent) {
+        if (resumeData == null || !torrent.getTorrentId().toString().equals(resumeData.torrentId())) {
+            return Set.of();
+        }
+        long size = torrent.getSize();
+        long chunkSize = torrent.getChunkSize();
+        if (size < 0 || chunkSize <= 0) {
+            return Set.of();
+        }
+        long pieces = size == 0 ? 0 : 1 + (size - 1) / chunkSize;
+        if (pieces > Integer.MAX_VALUE) {
+            return Set.of();
+        }
+        int piecesTotal = (int) pieces;
+        if (piecesTotal != resumeData.piecesTotal()) {
+            return Set.of();
+        }
+        Map<String, FileSystemResumeData.FileSnapshot> snapshots = new HashMap<>();
+        for (FileSystemResumeData.FileSnapshot snapshot : resumeData.files()) {
+            if (snapshots.put(snapshot.relativePath(), snapshot) != null) {
+                return Set.of();
+            }
+        }
+        if (snapshots.size() != torrent.getFiles().size()) {
+            return Set.of();
+        }
+        try {
+            for (TorrentFile torrentFile : torrent.getFiles()) {
+                ResolvedFile resolved = resolveFile(torrent, torrentFile);
+                Path file = resolved.root().resolve(resolved.path());
+                String relativePath = portableRelativePath(file);
+                FileSystemResumeData.FileSnapshot snapshot = snapshots.get(relativePath);
+                if (snapshot == null || snapshot.fileKey() == null) {
+                    return Set.of();
+                }
+                BasicFileAttributes attributes = Files.readAttributes(
+                        file, BasicFileAttributes.class, LinkOption.NOFOLLOW_LINKS);
+                if (!attributes.isRegularFile()
+                        || attributes.size() != torrentFile.getSize()
+                        || attributes.size() != snapshot.size()
+                        || attributes.lastModifiedTime().to(TimeUnit.NANOSECONDS) != snapshot.lastModifiedNanos()
+                        || attributes.fileKey() == null
+                        || !attributes.fileKey().toString().equals(snapshot.fileKey())) {
+                    return Set.of();
+                }
+            }
+        } catch (IOException | RuntimeException exception) {
+            return Set.of();
+        }
+        Set<Integer> verified = new HashSet<>();
+        for (Integer piece : resumeData.verifiedPieces()) {
+            if (piece == null || piece < 0 || piece >= piecesTotal || !verified.add(piece)) {
+                return Set.of();
+            }
+        }
+        return Set.copyOf(verified);
+    }
+
+    private String portableRelativePath(Path file) {
+        Path relative = rootDirectory.toAbsolutePath().normalize()
+                .relativize(file.toAbsolutePath().normalize());
+        StringBuilder result = new StringBuilder();
+        for (Path element : relative) {
+            if (!result.isEmpty()) {
+                result.append('/');
+            }
+            result.append(element);
+        }
+        return result.toString();
+    }
+
+    record ResolvedFile(Path root, String path, long capacity) {
     }
 }

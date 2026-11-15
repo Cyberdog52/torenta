@@ -169,15 +169,14 @@ public class PeerRegistry implements IPeerRegistry {
 
     private boolean mightCreateTracker(AnnounceKey announceKey) {
         if (announceKey.isMultiKey()) {
-            // TODO: need some more sophisticated solution because some of the trackers might be supported
             for (List<String> tier : announceKey.getTrackerUrls()) {
                 for (String trackerUrl : tier) {
-                    if (!trackerService.isSupportedProtocol(trackerUrl)) {
-                        return false;
+                    if (trackerService.isSupportedProtocol(trackerUrl)) {
+                        return true;
                     }
                 }
             }
-            return true;
+            return false;
         } else {
             return trackerService.isSupportedProtocol(announceKey.getTrackerUrl());
         }

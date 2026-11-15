@@ -7,6 +7,7 @@ import ch.andreskonrad.torenta.bittorrent.dto.DownloadDto;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadFailureKind;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRecordState;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRequest;
+import ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeCheckpoint;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadState;
 
 import java.nio.file.Path;
@@ -43,6 +44,7 @@ public class Download {
     private volatile DownloadFailureKind failureKind;
     private volatile String errorMessage;
     private volatile List<String> finalPayloadManifest = List.of();
+    private volatile DownloadResumeCheckpoint resumeCheckpoint;
     private volatile double recoveredProgress = 0;
     private volatile long recoveredTotalBytes = 0;
 
@@ -67,7 +69,8 @@ public class Download {
     static Download recovered(String id, DownloadRequest downloadRequest, Path stagingDirectory, Path finalTargetDirectory,
                                long startTimeInMs, DownloadRecordState recordState, DownloadFailureKind failureKind,
                                String errorMessage, double recoveredProgress, long recoveredTotalBytes,
-                               long activeDownloadTimeInMs, List<String> finalPayloadManifest) {
+                               long activeDownloadTimeInMs, List<String> finalPayloadManifest,
+                               DownloadResumeCheckpoint resumeCheckpoint) {
         Download download = new Download(id, downloadRequest, stagingDirectory, finalTargetDirectory, null,
                 CompletableFuture.completedFuture(null), startTimeInMs);
         download.sessionStartTimeInMs = 0;
@@ -78,6 +81,7 @@ public class Download {
         download.recoveredProgress = recoveredProgress;
         download.recoveredTotalBytes = recoveredTotalBytes;
         download.finalPayloadManifest = finalPayloadManifest == null ? List.of() : finalPayloadManifest;
+        download.resumeCheckpoint = resumeCheckpoint;
         download.paused = recordState == DownloadRecordState.PAUSED;
         return download;
     }
@@ -131,6 +135,14 @@ public class Download {
 
     public List<String> getFinalPayloadManifest() {
         return finalPayloadManifest;
+    }
+
+    public DownloadResumeCheckpoint getResumeCheckpoint() {
+        return resumeCheckpoint;
+    }
+
+    public void setResumeCheckpoint(DownloadResumeCheckpoint resumeCheckpoint) {
+        this.resumeCheckpoint = resumeCheckpoint;
     }
 
     public boolean isPaused() {
@@ -192,6 +204,7 @@ public class Download {
         this.peersEverConnected = false;
         this.sessionStartTimeInMs = System.currentTimeMillis();
         this.state = null;
+        this.resumeCheckpoint = null;
         setTorrentFuture(newFuture);
     }
 
@@ -301,7 +314,8 @@ public class Download {
         if (isActivelyRunning() && !peersEverConnected
                 && System.currentTimeMillis() - sessionStartTimeInMs > PEER_DISCOVERY_TIMEOUT_IN_MS) {
             return "No peers found within " + (PEER_DISCOVERY_TIMEOUT_IN_MS / 60_000)
-                    + " minutes. The trackers of this torrent are unreachable or have no seeders.";
+                    + " minutes. Possible causes include unreachable or unsupported trackers, no seeders, "
+                    + "or blocked network connectivity.";
         }
         return null;
     }

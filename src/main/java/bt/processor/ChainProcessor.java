@@ -26,6 +26,8 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.CancellationException;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiFunction;
 
 /**
@@ -78,8 +80,65 @@ public class ChainProcessor<C extends ProcessingContext> implements Processor<C>
 
     @Override
     public CompletableFuture<?> process(C context, ListenerSource<C> listenerSource) {
-        Runnable r = () -> executeStage(chainHead, context, listenerSource);
-        return CompletableFuture.runAsync(r, executor);
+        ProcessingFuture result = new ProcessingFuture();
+        executor.execute(() -> {
+            if (!result.start()) {
+                result.finishCancellation();
+                return;
+            }
+            try {
+                executeStage(chainHead, context, listenerSource);
+                if (result.isCancellationRequested()) {
+                    result.finishCancellation();
+                } else {
+                    result.complete(null);
+                }
+            } catch (Throwable throwable) {
+                if (result.isCancellationRequested()) {
+                    result.finishCancellation();
+                } else {
+                    result.completeExceptionally(throwable);
+                }
+            } finally {
+                result.clearWorker();
+            }
+        });
+        return result;
+    }
+
+    private static final class ProcessingFuture extends CompletableFuture<Void> {
+        private final AtomicReference<Thread> worker = new AtomicReference<>();
+        private volatile boolean cancellationRequested;
+
+        private boolean start() {
+            worker.set(Thread.currentThread());
+            return !cancellationRequested;
+        }
+
+        @Override
+        public boolean cancel(boolean mayInterruptIfRunning) {
+            if (isDone()) {
+                return false;
+            }
+            cancellationRequested = true;
+            Thread runningWorker = worker.get();
+            if (mayInterruptIfRunning && runningWorker != null) {
+                runningWorker.interrupt();
+            }
+            return true;
+        }
+
+        private boolean isCancellationRequested() {
+            return cancellationRequested;
+        }
+
+        private void finishCancellation() {
+            super.completeExceptionally(new CancellationException());
+        }
+
+        private void clearWorker() {
+            worker.compareAndSet(Thread.currentThread(), null);
+        }
     }
 
     private void executeStage(ProcessingStage<C> chainHead,

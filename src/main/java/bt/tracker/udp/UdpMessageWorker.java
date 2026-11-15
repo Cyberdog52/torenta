@@ -28,12 +28,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketAddress;
 import java.net.SocketException;
+import java.net.SocketTimeoutException;
 import java.util.Arrays;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit;
-import java.util.concurrent.TimeoutException;
 
 class UdpMessageWorker {
 
@@ -44,6 +40,8 @@ class UdpMessageWorker {
     private static final int MESSAGE_ID_OFFSET = 4;
     private static final int ERROR_MESSAGE_TYPE = 3;
     private static final int DATA_OFFSET = 8;
+    private static final int INITIAL_RETRY_TIMEOUT_MILLIS = 15_000;
+    private static final int MAX_ATTEMPTS = 2;
 
     private final SocketAddress localAddress;
     private final SocketAddress remoteAddress;
@@ -51,30 +49,35 @@ class UdpMessageWorker {
     private volatile boolean shutdown;
     private volatile DatagramSocket socket;
     private final Object lock;
-
-    private final ExecutorService executor;
+    private final int initialRetryTimeoutMillis;
+    private final int maxAttempts;
 
     private volatile Session session;
 
     public UdpMessageWorker(SocketAddress localAddress,
                             SocketAddress remoteAddress,
                             IRuntimeLifecycleBinder lifecycleBinder) {
+        this(localAddress, remoteAddress, lifecycleBinder, INITIAL_RETRY_TIMEOUT_MILLIS, MAX_ATTEMPTS);
+    }
+
+    UdpMessageWorker(SocketAddress localAddress,
+                     SocketAddress remoteAddress,
+                     IRuntimeLifecycleBinder lifecycleBinder,
+                     int initialRetryTimeoutMillis,
+                     int maxAttempts) {
         this.localAddress = localAddress;
         this.remoteAddress = remoteAddress;
         this.lock = new Object();
-
-        this.executor = Executors.newSingleThreadExecutor(r -> new Thread(r, "bt.tracker.udp.message-worker"));
-        lifecycleBinder.onShutdown("Shutdown UDP message worker", () -> {
-            try {
-                this.shutdown();
-            } finally {
-                this.executor.shutdownNow();
-            }
-        });
+        if (initialRetryTimeoutMillis <= 0 || maxAttempts <= 0) {
+            throw new IllegalArgumentException("UDP retry timeout and attempt count must be positive");
+        }
+        this.initialRetryTimeoutMillis = initialRetryTimeoutMillis;
+        this.maxAttempts = maxAttempts;
+        lifecycleBinder.onShutdown("Shutdown UDP message worker", this::shutdown);
     }
 
     public synchronized <T> T sendMessage(UdpTrackerMessage message, UdpTrackerResponseHandler<T> responseHandler) {
-        return sendMessage(message, getSession(), responseHandler, false);
+        return sendMessage(message, getSession(), responseHandler);
     }
 
     private Session getSession() {
@@ -85,31 +88,34 @@ class UdpMessageWorker {
     }
 
     private Session createSession() {
-        return sendMessage(new ConnectRequest(), Session.noSession(), ConnectResponseHandler.handler(), false);
+        return sendMessage(new ConnectRequest(), Session.noSession(), ConnectResponseHandler.handler());
     }
 
     private <T> T sendMessage(UdpTrackerMessage message, Session session,
-                              UdpTrackerResponseHandler<T> responseHandler, boolean retry) {
-        int timeToWait = retry ? 5 : 10;
-        try {
-            return CompletableFuture.supplyAsync(() ->
-                    doSend(message, session, responseHandler), executor).get(timeToWait, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            throw new BtException("Unexpectedly interrupted while waiting for response from the tracker", e);
-        } catch (TimeoutException e) {
-            if (retry) {
-                throw new BtException("Failed to receive response from the tracker", e);
-            } else {
-                return sendMessage(message, session, responseHandler, true);
+                              UdpTrackerResponseHandler<T> responseHandler) {
+        UdpTrackerTimeoutException lastTimeout = null;
+        for (int attempt = 0; attempt < maxAttempts; attempt++) {
+            int timeout = Math.multiplyExact(initialRetryTimeoutMillis, 1 << attempt);
+            try {
+                return doSend(message, session, responseHandler, timeout);
+            } catch (UdpTrackerTimeoutException exception) {
+                lastTimeout = exception;
+                if (LOGGER.isDebugEnabled()) {
+                    LOGGER.debug("[Session {}] Tracker request timed out after {} ms (attempt {}/{})",
+                            session.getId(), timeout, attempt + 1, maxAttempts);
+                }
             }
-        } catch (Throwable e) {
-            throw new BtException("Failed to receive response from the tracker", e);
         }
+        throw new BtException("Failed to receive response from the tracker after "
+                + maxAttempts + " attempts", lastTimeout);
     }
 
-    private <T> T doSend(UdpTrackerMessage message, Session session, UdpTrackerResponseHandler<T> responseHandler) {
+    private <T> T doSend(UdpTrackerMessage message, Session session,
+                         UdpTrackerResponseHandler<T> responseHandler, int timeoutMillis) {
         DatagramSocket socket = getSocket();
         try {
+            long startedAtNanos = System.nanoTime();
+            long timeoutNanos = timeoutMillis * 1_000_000L;
             if (LOGGER.isTraceEnabled()) {
                 LOGGER.trace("[Session {}] Sending message {} to remote address: {}",
                         session.getId(), message, remoteAddress);
@@ -118,6 +124,12 @@ class UdpMessageWorker {
             DatagramPacket response = new DatagramPacket(new byte[8192], 8192);
 
             while (true) {
+                long remainingNanos = timeoutNanos - (System.nanoTime() - startedAtNanos);
+                if (remainingNanos <= 0) {
+                    throw new SocketTimeoutException("UDP tracker attempt deadline exceeded");
+                }
+                socket.setSoTimeout((int) Math.max(1, (remainingNanos + 999_999L) / 1_000_000L));
+                response.setLength(response.getData().length);
                 socket.receive(response);
 
                 if (!remoteAddress.equals(response.getSocketAddress())) {
@@ -175,6 +187,8 @@ class UdpMessageWorker {
                             session.getId(), remoteAddress, MIN_MESSAGE_LENGTH, response.getLength());
                 }
             }
+        } catch (SocketTimeoutException exception) {
+            throw new UdpTrackerTimeoutException(exception);
         } catch (IOException e) {
             throw new BtException("Interaction with the tracker failed {remoteAddress=" + remoteAddress + "}", e);
         }
@@ -236,11 +250,16 @@ class UdpMessageWorker {
         synchronized (lock) {
             if (!shutdown) {
                 shutdown = true;
-                executor.shutdownNow();
                 if (socket != null) {
                     socket.close();
                 }
             }
+        }
+    }
+
+    private static final class UdpTrackerTimeoutException extends RuntimeException {
+        private UdpTrackerTimeoutException(SocketTimeoutException cause) {
+            super(cause);
         }
     }
 }

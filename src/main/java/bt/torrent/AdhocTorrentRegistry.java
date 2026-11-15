@@ -16,12 +16,15 @@
 
 package bt.torrent;
 
+import bt.BtException;
 import bt.data.IDataDescriptorFactory;
 import bt.data.Storage;
 import bt.metainfo.Torrent;
 import bt.metainfo.TorrentId;
 import bt.service.IRuntimeLifecycleBinder;
 import com.google.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -39,6 +42,8 @@ import java.util.concurrent.ConcurrentMap;
  * Hence, is not a part of the public API and is a subject to change.</b></p>
  */
 public class AdhocTorrentRegistry implements TorrentRegistry {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(AdhocTorrentRegistry.class);
 
     private IDataDescriptorFactory dataDescriptorFactory;
     private IRuntimeLifecycleBinder lifecycleBinder;
@@ -82,28 +87,32 @@ public class AdhocTorrentRegistry implements TorrentRegistry {
     }
 
     @Override
-    public TorrentDescriptor register(Torrent torrent, Storage storage) {
+    public synchronized TorrentDescriptor register(Torrent torrent, Storage storage) {
         TorrentId torrentId = torrent.getTorrentId();
 
         DefaultTorrentDescriptor descriptor = descriptors.get(torrentId);
         if (descriptor != null) {
-            if (descriptor.getDataDescriptor() != null) {
-                throw new IllegalStateException(
-                        "Torrent already registered and data descriptor created: " + torrent.getTorrentId());
+            synchronized (descriptor) {
+                if (descriptor.isActive() && descriptor.getDataDescriptor() != null) {
+                    throw new IllegalStateException("Torrent is already active: " + torrent.getTorrentId());
+                }
+                if (descriptor.getDataDescriptor() != null) {
+                    try {
+                        descriptor.getDataDescriptor().close();
+                    } catch (IOException exception) {
+                        throw new BtException("Failed to close previous torrent data descriptor", exception);
+                    }
+                }
+                descriptor.setDataDescriptor(dataDescriptorFactory.createDescriptor(torrent, storage));
+                descriptor.start();
             }
-            descriptor.setDataDescriptor(dataDescriptorFactory.createDescriptor(torrent, storage));
-
         } else {
             descriptor = new DefaultTorrentDescriptor();
             descriptor.setDataDescriptor(dataDescriptorFactory.createDescriptor(torrent, storage));
-
-            DefaultTorrentDescriptor existing = descriptors.putIfAbsent(torrentId, descriptor);
-            if (existing != null) {
-                descriptor = existing;
-            } else {
-                torrentIds.add(torrentId);
-                addShutdownHook(torrentId, descriptor);
-            }
+            descriptor.start();
+            descriptors.put(torrentId, descriptor);
+            torrentIds.add(torrentId);
+            addShutdownHook(torrentId, descriptor);
         }
 
         torrents.putIfAbsent(torrentId, torrent);
@@ -111,20 +120,30 @@ public class AdhocTorrentRegistry implements TorrentRegistry {
     }
 
     @Override
-    public TorrentDescriptor register(TorrentId torrentId) {
-        return getDescriptor(torrentId).orElseGet(() -> {
-            DefaultTorrentDescriptor descriptor = new DefaultTorrentDescriptor();
-
-            DefaultTorrentDescriptor existing = descriptors.putIfAbsent(torrentId, descriptor);
-            if (existing != null) {
-                descriptor = existing;
-            } else {
-                torrentIds.add(torrentId);
-                addShutdownHook(torrentId, descriptor);
+    public synchronized TorrentDescriptor register(TorrentId torrentId) {
+        DefaultTorrentDescriptor existing = descriptors.get(torrentId);
+        if (existing != null && existing.isActive()) {
+            throw new IllegalStateException("Torrent is already active: " + torrentId);
+        }
+        if (existing != null) {
+            if (existing.getDataDescriptor() != null) {
+                try {
+                    existing.getDataDescriptor().close();
+                } catch (IOException exception) {
+                    throw new BtException("Failed to close previous torrent data descriptor", exception);
+                }
+                existing.setDataDescriptor(null);
             }
+            existing.start();
+            return existing;
+        }
 
-            return descriptor;
-        });
+        DefaultTorrentDescriptor descriptor = new DefaultTorrentDescriptor();
+        descriptor.start();
+        descriptors.put(torrentId, descriptor);
+        torrentIds.add(torrentId);
+        addShutdownHook(torrentId, descriptor);
+        return descriptor;
     }
 
     @Override
@@ -141,7 +160,7 @@ public class AdhocTorrentRegistry implements TorrentRegistry {
                 try {
                     descriptor.getDataDescriptor().close();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    LOGGER.warn("Failed to close data descriptor for torrent ID: {}", torrentId, e);
                 }
             }
         });

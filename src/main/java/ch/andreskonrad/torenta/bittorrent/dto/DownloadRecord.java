@@ -18,7 +18,7 @@ import java.util.List;
 @Builder(toBuilder = true)
 public class DownloadRecord {
 
-    public static final int CURRENT_VERSION = 1;
+    public static final int CURRENT_VERSION = 2;
 
     private int version;
     private String id;
@@ -35,5 +35,7 @@ public class DownloadRecord {
     private long lastTotalBytes;
     /** Root-relative paths of files copied into the final destination once finished. */
     private List<String> finalPayloadManifest;
+    /** Present only after a clean pause; cleared before a restarted engine can write payload data. */
+    private DownloadResumeCheckpoint resumeCheckpoint;
     private String errorMessage;
 }

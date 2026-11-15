@@ -46,10 +46,19 @@ public class SocketChannelConnectionAcceptor implements PeerConnectionAcceptor {
             Selector selector,
             IPeerConnectionFactory connectionFactory,
             InetSocketAddress localAddress) {
+        this(selector, connectionFactory, localAddress, null);
+    }
+
+    public SocketChannelConnectionAcceptor(
+            Selector selector,
+            IPeerConnectionFactory connectionFactory,
+            InetSocketAddress localAddress,
+            ServerSocketChannel serverChannel) {
 
         this.selector = selector;
         this.connectionFactory = connectionFactory;
         this.localAddress = localAddress;
+        this.serverChannel = serverChannel;
     }
 
     /**
@@ -121,6 +130,18 @@ public class SocketChannelConnectionAcceptor implements PeerConnectionAcceptor {
             LOGGER.info("Opening server channel for incoming connections @ {}", localAddress);
         }
         return serverChannel;
+    }
+
+    @Override
+    public void close() {
+        ServerSocketChannel current = serverChannel;
+        if (current != null) {
+            try {
+                current.close();
+            } catch (IOException exception) {
+                LOGGER.warn("Failed to close incoming server channel @ {}", localAddress, exception);
+            }
+        }
     }
 
     private ConnectionRoutine getConnectionRoutine(SocketChannel incomingChannel, SocketAddress remoteAddress) {

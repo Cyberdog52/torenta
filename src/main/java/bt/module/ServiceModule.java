@@ -49,6 +49,7 @@ import bt.torrent.data.NoCache;
 import bt.tracker.ITrackerService;
 import bt.tracker.TrackerFactory;
 import bt.tracker.TrackerService;
+import bt.tracker.http.HttpTrackerFactory;
 import bt.tracker.udp.UdpTrackerFactory;
 import com.google.inject.Binder;
 import com.google.inject.Module;
@@ -133,6 +134,7 @@ public class ServiceModule implements Module {
 
         ServiceModule.extend(binder).initAllExtensions()
                 .addTrackerFactory(UdpTrackerFactory.class, "udp")
+                .addTrackerFactory(HttpTrackerFactory.class, "http", "https")
                 .addConnectionAcceptor(SocketChannelConnectionAcceptor.class);
 
         // core services that contribute startup lifecycle bindings and should be instantiated eagerly
@@ -250,6 +252,7 @@ public class ServiceModule implements Module {
             IPeerConnectionFactory connectionFactory,
             Config config) {
         InetSocketAddress localAddress = new InetSocketAddress(config.getAcceptorAddress(), config.getAcceptorPort());
-        return new SocketChannelConnectionAcceptor(selector, connectionFactory, localAddress);
+        return new SocketChannelConnectionAcceptor(
+                selector, connectionFactory, localAddress, config.getAcceptorServerChannel());
     }
 }

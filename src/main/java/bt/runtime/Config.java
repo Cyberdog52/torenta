@@ -20,6 +20,7 @@ import bt.protocol.crypto.EncryptionPolicy;
 import bt.service.NetworkUtil;
 
 import java.net.InetAddress;
+import java.nio.channels.ServerSocketChannel;
 import java.time.Duration;
 
 /**
@@ -31,6 +32,7 @@ public class Config {
 
     private InetAddress acceptorAddress;
     private int acceptorPort;
+    private ServerSocketChannel acceptorServerChannel;
     private Duration peerDiscoveryInterval;
     private Duration peerHandshakeTimeout;
     private Duration peerConnectionRetryInterval;
@@ -162,6 +164,14 @@ public class Config {
      */
     public int getAcceptorPort() {
         return acceptorPort;
+    }
+
+    public void setAcceptorServerChannel(ServerSocketChannel acceptorServerChannel) {
+        this.acceptorServerChannel = acceptorServerChannel;
+    }
+
+    public ServerSocketChannel getAcceptorServerChannel() {
+        return acceptorServerChannel;
     }
 
     /**

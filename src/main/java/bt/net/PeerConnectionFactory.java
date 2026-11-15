@@ -39,17 +39,15 @@ import java.io.IOException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
+import java.net.Socket;
 import java.nio.channels.ByteChannel;
 import java.nio.channels.Selector;
 import java.nio.channels.SocketChannel;
-import java.time.Duration;
 import java.util.Objects;
 import java.util.Optional;
 
 public class PeerConnectionFactory implements IPeerConnectionFactory {
     private static final Logger LOGGER = LoggerFactory.getLogger(PeerConnectionFactory.class);
-
-    private static final Duration socketTimeout = Duration.ofSeconds(30);
 
     private MessageHandler<Message> protocol;
 
@@ -62,6 +60,7 @@ public class PeerConnectionFactory implements IPeerConnectionFactory {
     private EventSource eventSource;
 
     private InetSocketAddress localOutgoingSocketAddress;
+    private int peerConnectionTimeoutMillis;
 
     public PeerConnectionFactory(Selector selector,
                                  IConnectionHandlerFactory connectionHandlerFactory,
@@ -82,6 +81,7 @@ public class PeerConnectionFactory implements IPeerConnectionFactory {
         this.dataReceiver = dataReceiver;
         this.eventSource = eventSource;
         this.localOutgoingSocketAddress = new InetSocketAddress(config.getAcceptorAddress(), 0);
+        this.peerConnectionTimeoutMillis = Math.toIntExact(config.getPeerConnectionTimeout().toMillis());
     }
 
     @Override
@@ -109,11 +109,16 @@ public class PeerConnectionFactory implements IPeerConnectionFactory {
     private SocketChannel getChannel(InetAddress inetAddress, int port) throws IOException {
         InetSocketAddress remoteAddress = new InetSocketAddress(inetAddress, port);
         SocketChannel outgoingChannel = selector.provider().openSocketChannel();
-        outgoingChannel.socket().bind(localOutgoingSocketAddress);
-        outgoingChannel.socket().setSoTimeout((int) socketTimeout.toMillis());
-        outgoingChannel.socket().setSoLinger(false, 0);
-        outgoingChannel.connect(remoteAddress);
-        return outgoingChannel;
+        try {
+            Socket socket = outgoingChannel.socket();
+            socket.bind(localOutgoingSocketAddress);
+            socket.setSoLinger(false, 0);
+            socket.connect(remoteAddress, peerConnectionTimeoutMillis);
+            return outgoingChannel;
+        } catch (IOException | RuntimeException exception) {
+            closeQuietly(outgoingChannel);
+            throw exception;
+        }
     }
 
     @Override

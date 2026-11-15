@@ -16,28 +16,62 @@
 
 package bt.processor.torrent;
 
+import bt.BtException;
 import bt.event.EventSink;
+import bt.metainfo.TorrentId;
 import bt.processor.ContextFinalizer;
 import bt.torrent.TorrentDescriptor;
 import bt.torrent.TorrentRegistry;
 import bt.torrent.TrackerAnnouncer;
+import bt.torrent.data.DataWorker;
+
+import java.io.IOException;
+import java.util.Optional;
 
 public class TorrentContextFinalizer<C extends TorrentContext> implements ContextFinalizer<C> {
 
     private TorrentRegistry torrentRegistry;
     private EventSink eventSink;
+    private DataWorker dataWorker;
 
-    public TorrentContextFinalizer(TorrentRegistry torrentRegistry, EventSink eventSink) {
+    public TorrentContextFinalizer(TorrentRegistry torrentRegistry, EventSink eventSink, DataWorker dataWorker) {
         this.torrentRegistry = torrentRegistry;
         this.eventSink = eventSink;
+        this.dataWorker = dataWorker;
     }
 
     @Override
     public void finalizeContext(C context) {
-        context.getTorrentId().ifPresent(torrentId -> {
-            torrentRegistry.getDescriptor(torrentId).ifPresent(TorrentDescriptor::stop);
-            eventSink.fireTorrentStopped(torrentId);
-        });
+        IOException closeFailure = null;
+        RuntimeException drainFailure = null;
+        Optional<TorrentId> torrentId = context.getTorrentId();
+        if (torrentId.isPresent()) {
+            TorrentDescriptor descriptor = torrentRegistry.getDescriptor(torrentId.get()).orElse(null);
+            if (descriptor != null) {
+                descriptor.stop();
+            }
+            eventSink.fireTorrentStopped(torrentId.get());
+            try {
+                dataWorker.awaitIdle().join();
+            } catch (RuntimeException exception) {
+                drainFailure = exception;
+            }
+            if (descriptor != null) {
+                if (descriptor.getDataDescriptor() != null) {
+                    try {
+                        descriptor.getDataDescriptor().close();
+                    } catch (IOException exception) {
+                        closeFailure = exception;
+                    }
+                }
+            }
+        }
         context.getAnnouncer().ifPresent(TrackerAnnouncer::stop);
+        if (closeFailure != null) {
+            throw new BtException("Failed to close torrent data", closeFailure);
+        }
+        if (drainFailure != null) {
+            throw new BtException("Failed to drain torrent data operations", drainFailure);
+        }
     }
 }

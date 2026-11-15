@@ -74,6 +74,9 @@ public class DefaultDataWorker implements DataWorker {
 
     @Override
     public CompletableFuture<BlockRead> addBlockRequest(TorrentId torrentId, Peer peer, int pieceIndex, int offset, int length) {
+        if (!isActive(torrentId)) {
+            return CompletableFuture.completedFuture(BlockRead.rejected(peer, pieceIndex, offset, length));
+        }
         DataDescriptor data = getDataDescriptor(torrentId);
         if (!data.getBitfield().isVerified(pieceIndex)) {
             if (LOGGER.isDebugEnabled()) {
@@ -104,7 +107,11 @@ public class DefaultDataWorker implements DataWorker {
 
     @Override
     public CompletableFuture<BlockWrite> addBlock(TorrentId torrentId, Peer peer, int pieceIndex, int offset, BufferedData buffer) {
-        if (!tryIncrementTaskCount()) {
+        if (!isActive(torrentId)) {
+            int length = buffer.length();
+            buffer.dispose();
+            return CompletableFuture.completedFuture(BlockWrite.rejected(peer, pieceIndex, offset, length));
+        } else if (!tryIncrementTaskCount()) {
             LOGGER.warn("Can't accept write block request -- queue is full");
             buffer.dispose();
             return CompletableFuture.completedFuture(BlockWrite.exceptional(peer,
@@ -113,6 +120,9 @@ public class DefaultDataWorker implements DataWorker {
 
         return CompletableFuture.supplyAsync(() -> {
             try {
+                if (!isActive(torrentId)) {
+                    return BlockWrite.rejected(peer, pieceIndex, offset, buffer.length());
+                }
                 DataDescriptor data = getDataDescriptor(torrentId);
                 ChunkDescriptor chunk = data.getChunkDescriptors().get(pieceIndex);
 
@@ -133,20 +143,18 @@ public class DefaultDataWorker implements DataWorker {
 
                 CompletableFuture<Boolean> verificationFuture = null;
                 if (chunk.isComplete()) {
-                    verificationFuture = CompletableFuture.supplyAsync(() -> {
-                        try {
-                            boolean verified = verifier.verify(chunk);
-                            if (verified) {
-                                data.getBitfield().markVerified(pieceIndex);
-                            } else {
-                                chunk.clear();
-                            }
-                            return verified;
-                        } catch (RuntimeException | Error e) {
+                    try {
+                        boolean verified = verifier.verify(chunk);
+                        if (verified) {
+                            data.getBitfield().markVerified(pieceIndex);
+                        } else {
                             chunk.clear();
-                            throw e;
                         }
-                    }, executor);
+                        verificationFuture = CompletableFuture.completedFuture(verified);
+                    } catch (RuntimeException | Error e) {
+                        chunk.clear();
+                        throw e;
+                    }
                 }
 
                 return BlockWrite.complete(peer, pieceIndex, offset, buffer.length(), verificationFuture);
@@ -159,18 +167,30 @@ public class DefaultDataWorker implements DataWorker {
         }, executor);
     }
 
+    @Override
+    public CompletableFuture<Void> awaitIdle() {
+        return CompletableFuture.runAsync(() -> {
+        }, executor);
+    }
+
     private boolean tryIncrementTaskCount() {
-        int newCount = pendingTasksCount.updateAndGet(oldCount -> {
-            if (oldCount == maxPendingTasks) {
-                return oldCount;
-            } else {
-                return oldCount + 1;
+        int current = pendingTasksCount.get();
+        while (current < maxPendingTasks) {
+            if (pendingTasksCount.compareAndSet(current, current + 1)) {
+                return true;
             }
-        });
-        return newCount < maxPendingTasks;
+            current = pendingTasksCount.get();
+        }
+        return false;
     }
 
     private DataDescriptor getDataDescriptor(TorrentId torrentId) {
         return torrentRegistry.getDescriptor(torrentId).get().getDataDescriptor();
+    }
+
+    private boolean isActive(TorrentId torrentId) {
+        return torrentRegistry.getDescriptor(torrentId)
+                .map(descriptor -> descriptor.isActive() && descriptor.getDataDescriptor() != null)
+                .orElse(false);
     }
 }

@@ -21,13 +21,17 @@ import bt.processor.Processor;
 import bt.processor.listener.ListenerSource;
 import bt.runtime.BtClient;
 import bt.runtime.BtRuntime;
+import bt.torrent.TorrentDescriptor;
+import bt.torrent.TorrentRegistry;
 import bt.torrent.TorrentSessionState;
 
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.function.Consumer;
 
 /**
@@ -80,7 +84,9 @@ class DefaultClient<C extends ProcessingContext> implements BtClient {
     }
 
     private void shutdownListener() {
-        listenerExecutor.shutdownNow();
+        if (listenerExecutor != null) {
+            listenerExecutor.shutdownNow();
+        }
     }
 
     @Override
@@ -115,8 +121,32 @@ class DefaultClient<C extends ProcessingContext> implements BtClient {
         if (futureOptional.isPresent()) {
             CompletableFuture<?> f = futureOptional.get();
             futureOptional = Optional.empty();
-            detachFromRuntime();
-            f.complete(null);
+            try {
+                if (!f.isDone()) {
+                    context.getTorrentId()
+                            .flatMap(runtime.service(TorrentRegistry.class)::getDescriptor)
+                            .ifPresent(TorrentDescriptor::stop);
+                    if (!f.isDone()) {
+                        f.cancel(true);
+                    }
+                    try {
+                        f.get(runtime.getConfig().getShutdownHookTimeout().toMillis(), TimeUnit.MILLISECONDS);
+                    } catch (ExecutionException exception) {
+                        throw new BtException("Failed to stop torrent processing", exception.getCause());
+                    } catch (TimeoutException exception) {
+                        f.cancel(true);
+                        throw new BtException("Timed out while stopping torrent processing", exception);
+                    } catch (InterruptedException exception) {
+                        Thread.currentThread().interrupt();
+                        f.cancel(true);
+                        throw new BtException("Interrupted while stopping torrent processing", exception);
+                    } catch (java.util.concurrent.CancellationException ignored) {
+                        // Expected when processing is stopped before torrent metadata is available.
+                    }
+                }
+            } finally {
+                detachFromRuntime();
+            }
         }
     }
 

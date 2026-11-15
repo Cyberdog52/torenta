@@ -59,7 +59,7 @@ public class IncomingConnectionListener {
                         try {
                             connectionRoutine = acceptor.accept();
                         } catch (Exception e) {
-                            LOGGER.warn("Could not accept connection " + e.toString());
+                            LOGGER.warn("Could not accept incoming connection", e);
                             return;
                         }
 
@@ -100,6 +100,7 @@ public class IncomingConnectionListener {
 
     public void shutdown() {
         shutdown = true;
+        connectionAcceptors.forEach(PeerConnectionAcceptor::close);
         executor.shutdownNow();
     }
 }

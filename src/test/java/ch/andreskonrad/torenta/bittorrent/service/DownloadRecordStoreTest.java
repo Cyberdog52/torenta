@@ -4,7 +4,9 @@ import ch.andreskonrad.torenta.bittorrent.dto.DownloadFailureKind;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRecord;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRecordState;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRequest;
+import ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeCheckpoint;
 import ch.andreskonrad.torenta.torrent.dto.TorrentEntry;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
@@ -32,11 +34,18 @@ class DownloadRecordStoreTest {
 
     private DownloadRecordStore recordStore;
     private String id;
+    private long startTimeInMs;
 
     @BeforeEach
     void setUp() {
         recordStore = new DownloadRecordStore(new ObjectMapper());
         id = DownloadIdGenerator.generate(MAGNET_LINK);
+        startTimeInMs = System.currentTimeMillis();
+    }
+
+    @AfterEach
+    void tearDown() {
+        recordStore.shutdown();
     }
 
     @Test
@@ -55,6 +64,35 @@ class DownloadRecordStoreTest {
     }
 
     @Test
+    void recoverAll_upgradesVersionOneRecordWithFullRecheckFallback() throws IOException {
+        recordStore.writeRecord(root, baseRecordBuilder()
+                .version(1)
+                .state(DownloadRecordState.PAUSED)
+                .build());
+
+        DownloadRecordStore.RecoveryEntry recovered = recordStore.recoverAll(root).getFirst();
+
+        assertTrue(recovered.isValid());
+        assertEquals(DownloadRecord.CURRENT_VERSION, recovered.getRecord().getVersion());
+        assertNull(recovered.getRecord().getResumeCheckpoint());
+        assertEquals(DownloadRecord.CURRENT_VERSION, recordStore.readRecord(root, id).getVersion());
+    }
+
+    @Test
+    void recoverAll_discardsMalformedCheckpointInsteadOfInvalidatingDownload() {
+        recordStore.writeRecord(root, baseRecordBuilder()
+                .state(DownloadRecordState.PAUSED)
+                .resumeCheckpoint(new DownloadResumeCheckpoint(
+                        "not-a-torrent-id", 2, List.of(0), List.of()))
+                .build());
+
+        DownloadRecordStore.RecoveryEntry recovered = recordStore.recoverAll(root).getFirst();
+
+        assertTrue(recovered.isValid());
+        assertNull(recovered.getRecord().getResumeCheckpoint());
+    }
+
+    @Test
     void writeRecord_isAtomicAndLeavesNoTemporaryFilesBehind() throws IOException {
         recordStore.writeRecord(root, baseRecordBuilder().build());
 
@@ -66,21 +104,86 @@ class DownloadRecordStoreTest {
     }
 
     @Test
-    void persistProgress_throttlesRepeatedWritesWithinOneSecond() throws IOException, InterruptedException {
+    void writeRecord_removesTemporaryFileWhenAtomicMoveFails() throws IOException {
+        Path target = recordStore.recordFile(root, id);
+        Files.createDirectories(target);
+        Files.writeString(target.resolve("blocker"), "data");
+
+        assertThrows(DownloadOperationException.class,
+                () -> recordStore.writeRecord(root, baseRecordBuilder().build()));
+
+        try (var stream = Files.list(recordStore.recordDirectory(root, id))) {
+            assertTrue(stream.noneMatch(path -> path.getFileName().toString().endsWith(".tmp")));
+        }
+    }
+
+    @Test
+    void persistProgress_coalescesRepeatedWritesWithinOneSecond() throws IOException, InterruptedException {
         recordStore.writeRecord(root, baseRecordBuilder().lastProgress(0).build());
-        long firstModified = Files.getLastModifiedTime(recordStore.recordFile(root, id)).toMillis();
 
         recordStore.persistProgress(root, baseRecordBuilder().lastProgress(0.5).build());
+        recordStore.persistProgress(root, baseRecordBuilder().lastProgress(0.75).build());
         DownloadRecord afterThrottledWrite = recordStore.readRecord(root, id);
 
         assertEquals(0, afterThrottledWrite.getLastProgress());
 
         Thread.sleep(DownloadRecordStore.PROGRESS_PERSIST_INTERVAL_MS + 100);
-        recordStore.persistProgress(root, baseRecordBuilder().lastProgress(0.75).build());
         DownloadRecord afterDelayedWrite = recordStore.readRecord(root, id);
 
         assertEquals(0.75, afterDelayedWrite.getLastProgress());
-        assertTrue(firstModified <= Files.getLastModifiedTime(recordStore.recordFile(root, id)).toMillis());
+    }
+
+    @Test
+    void writeRecord_discardsOlderQueuedProgress() throws IOException, InterruptedException {
+        recordStore.writeRecord(root, baseRecordBuilder().lastProgress(0).build());
+        recordStore.persistProgress(root, baseRecordBuilder().lastProgress(0.5).build());
+
+        recordStore.writeRecord(root, baseRecordBuilder()
+                .state(DownloadRecordState.PAUSED)
+                .lastProgress(0.25)
+                .build());
+        Thread.sleep(DownloadRecordStore.PROGRESS_PERSIST_INTERVAL_MS + 100);
+
+        DownloadRecord persisted = recordStore.readRecord(root, id);
+        assertEquals(DownloadRecordState.PAUSED, persisted.getState());
+        assertEquals(0.25, persisted.getLastProgress());
+    }
+
+    @Test
+    void shutdown_flushesLatestQueuedProgress() throws IOException {
+        recordStore.writeRecord(root, baseRecordBuilder().lastProgress(0).build());
+        recordStore.persistProgress(root, baseRecordBuilder().lastProgress(0.75).build());
+
+        recordStore.shutdown();
+
+        assertEquals(0.75, recordStore.readRecord(root, id).getLastProgress());
+    }
+
+    @Test
+    void persistProgress_doesNotRecreateDeletedRecord() throws IOException, InterruptedException {
+        recordStore.writeRecord(root, baseRecordBuilder().lastProgress(0).build());
+        recordStore.deleteRecordAndStaging(root, id);
+
+        recordStore.persistProgress(root, baseRecordBuilder().lastProgress(0.75).build());
+        Thread.sleep(DownloadRecordStore.PROGRESS_PERSIST_INTERVAL_MS + 100);
+
+        assertFalse(Files.exists(recordStore.recordDirectory(root, id)));
+    }
+
+    @Test
+    void staleGenerationCannotOverwriteNewDownloadWithSameId() throws IOException, InterruptedException {
+        DownloadRecord oldRecord = baseRecordBuilder().startTimeInMs(100).lastProgress(0.5).build();
+        recordStore.writeRecord(root, oldRecord);
+        recordStore.deleteRecordAndStaging(root, id);
+        DownloadRecord newRecord = baseRecordBuilder().startTimeInMs(200).lastProgress(0).build();
+        recordStore.writeRecord(root, newRecord);
+
+        recordStore.persistProgress(root, oldRecord);
+        Thread.sleep(DownloadRecordStore.PROGRESS_PERSIST_INTERVAL_MS + 100);
+
+        DownloadRecord persisted = recordStore.readRecord(root, id);
+        assertEquals(200, persisted.getStartTimeInMs());
+        assertEquals(0, persisted.getLastProgress());
     }
 
     @Test
@@ -285,7 +388,7 @@ class DownloadRecordStoreTest {
                 .state(DownloadRecordState.STARTED)
                 .downloadRequest(downloadRequest)
                 .finalTargetRelativePath("Movies/Movie")
-                .startTimeInMs(System.currentTimeMillis())
+                .startTimeInMs(startTimeInMs)
                 .lastProgress(0)
                 .lastTotalBytes(0)
                 .finalPayloadManifest(List.of());

@@ -19,7 +19,10 @@ package bt.tracker;
 import bt.BtException;
 import bt.module.TrackerFactories;
 import com.google.inject.Inject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -29,6 +32,8 @@ import java.util.concurrent.ConcurrentMap;
  * Hence, is not a part of the public API and is a subject to change.</b></p>
  */
 public class TrackerService implements ITrackerService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(TrackerService.class);
 
     private Map<String, TrackerFactory> trackerFactories;
     private ConcurrentMap<String, Tracker> knownTrackers;
@@ -52,10 +57,27 @@ public class TrackerService implements ITrackerService {
     @Override
     public Tracker getTracker(AnnounceKey announceKey) {
         if (announceKey.isMultiKey()) {
-            return new MultiTracker(this, announceKey);
+            List<List<String>> supportedTiers = announceKey.getTrackerUrls().stream()
+                    .map(tier -> tier.stream()
+                            .filter(this::isSupportedTracker)
+                            .toList())
+                    .filter(tier -> !tier.isEmpty())
+                    .toList();
+            if (supportedTiers.isEmpty()) {
+                throw new BtException("Announce key contains no supported tracker protocols: " + announceKey);
+            }
+            return new MultiTracker(this, new AnnounceKey(supportedTiers));
         } else {
             return getOrCreateTracker(announceKey.getTrackerUrl());
         }
+    }
+
+    private boolean isSupportedTracker(String trackerUrl) {
+        boolean supported = isSupportedProtocol(trackerUrl);
+        if (!supported) {
+            LOGGER.warn("Ignoring tracker with unsupported protocol: {}", trackerUrl);
+        }
+        return supported;
     }
 
     private Tracker getOrCreateTracker(String trackerUrl) {

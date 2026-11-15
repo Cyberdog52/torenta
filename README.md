@@ -187,7 +187,24 @@ Torenta stores durable download records and partial payloads under
 application restart and must be restarted manually. The Downloads page can pause or restart a
 download, stop it and delete only its torrent-owned files, or remove a finished tile while keeping
 the media files. Concurrent downloads share one bounded BitTorrent runtime and listen port instead
-of creating competing network runtimes for each torrent.
+of creating competing network runtimes for each torrent. Torenta prefers port 6891 and automatically
+reserves an available OS-assigned port when another process already uses it; trackers and peers are
+given the port held by the actual incoming connection listener.
+
+Aggregate download diagnostics are available through Spring Boot Actuator at
+`/actuator/metrics/torenta.bittorrent.*`; metric tags never contain download ids, magnet links,
+peer addresses, or media names. See [`docs/DOWNLOAD_BENCHMARKS.md`](docs/DOWNLOAD_BENCHMARKS.md)
+for the repeatable performance and crash-recovery test matrix.
+
+The BitTorrent engine accepts UDP and HTTP(S) trackers, keeps usable trackers from mixed-protocol
+tiers, and applies bounded connection and BEP 15 UDP retry timeouts. HTTP tracker requests reject
+non-public destinations and HTTPS downgrades, limit redirects, and cap response bodies at 1 MiB.
+
+Payload writes use buffered file channels rather than forcing every 16 KiB block to stable storage.
+Graceful pause/shutdown forces and closes the channels, then checkpoints verified pieces with the
+payload files' identity, size, and nanosecond modification time. Manual restart skips hashing only
+when the torrent and every file still match that clean checkpoint; otherwise it performs the normal
+full piece hash check. Version-1 records remain compatible and use the full-check fallback.
 
 Torrent payloads download into an isolated hidden staging directory. On completion Torenta copies
 them into the movie or season directory, overwriting files with the same paths, records the final

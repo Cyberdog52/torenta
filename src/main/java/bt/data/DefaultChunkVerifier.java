@@ -132,6 +132,10 @@ public class DefaultChunkVerifier implements ChunkVerifier {
         return () -> {
             int i = from;
             while (i < to) {
+                if (bitfield.isVerified(i)) {
+                    i++;
+                    continue;
+                }
                 // optimization to speedup the initial verification of torrent's data
                 int[] emptyUnits = new int[]{0};
                 chunks[i].getData().visitUnits((u, off, lim) -> {

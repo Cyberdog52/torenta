@@ -87,8 +87,22 @@ reformat, or clean it up** — only touch it for a deliberate, user-approved int
    that runtime down after the service has stopped its clients. `BitTorrentService` sets the
    engine's acceptor address from `RoutableAddressResolver`, because the vendored default picks the
    first non-loopback IPv4 address of any interface (often a Hyper-V/WSL/VPN adapter with no
-   internet route). Session snapshots are sampled once per second to keep progress durable without
-   repeatedly serializing records on the engine listener thread.
+   internet route). Session snapshots are sampled once per second; `DownloadRecordStore` coalesces
+   progress per download on one bounded background writer while lifecycle transitions remain
+   immediate atomic writes. Lifecycle writes supersede queued progress, shutdown flushes the latest
+   snapshot, and generation checks prevent late callbacks from recreating deleted records.
+   `DownloadMetrics` exports low-cardinality Actuator counters, gauges, and milestone timers under
+   `torenta.bittorrent.*`; download ids are correlation keys only and never metric tags. The
+   vendored tracker integration supports UDP and HTTP(S), filters unsupported URLs from mixed BEP 12
+   tiers without discarding usable trackers, follows BEP 15 UDP retransmission timing, and honors
+   the configured outbound TCP connection timeout. HTTP announces reject non-public destinations
+   and HTTPS downgrades, follow at most three redirects, and read at most 1 MiB per response. Payload
+   storage avoids per-block `DSYNC`; the measured local 16 KiB write workload was substantially
+   faster with buffered channels. A graceful pause forces and closes each payload file before
+   persisting verified-piece resume data. Restart trusts it only when torrent identity, piece count,
+   file identity, size, and nanosecond mtime all match; incompatible, changed, malformed, and
+   version-1 records fall back to full piece hashing. The preferred incoming port is 6891; a
+   pre-bound OS-assigned fallback is retained and advertised when 6891 is occupied.
 4. **Library** — completed media is surfaced through `LibraryService`/`DirectoryService`.
 5. **Recommend** — the Recommendations page calls `RecommendationController` →
    `RecommendationService`, which by default lists series folders under

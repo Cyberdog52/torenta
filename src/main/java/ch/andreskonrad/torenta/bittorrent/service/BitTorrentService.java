@@ -8,6 +8,8 @@ import ch.andreskonrad.torenta.bittorrent.dto.DownloadFailureKind;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRecord;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRecordState;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRequest;
+import ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeCheckpoint;
+import ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeFile;
 import ch.andreskonrad.torenta.directory.service.DirectoryService;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbMovieDetailDto;
 import jakarta.annotation.PreDestroy;
@@ -20,6 +22,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
@@ -31,6 +34,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -49,6 +53,7 @@ public class BitTorrentService {
     private final DirectoryService directoryService;
     private final BitTorrentClientFactory clientFactory;
     private final DownloadRecordStore recordStore;
+    private final DownloadMetrics downloadMetrics;
     private final ConcurrentMap<String, Download> downloads = new ConcurrentHashMap<>();
     private final ConcurrentMap<String, Object> operationLocks = new ConcurrentHashMap<>();
 
@@ -57,15 +62,21 @@ public class BitTorrentService {
     private volatile Config runtimeConfig;
 
     public BitTorrentService(DirectoryService directoryService, DownloadRecordStore recordStore) {
-        this(directoryService, new DefaultBitTorrentClientFactory(), recordStore);
+        this(directoryService, new DefaultBitTorrentClientFactory(), recordStore, DownloadMetrics.disabled());
+    }
+
+    BitTorrentService(DirectoryService directoryService, BitTorrentClientFactory clientFactory,
+                      DownloadRecordStore recordStore) {
+        this(directoryService, clientFactory, recordStore, DownloadMetrics.disabled());
     }
 
     @Autowired
     public BitTorrentService(DirectoryService directoryService, BitTorrentClientFactory clientFactory,
-                              DownloadRecordStore recordStore) {
+                             DownloadRecordStore recordStore, DownloadMetrics downloadMetrics) {
         this.directoryService = directoryService;
         this.clientFactory = clientFactory;
         this.recordStore = recordStore;
+        this.downloadMetrics = downloadMetrics;
     }
 
     /**
@@ -110,8 +121,10 @@ public class BitTorrentService {
                     download.cancelPause();
                     throw exception;
                 }
+                download.setResumeCheckpoint(createResumeCheckpoint(download));
                 download.markPaused();
                 persistLifecycle(previousRoot, download);
+                downloadMetrics.paused(download.getId());
             }
         }
     }
@@ -121,7 +134,7 @@ public class BitTorrentService {
         if (!entry.isValid()) {
             return Download.recovered(entry.getId(), null, stagingDirectory, null, 0L,
                     DownloadRecordState.FAILED, DownloadFailureKind.CLEANUP_ONLY,
-                    "Invalid download record: " + entry.getInvalidReason(), 0, 0, 0, List.of());
+                    "Invalid download record: " + entry.getInvalidReason(), 0, 0, 0, List.of(), null);
         }
         DownloadRecord record = entry.getRecord();
         Path finalTargetDirectory;
@@ -134,12 +147,12 @@ public class BitTorrentService {
                     record.getStartTimeInMs(), DownloadRecordState.FAILED, DownloadFailureKind.CLEANUP_ONLY,
                     "Invalid final target path: " + e.getMessage(), record.getLastProgress(),
                     record.getLastTotalBytes(), activeDownloadTime(record),
-                    record.getFinalPayloadManifest());
+                    record.getFinalPayloadManifest(), null);
         }
         return Download.recovered(record.getId(), record.getDownloadRequest(), stagingDirectory, finalTargetDirectory,
                 record.getStartTimeInMs(), record.getState(), record.getFailureKind(), record.getErrorMessage(),
                 record.getLastProgress(), record.getLastTotalBytes(), activeDownloadTime(record),
-                record.getFinalPayloadManifest());
+                record.getFinalPayloadManifest(), record.getResumeCheckpoint());
     }
 
     public synchronized void startDownload(DownloadRequest downloadRequest, Path finalTargetDirectory) throws IllegalStateException {
@@ -183,16 +196,18 @@ public class BitTorrentService {
                 .finalPayloadManifest(List.of())
                 .build();
         recordStore.writeRecord(root, record);
+        downloadMetrics.started(id);
 
         BtClient client;
         try {
-            client = clientFactory.create(getConfig(), stagingDirectory, magnetLink.replace(" ", "%20"));
+            client = clientFactory.create(getConfig(), stagingDirectory, magnetLink.replace(" ", "%20"), null);
         } catch (RuntimeException | Error exception) {
             Download failedDownload = Download.recovered(id, downloadRequest, stagingDirectory,
                     validatedFinalTarget, startTimeInMs, DownloadRecordState.FAILED,
-                    DownloadFailureKind.RESTARTABLE, rootCauseMessage(exception), 0, 0, 0, List.of());
+                    DownloadFailureKind.RESTARTABLE, rootCauseMessage(exception), 0, 0, 0, List.of(), null);
             downloads.put(id, failedDownload);
             persistLifecycle(root, failedDownload);
+            downloadMetrics.failed(id, DownloadFailureKind.RESTARTABLE);
             throw exception;
         }
         Download download = new Download(id, downloadRequest, stagingDirectory, validatedFinalTarget, client,
@@ -200,13 +215,14 @@ public class BitTorrentService {
         downloads.put(id, download);
         try {
             CompletableFuture<?> torrentFuture = client.startAsync(
-                    torrentSessionState -> processSessionState(torrentSessionState, id),
+                    torrentSessionState -> processSessionState(torrentSessionState, id, client),
                     SESSION_STATE_UPDATE_INTERVAL);
-            torrentFuture.whenComplete((result, throwable) -> handleCompletion(id, throwable));
+            torrentFuture.whenComplete((result, throwable) -> handleCompletion(id, client, throwable));
             download.setTorrentFuture(torrentFuture);
         } catch (RuntimeException | Error exception) {
             download.fail(rootCauseMessage(exception), DownloadFailureKind.RESTARTABLE);
             persistLifecycle(root, download);
+            downloadMetrics.failed(id, DownloadFailureKind.RESTARTABLE);
             throw exception;
         }
     }
@@ -238,8 +254,10 @@ public class BitTorrentService {
                 download.cancelPause();
                 throw exception;
             }
+            download.setResumeCheckpoint(createResumeCheckpoint(download));
             download.markPaused();
             persistLifecycle(root, download);
+            downloadMetrics.paused(id);
         }
     }
 
@@ -262,18 +280,22 @@ public class BitTorrentService {
                 throw new DownloadOperationException("Failed to prepare staging directory for download " + id, e);
             }
             String magnetLink = download.getDownloadRequest().getTorrentEntry().getMagnetLink();
-            BtClient client = clientFactory.create(getConfig(), download.getStagingDirectory(), magnetLink.replace(" ", "%20"));
+            DownloadResumeCheckpoint resumeCheckpoint = download.getResumeCheckpoint();
+            BtClient client = clientFactory.create(
+                    getConfig(), download.getStagingDirectory(), magnetLink.replace(" ", "%20"), resumeCheckpoint);
             download.restart(client, new CompletableFuture<>());
             persistLifecycle(root, download);
+            downloadMetrics.restarted(id, download.getRecoveredProgress());
             try {
                 CompletableFuture<?> torrentFuture = client.startAsync(
-                        torrentSessionState -> processSessionState(torrentSessionState, id),
+                        torrentSessionState -> processSessionState(torrentSessionState, id, client),
                         SESSION_STATE_UPDATE_INTERVAL);
-                torrentFuture.whenComplete((result, throwable) -> handleCompletion(id, throwable));
+                torrentFuture.whenComplete((result, throwable) -> handleCompletion(id, client, throwable));
                 download.setTorrentFuture(torrentFuture);
             } catch (RuntimeException | Error exception) {
                 download.fail(rootCauseMessage(exception), DownloadFailureKind.RESTARTABLE);
                 persistLifecycle(root, download);
+                downloadMetrics.failed(id, DownloadFailureKind.RESTARTABLE);
                 throw exception;
             }
         }
@@ -328,11 +350,13 @@ public class BitTorrentService {
                         .finalPayloadManifest(remainingManifest)
                         .build();
                 recordStore.writeRecord(root, record);
+                downloadMetrics.failed(id, DownloadFailureKind.CLEANUP_ONLY);
                 throw new DownloadOperationException("Cleanup for download " + id + " is incomplete; retry stop and delete.");
             }
 
             deleteEverythingOrThrow(root, id);
             downloads.remove(id, download);
+            downloadMetrics.removed(id);
         }
     }
 
@@ -347,6 +371,7 @@ public class BitTorrentService {
             }
             deleteEverythingOrThrow(root, id);
             downloads.remove(id, download);
+            downloadMetrics.removed(id);
         }
     }
 
@@ -377,8 +402,10 @@ public class BitTorrentService {
                                 download.getId(), exception);
                         continue;
                     }
+                    download.setResumeCheckpoint(createResumeCheckpoint(download));
                     download.markPaused();
                     persistLifecycle(root, download);
+                    downloadMetrics.paused(download.getId());
                 }
             }
         }
@@ -396,13 +423,13 @@ public class BitTorrentService {
         }
     }
 
-    private void handleCompletion(String id, Throwable throwable) {
+    private void handleCompletion(String id, BtClient client, Throwable throwable) {
         Download download = downloads.get(id);
         if (download == null) {
             return;
         }
         synchronized (lockFor(id)) {
-            if (download.isPaused()) {
+            if (downloads.get(id) != download || download.getClient() != client || download.isPaused()) {
                 return;
             }
             if (throwable instanceof CancellationException) {
@@ -413,6 +440,7 @@ public class BitTorrentService {
                 LOGGER.error("Torrent download {} failed", id, throwable);
                 download.fail(rootCauseMessage(throwable), DownloadFailureKind.RESTARTABLE);
                 persistLifecycle(root, download);
+                downloadMetrics.failed(id, DownloadFailureKind.RESTARTABLE);
             } else if (download.isComplete()) {
                 finalizeDownload(root, download);
             } else {
@@ -420,6 +448,7 @@ public class BitTorrentService {
                         + "terminated; enable DEBUG logging for the 'bt' package to see the failing stage.", id);
                 download.fail("Torrent processing was terminated before the download completed.", DownloadFailureKind.RESTARTABLE);
                 persistLifecycle(root, download);
+                downloadMetrics.failed(id, DownloadFailureKind.RESTARTABLE);
             }
         }
     }
@@ -451,10 +480,12 @@ public class BitTorrentService {
             download.markFinished(manifest);
             persistLifecycle(root, download);
             recordStore.deleteStagingOnly(root, download.getId());
+            downloadMetrics.finished(download.getId());
         } catch (Exception e) {
             LOGGER.error("Finalization failed for download {}", download.getId(), e);
             download.fail("Finalizing the download failed: " + rootCauseMessage(e), DownloadFailureKind.RESTARTABLE);
             persistLifecycle(root, download);
+            downloadMetrics.failed(download.getId(), DownloadFailureKind.RESTARTABLE);
         }
     }
 
@@ -482,8 +513,58 @@ public class BitTorrentService {
                 .lastProgress(dto.getProgress())
                 .lastTotalBytes(dto.getTotalBytes())
                 .finalPayloadManifest(download.getFinalPayloadManifest())
+                .resumeCheckpoint(download.getResumeCheckpoint())
                 .errorMessage(download.getErrorMessage())
                 .build();
+    }
+
+    private DownloadResumeCheckpoint createResumeCheckpoint(Download download) {
+        TorrentSessionState state = download.getState();
+        if (state == null || state.getVerifiedPieces().isEmpty()) {
+            return null;
+        }
+        Path staging = download.getStagingDirectory();
+        try (Stream<Path> walk = Files.walk(staging)) {
+            List<DownloadResumeFile> files = new ArrayList<>();
+            for (Path path : walk.sorted().toList()) {
+                if (path.equals(staging)) {
+                    continue;
+                }
+                BasicFileAttributes attributes = Files.readAttributes(
+                        path, BasicFileAttributes.class, java.nio.file.LinkOption.NOFOLLOW_LINKS);
+                if (attributes.isDirectory()) {
+                    continue;
+                }
+                if (!attributes.isRegularFile() || attributes.fileKey() == null) {
+                    return null;
+                }
+                files.add(new DownloadResumeFile(
+                        portableRelativePath(staging, path),
+                        attributes.size(),
+                        attributes.lastModifiedTime().to(TimeUnit.NANOSECONDS),
+                        attributes.fileKey().toString()));
+            }
+            return new DownloadResumeCheckpoint(
+                    state.getTorrentId(),
+                    state.getPiecesTotal(),
+                    state.getVerifiedPieces().stream().sorted().toList(),
+                    files);
+        } catch (IOException | RuntimeException exception) {
+            LOGGER.warn("Could not create resume checkpoint for download {}", download.getId(), exception);
+            return null;
+        }
+    }
+
+    private String portableRelativePath(Path root, Path file) {
+        Path relative = root.toAbsolutePath().normalize().relativize(file.toAbsolutePath().normalize());
+        StringBuilder result = new StringBuilder();
+        for (Path element : relative) {
+            if (!result.isEmpty()) {
+                result.append('/');
+            }
+            result.append(element);
+        }
+        return result.toString();
     }
 
     private String rootCauseMessage(Throwable throwable) {
@@ -511,14 +592,21 @@ public class BitTorrentService {
         }
     }
 
-    private void processSessionState(TorrentSessionState state, String id) {
+    private void processSessionState(TorrentSessionState state, String id, BtClient client) {
         Download download = downloads.get(id);
         if (download == null) {
             LOGGER.warn("Received session state for unknown download id {}", id);
             return;
         }
         synchronized (lockFor(id)) {
+            if (downloads.get(id) != download
+                    || download.getClient() != client
+                    || download.getRecordState() != DownloadRecordState.STARTED
+                    || download.isPaused()) {
+                return;
+            }
             download.setState(state);
+            downloadMetrics.stateUpdated(id, state);
             Path root = loadedRoot;
             if (root != null) {
                 recordStore.persistProgress(root, toRecord(root, download));

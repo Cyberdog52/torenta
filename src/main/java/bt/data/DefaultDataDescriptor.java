@@ -152,6 +152,7 @@ class DefaultDataDescriptor implements DataDescriptor {
 
     private Bitfield buildBitfield(List<ChunkDescriptor> chunks) {
         Bitfield bitfield = new Bitfield(chunks.size());
+        storage.getVerifiedPieces(torrent).forEach(bitfield::markVerified);
         verifier.verify(chunks, bitfield);
         return bitfield;
     }
@@ -186,14 +187,23 @@ class DefaultDataDescriptor implements DataDescriptor {
     }
 
     @Override
-    public void close() {
-        storageUnits.forEach(unit -> {
+    public void close() throws java.io.IOException {
+        java.io.IOException failure = null;
+        for (StorageUnit unit : storageUnits) {
             try {
                 unit.close();
-            } catch (Exception e) {
-                LOGGER.warn("Failed to close storage unit: " + unit);
+            } catch (java.io.IOException exception) {
+                LOGGER.warn("Failed to close storage unit: {}", unit, exception);
+                if (failure == null) {
+                    failure = exception;
+                } else {
+                    failure.addSuppressed(exception);
+                }
             }
-        });
+        }
+        if (failure != null) {
+            throw failure;
+        }
     }
 
     @Override

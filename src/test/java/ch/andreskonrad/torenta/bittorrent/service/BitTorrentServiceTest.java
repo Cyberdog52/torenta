@@ -8,6 +8,7 @@ import ch.andreskonrad.torenta.bittorrent.dto.DownloadFailureKind;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRecord;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRecordState;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadRequest;
+import ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeCheckpoint;
 import ch.andreskonrad.torenta.bittorrent.dto.DownloadState;
 import ch.andreskonrad.torenta.directory.service.DirectoryService;
 import ch.andreskonrad.torenta.tmdb.dto.TmdbEpisodeDto;
@@ -42,6 +43,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -65,6 +67,7 @@ class BitTorrentServiceTest {
     private DirectoryService directoryService;
     private BitTorrentClientFactory clientFactory;
     private DownloadRecordStore recordStore;
+    private DownloadMetrics downloadMetrics;
     private BtClient client;
     private CompletableFuture<Void> future;
     private BitTorrentService service;
@@ -74,12 +77,15 @@ class BitTorrentServiceTest {
         directoryService = mock(DirectoryService.class);
         clientFactory = mock(BitTorrentClientFactory.class);
         recordStore = new DownloadRecordStore(new ObjectMapper());
+        downloadMetrics = mock(DownloadMetrics.class);
         client = mock(BtClient.class);
         future = new CompletableFuture<>();
         lenient().when(directoryService.getRootDirectoryPath()).thenReturn(root);
-        lenient().when(clientFactory.create(any(Config.class), any(Path.class), any(String.class))).thenReturn(client);
+        lenient().when(clientFactory.create(any(Config.class), any(Path.class), any(String.class),
+                nullable(ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeCheckpoint.class)))
+                .thenReturn(client);
         lenient().doReturn(future).when(client).startAsync(any(), anyLong());
-        service = new BitTorrentService(directoryService, clientFactory, recordStore);
+        service = new BitTorrentService(directoryService, clientFactory, recordStore, downloadMetrics);
     }
 
     @Test
@@ -89,7 +95,9 @@ class BitTorrentServiceTest {
         service.startDownloadToPreferredFolder(request);
 
         String id = DownloadIdGenerator.generate(MAGNET_LINK);
-        verify(clientFactory).create(any(Config.class), eq(recordStore.payloadDirectory(root, id)), eq("magnet:?xt=urn:btih:abc%20def"));
+        verify(clientFactory).create(any(Config.class), eq(recordStore.payloadDirectory(root, id)),
+                eq("magnet:?xt=urn:btih:abc%20def"),
+                nullable(ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeCheckpoint.class));
         assertEquals(root, service.getDownload(id).getFinalTargetDirectory());
     }
 
@@ -109,7 +117,9 @@ class BitTorrentServiceTest {
 
         String id = DownloadIdGenerator.generate(MAGNET_LINK);
         verify(directoryService).createDirectoryToSaveSeries("Show", 3);
-        verify(clientFactory).create(any(Config.class), eq(recordStore.payloadDirectory(root, id)), eq("magnet:?xt=urn:btih:abc%20def"));
+        verify(clientFactory).create(any(Config.class), eq(recordStore.payloadDirectory(root, id)),
+                eq("magnet:?xt=urn:btih:abc%20def"),
+                nullable(ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeCheckpoint.class));
         assertEquals(seasonDirectory, service.getDownload(id).getFinalTargetDirectory());
     }
 
@@ -125,7 +135,9 @@ class BitTorrentServiceTest {
 
         verify(directoryService).createDirectoryToSaveMovie("Movie", 2024);
         String id = DownloadIdGenerator.generate(MAGNET_LINK);
-        verify(clientFactory).create(any(Config.class), eq(recordStore.payloadDirectory(root, id)), eq("magnet:?xt=urn:btih:abc%20def"));
+        verify(clientFactory).create(any(Config.class), eq(recordStore.payloadDirectory(root, id)),
+                eq("magnet:?xt=urn:btih:abc%20def"),
+                nullable(ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeCheckpoint.class));
     }
 
     @ParameterizedTest
@@ -152,8 +164,11 @@ class BitTorrentServiceTest {
         service.startDownload(request, target);
 
         String id = DownloadIdGenerator.generate(MAGNET_LINK);
-        verify(clientFactory).create(configCaptor.capture(), eq(recordStore.payloadDirectory(root, id)), eq("magnet:?xt=urn:btih:abc%20def"));
+        verify(clientFactory).create(configCaptor.capture(), eq(recordStore.payloadDirectory(root, id)),
+                eq("magnet:?xt=urn:btih:abc%20def"),
+                nullable(ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeCheckpoint.class));
         verify(client).startAsync(any(), eq(1000L));
+        verify(downloadMetrics).started(id);
         assertEquals(Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors())),
                 configCaptor.getValue().getNumOfHashingThreads());
         assertEquals(200, configCaptor.getValue().getMaxPeerConnections());
@@ -164,13 +179,40 @@ class BitTorrentServiceTest {
     }
 
     @Test
+    void restartIgnoresCallbacksFromPreviousEngineClient() {
+        ArgumentCaptor<Consumer<TorrentSessionState>> oldStateListener = ArgumentCaptor.forClass(Consumer.class);
+        service.startDownload(request(MAGNET_LINK), root.resolve("target"));
+        verify(client).startAsync(oldStateListener.capture(), anyLong());
+        String id = DownloadIdGenerator.generate(MAGNET_LINK);
+        service.pause(id);
+
+        BtClient restartedClient = mock(BtClient.class);
+        CompletableFuture<Void> restartedFuture = new CompletableFuture<>();
+        when(clientFactory.create(any(Config.class), any(Path.class), any(String.class),
+                nullable(ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeCheckpoint.class)))
+                .thenReturn(restartedClient);
+        doReturn(restartedFuture).when(restartedClient).startAsync(any(), anyLong());
+        service.restart(id);
+
+        oldStateListener.getValue().accept(mock(TorrentSessionState.class));
+        future.completeExceptionally(new IllegalStateException("stale session"));
+
+        Download restartedDownload = service.getDownload(id);
+        assertNull(restartedDownload.getState());
+        assertEquals(DownloadRecordState.STARTED, restartedDownload.getRecordState());
+        assertSame(restartedClient, restartedDownload.getClient());
+    }
+
+    @Test
     void startDownload_reusesSharedRuntimeConfiguration() {
         ArgumentCaptor<Config> configCaptor = ArgumentCaptor.forClass(Config.class);
 
         service.startDownload(request(MAGNET_LINK), root.resolve("first"));
         service.startDownload(request("magnet:?xt=urn:btih:second"), root.resolve("second"));
 
-        verify(clientFactory, times(2)).create(configCaptor.capture(), any(Path.class), any(String.class));
+        verify(clientFactory, times(2)).create(
+                configCaptor.capture(), any(Path.class), any(String.class),
+                nullable(ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeCheckpoint.class));
         assertSame(configCaptor.getAllValues().get(0), configCaptor.getAllValues().get(1));
     }
 
@@ -182,7 +224,7 @@ class BitTorrentServiceTest {
                 InvalidDownloadStateException.class,
                 () -> service.startDownload(request, root.resolve("target")));
 
-        verify(clientFactory, never()).create(any(), any(), any());
+        verify(clientFactory, never()).create(any(), any(), any(), any());
     }
 
     @Test
@@ -216,6 +258,7 @@ class BitTorrentServiceTest {
 
         assertSame(firstState, service.getDownload(firstId).getState());
         assertNull(service.getDownload(secondId).getState());
+        verify(downloadMetrics).stateUpdated(firstId, firstState);
 
         callbackCaptor.getAllValues().get(1).accept(secondState);
 
@@ -327,6 +370,7 @@ class BitTorrentServiceTest {
         assertEquals(DownloadState.FAILED, dto.getState());
         assertEquals(DownloadFailureKind.RESTARTABLE, dto.getFailureKind());
         assertEquals("IllegalArgumentException: no metadata", dto.getErrorMessage());
+        verify(downloadMetrics).failed(DownloadIdGenerator.generate(MAGNET_LINK), DownloadFailureKind.RESTARTABLE);
     }
 
     @Test
@@ -368,6 +412,7 @@ class BitTorrentServiceTest {
         assertFalse(Files.exists(staging));
         DownloadRecord record = recordStore.readRecord(root, id);
         assertEquals(DownloadRecordState.FINISHED, record.getState());
+        verify(downloadMetrics).finished(id);
         assertTrue(record.getFinalPayloadManifest().contains("Movies/Movie (2024)/movie.mkv"));
     }
 
@@ -382,6 +427,7 @@ class BitTorrentServiceTest {
         assertEquals(DownloadState.PAUSED, dto.getState());
         verify(client).stop();
         assertEquals(DownloadRecordState.PAUSED, recordStore.readRecord(root, id).getState());
+        verify(downloadMetrics).paused(id);
     }
 
     @Test
@@ -418,7 +464,9 @@ class BitTorrentServiceTest {
         service.pause(id);
         BtClient restartedClient = mock(BtClient.class);
         CompletableFuture<Void> restartedFuture = new CompletableFuture<>();
-        when(clientFactory.create(any(Config.class), any(Path.class), any(String.class))).thenReturn(restartedClient);
+        when(clientFactory.create(any(Config.class), any(Path.class), any(String.class),
+                nullable(ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeCheckpoint.class)))
+                .thenReturn(restartedClient);
         doReturn(restartedFuture).when(restartedClient).startAsync(any(), anyLong());
 
         service.restart(id);
@@ -426,7 +474,43 @@ class BitTorrentServiceTest {
         assertEquals(DownloadState.STARTED, service.getDownload(id).mapToDownloadDto().getState());
         assertSame(restartedClient, service.getDownload(id).getClient());
         verify(clientFactory, times(2)).create(any(Config.class),
-                eq(recordStore.payloadDirectory(root, id)), eq("magnet:?xt=urn:btih:abc%20def"));
+                eq(recordStore.payloadDirectory(root, id)), eq("magnet:?xt=urn:btih:abc%20def"),
+                nullable(ch.andreskonrad.torenta.bittorrent.dto.DownloadResumeCheckpoint.class));
+    }
+
+    @Test
+    void cleanPausePersistsCheckpointAndRestartClearsItBeforeNewWrites() throws Exception {
+        ArgumentCaptor<Consumer<TorrentSessionState>> callbackCaptor = sessionCallbackCaptor();
+        service.startDownload(request(MAGNET_LINK), root.resolve("target"));
+        verify(client).startAsync(callbackCaptor.capture(), eq(1000L));
+        String id = DownloadIdGenerator.generate(MAGNET_LINK);
+        Path staging = recordStore.payloadDirectory(root, id);
+        Files.write(staging.resolve("payload.bin"), new byte[]{1, 2, 3, 4});
+        TorrentSessionState state = state(1, 2);
+        when(state.getTorrentId()).thenReturn("0000000000000000000000000000000000000000");
+        when(state.getVerifiedPieces()).thenReturn(Set.of(0));
+        callbackCaptor.getValue().accept(state);
+
+        service.pause(id);
+
+        DownloadResumeCheckpoint persistedCheckpoint = recordStore.readRecord(root, id).getResumeCheckpoint();
+        assertNotNull(persistedCheckpoint);
+        assertEquals(List.of(0), persistedCheckpoint.verifiedPieces());
+        assertEquals(1, persistedCheckpoint.files().size());
+
+        BtClient restartedClient = mock(BtClient.class);
+        when(clientFactory.create(any(Config.class), any(Path.class), any(String.class),
+                nullable(DownloadResumeCheckpoint.class))).thenReturn(restartedClient);
+        doReturn(new CompletableFuture<>()).when(restartedClient).startAsync(any(), anyLong());
+        ArgumentCaptor<DownloadResumeCheckpoint> checkpointCaptor =
+                ArgumentCaptor.forClass(DownloadResumeCheckpoint.class);
+
+        service.restart(id);
+
+        verify(clientFactory, times(2)).create(
+                any(Config.class), any(Path.class), any(String.class), checkpointCaptor.capture());
+        assertEquals(persistedCheckpoint, checkpointCaptor.getAllValues().get(1));
+        assertNull(recordStore.readRecord(root, id).getResumeCheckpoint());
     }
 
     @Test
@@ -470,7 +554,7 @@ class BitTorrentServiceTest {
         assertThrows(InvalidDownloadStateException.class, () -> recoveredService.restart(id));
 
         assertEquals(DownloadState.PAUSED, recoveredService.getDownload(id).mapToDownloadDto().getState());
-        verify(clientFactory, never()).create(any(), any(), any());
+        verify(clientFactory, never()).create(any(), any(), any(), any());
     }
 
     @Test
@@ -483,6 +567,21 @@ class BitTorrentServiceTest {
         verify(client).stop();
         assertNull(service.getDownload(id));
         assertFalse(Files.exists(recordStore.recordDirectory(root, id)));
+    }
+
+    @Test
+    void stopAndDelete_lateSessionCallbackDoesNotRecreateRecord() throws InterruptedException {
+        ArgumentCaptor<Consumer<TorrentSessionState>> callbackCaptor = sessionCallbackCaptor();
+        service.startDownload(request(MAGNET_LINK), root.resolve("target"));
+        String id = DownloadIdGenerator.generate(MAGNET_LINK);
+        verify(client).startAsync(callbackCaptor.capture(), eq(1000L));
+
+        service.stopAndDelete(id);
+        callbackCaptor.getValue().accept(state(1, 4));
+        Thread.sleep(DownloadRecordStore.PROGRESS_PERSIST_INTERVAL_MS + 100);
+
+        assertFalse(Files.exists(recordStore.recordDirectory(root, id)));
+        verify(downloadMetrics, never()).stateUpdated(eq(id), any());
     }
 
     @Test

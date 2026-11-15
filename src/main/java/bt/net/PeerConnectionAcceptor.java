@@ -32,4 +32,7 @@ public interface PeerConnectionAcceptor {
      * @since 1.6
      */
     ConnectionRoutine accept();
+
+    default void close() {
+    }
 }

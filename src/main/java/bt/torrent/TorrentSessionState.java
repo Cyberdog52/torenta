@@ -92,4 +92,8 @@ public interface TorrentSessionState {
      * @return Get chunk size of an index in bytes
      */
     long getChunksSizeInBytes();
+
+    String getTorrentId();
+
+    Set<Integer> getVerifiedPieces();
 }

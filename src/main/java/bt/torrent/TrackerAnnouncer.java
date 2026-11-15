@@ -52,24 +52,11 @@ public class TrackerAnnouncer {
 
     private Tracker createTracker(ITrackerService trackerService, AnnounceKey announceKey) {
         try {
-            String trackerUrl = getTrackerUrl(announceKey);
-            if (trackerService.isSupportedProtocol(trackerUrl)) {
-                return trackerService.getTracker(announceKey);
-            } else {
-                LOGGER.warn("Tracker URL protocol is not supported: " + trackerUrl);
-            }
+            return trackerService.getTracker(announceKey);
         } catch (Exception e) {
-            LOGGER.warn("Failed to create tracker for announce key: " + announceKey);
+            LOGGER.warn("Failed to create tracker for announce key: {}", announceKey, e);
         }
         return null;
-    }
-
-    private String getTrackerUrl(AnnounceKey announceKey) {
-        if (announceKey.isMultiKey()) {
-            return announceKey.getTrackerUrls().get(0).get(0);
-        } else {
-            return announceKey.getTrackerUrl();
-        }
     }
 
     public void start() {

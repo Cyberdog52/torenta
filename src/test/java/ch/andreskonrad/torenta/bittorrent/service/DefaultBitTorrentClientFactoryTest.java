@@ -6,11 +6,16 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 
 import java.nio.file.Path;
+import java.net.InetAddress;
+import java.net.InetSocketAddress;
+import java.nio.channels.ServerSocketChannel;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -34,9 +39,9 @@ class DefaultBitTorrentClientFactoryTest {
         });
 
         factory.create(firstConfig, root.resolve("first"),
-                "magnet:?xt=urn:btih:1111111111111111111111111111111111111111");
+                "magnet:?xt=urn:btih:1111111111111111111111111111111111111111", null);
         factory.create(new Config(firstConfig), root.resolve("second"),
-                "magnet:?xt=urn:btih:2222222222222222222222222222222222222222");
+                "magnet:?xt=urn:btih:2222222222222222222222222222222222222222", null);
 
         assertEquals(1, creationCount.get());
         assertSame(firstConfig, runtimeConfig.get());
@@ -63,9 +68,9 @@ class DefaultBitTorrentClientFactoryTest {
         secondConfig.setAcceptorPort(secondConfig.getAcceptorPort() + 1);
 
         factory.create(firstConfig, root.resolve("first"),
-                "magnet:?xt=urn:btih:1111111111111111111111111111111111111111");
+                "magnet:?xt=urn:btih:1111111111111111111111111111111111111111", null);
         factory.create(secondConfig, root.resolve("second"),
-                "magnet:?xt=urn:btih:2222222222222222222222222222222222222222");
+                "magnet:?xt=urn:btih:2222222222222222222222222222222222222222", null);
 
         assertEquals(2, creationCount.get());
         assertSame(secondConfig, lastRuntimeConfig.get());
@@ -77,11 +82,38 @@ class DefaultBitTorrentClientFactoryTest {
         BtRuntime runtime = mock(BtRuntime.class);
         DefaultBitTorrentClientFactory factory = new DefaultBitTorrentClientFactory(config -> runtime);
         factory.create(new Config(), root,
-                "magnet:?xt=urn:btih:1111111111111111111111111111111111111111");
+                "magnet:?xt=urn:btih:1111111111111111111111111111111111111111", null);
 
         factory.shutdown();
         factory.shutdown();
 
         verify(runtime).shutdown();
+    }
+
+    @Test
+    void create_reservesFallbackPortUntilRuntimeShutdownWhenPreferredPortIsOccupied() throws Exception {
+        InetAddress loopback = InetAddress.getLoopbackAddress();
+        try (ServerSocketChannel occupied = ServerSocketChannel.open()) {
+            occupied.bind(new InetSocketAddress(loopback, 0));
+            int occupiedPort = ((InetSocketAddress) occupied.getLocalAddress()).getPort();
+            Config config = new Config();
+            config.setAcceptorAddress(loopback);
+            config.setAcceptorPort(occupiedPort);
+            BtRuntime runtime = mock(BtRuntime.class);
+            when(runtime.getConfig()).thenReturn(config);
+            DefaultBitTorrentClientFactory factory =
+                    new DefaultBitTorrentClientFactory(ignored -> runtime, true);
+
+            factory.create(config, root,
+                    "magnet:?xt=urn:btih:1111111111111111111111111111111111111111", null);
+
+            assertNotEquals(occupiedPort, config.getAcceptorPort());
+            assertTrue(config.getAcceptorServerChannel().isOpen());
+            assertEquals(config.getAcceptorPort(),
+                    ((InetSocketAddress) config.getAcceptorServerChannel().getLocalAddress()).getPort());
+
+            factory.shutdown();
+            assertTrue(config.getAcceptorServerChannel() == null);
+        }
     }
 }
