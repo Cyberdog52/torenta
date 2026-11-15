@@ -153,9 +153,25 @@ class BitTorrentServiceTest {
 
         String id = DownloadIdGenerator.generate(MAGNET_LINK);
         verify(clientFactory).create(configCaptor.capture(), eq(recordStore.payloadDirectory(root, id)), eq("magnet:?xt=urn:btih:abc%20def"));
-        verify(client).startAsync(any(), eq(100L));
-        assertEquals(Runtime.getRuntime().availableProcessors() * 2,
+        verify(client).startAsync(any(), eq(1000L));
+        assertEquals(Math.max(1, Math.min(4, Runtime.getRuntime().availableProcessors())),
                 configCaptor.getValue().getNumOfHashingThreads());
+        assertEquals(200, configCaptor.getValue().getMaxPeerConnections());
+        assertEquals(50, configCaptor.getValue().getMaxPeerConnectionsPerTorrent());
+        assertEquals(20, configCaptor.getValue().getMaxConcurrentlyActivePeerConnectionsPerTorrent());
+        assertEquals(25, configCaptor.getValue().getMaxPendingConnectionRequests());
+        assertEquals(4096, configCaptor.getValue().getMaxIOQueueSize());
+    }
+
+    @Test
+    void startDownload_reusesSharedRuntimeConfiguration() {
+        ArgumentCaptor<Config> configCaptor = ArgumentCaptor.forClass(Config.class);
+
+        service.startDownload(request(MAGNET_LINK), root.resolve("first"));
+        service.startDownload(request("magnet:?xt=urn:btih:second"), root.resolve("second"));
+
+        verify(clientFactory, times(2)).create(configCaptor.capture(), any(Path.class), any(String.class));
+        assertSame(configCaptor.getAllValues().get(0), configCaptor.getAllValues().get(1));
     }
 
     @Test
@@ -190,7 +206,7 @@ class BitTorrentServiceTest {
 
         service.startDownload(request(MAGNET_LINK), root.resolve("first"));
         service.startDownload(request(secondMagnet), root.resolve("second"));
-        verify(client, times(2)).startAsync(callbackCaptor.capture(), eq(100L));
+        verify(client, times(2)).startAsync(callbackCaptor.capture(), eq(1000L));
         TorrentSessionState firstState = state(1, 4);
         TorrentSessionState secondState = state(3, 4);
         String firstId = DownloadIdGenerator.generate(MAGNET_LINK);
@@ -263,7 +279,7 @@ class BitTorrentServiceTest {
         DownloadRequest secondRequest = request(secondMagnet);
         service.startDownload(firstRequest, root.resolve("first"));
         service.startDownload(secondRequest, root.resolve("second"));
-        verify(client, times(2)).startAsync(callbackCaptor.capture(), eq(100L));
+        verify(client, times(2)).startAsync(callbackCaptor.capture(), eq(1000L));
         callbackCaptor.getAllValues().get(0).accept(state(1, 4));
         callbackCaptor.getAllValues().get(1).accept(state(2, 4));
 
@@ -317,7 +333,7 @@ class BitTorrentServiceTest {
     void downloadTerminatedBeforeCompletion_isSurfacedAsFailedState() {
         ArgumentCaptor<Consumer<TorrentSessionState>> callbackCaptor = sessionCallbackCaptor();
         service.startDownload(request(MAGNET_LINK), root.resolve("target"));
-        verify(client).startAsync(callbackCaptor.capture(), eq(100L));
+        verify(client).startAsync(callbackCaptor.capture(), eq(1000L));
         callbackCaptor.getValue().accept(state(1, 4));
 
         future.complete(null);
@@ -339,7 +355,7 @@ class BitTorrentServiceTest {
         Files.createDirectories(staging.resolve("sub"));
         Files.writeString(staging.resolve("movie.mkv"), "fresh-content");
         Files.writeString(staging.resolve("sub").resolve("extra.txt"), "extra");
-        verify(client).startAsync(callbackCaptor.capture(), eq(100L));
+        verify(client).startAsync(callbackCaptor.capture(), eq(1000L));
         callbackCaptor.getValue().accept(state(4, 4));
 
         future.complete(null);
@@ -475,7 +491,7 @@ class BitTorrentServiceTest {
         ArgumentCaptor<Consumer<TorrentSessionState>> callbackCaptor = sessionCallbackCaptor();
         service.startDownload(request(MAGNET_LINK), finalTarget);
         String id = DownloadIdGenerator.generate(MAGNET_LINK);
-        verify(client).startAsync(callbackCaptor.capture(), eq(100L));
+        verify(client).startAsync(callbackCaptor.capture(), eq(1000L));
         callbackCaptor.getValue().accept(state(4, 4));
         future.complete(null);
 
@@ -520,7 +536,7 @@ class BitTorrentServiceTest {
         ArgumentCaptor<Consumer<TorrentSessionState>> callbackCaptor = sessionCallbackCaptor();
         service.startDownload(request(MAGNET_LINK), finalTarget);
         String id = DownloadIdGenerator.generate(MAGNET_LINK);
-        verify(client).startAsync(callbackCaptor.capture(), eq(100L));
+        verify(client).startAsync(callbackCaptor.capture(), eq(1000L));
         callbackCaptor.getValue().accept(state(4, 4));
         future.complete(null);
 

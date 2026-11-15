@@ -81,9 +81,14 @@ reformat, or clean it up** — only touch it for a deliberate, user-approved int
    (finished downloads only; deletes metadata but keeps the final media). Each `DownloadDto` carries
    backend-computed `DownloadActionCapabilities` so the UI never has to infer which actions are safe
    from a generic state. `BitTorrentService.shutdown()` (`@PreDestroy`) pauses and persists every
-   running download before the process exits. `BitTorrentService` sets the engine's acceptor address
-   from `RoutableAddressResolver`, because the vendored default picks the first non-loopback IPv4
-   address of any interface (often a Hyper-V/WSL/VPN adapter with no internet route).
+   running download before the process exits. `DefaultBitTorrentClientFactory` attaches every
+   client to one application-scoped `BtRuntime`, so concurrent downloads share the listener,
+   selector, peer registry, executors, and bounded global connection/I/O limits. The factory shuts
+   that runtime down after the service has stopped its clients. `BitTorrentService` sets the
+   engine's acceptor address from `RoutableAddressResolver`, because the vendored default picks the
+   first non-loopback IPv4 address of any interface (often a Hyper-V/WSL/VPN adapter with no
+   internet route). Session snapshots are sampled once per second to keep progress durable without
+   repeatedly serializing records on the engine listener thread.
 4. **Library** — completed media is surfaced through `LibraryService`/`DirectoryService`.
 5. **Recommend** — the Recommendations page calls `RecommendationController` →
    `RecommendationService`, which by default lists series folders under

@@ -20,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
@@ -37,7 +38,13 @@ import java.util.stream.Stream;
 public class BitTorrentService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(BitTorrentService.class);
-    private static final int SESSION_STATE_UPDATE_INTERVAL = 100;
+    private static final int SESSION_STATE_UPDATE_INTERVAL = 1000;
+    private static final int MAX_HASHING_THREADS = 4;
+    private static final int MAX_PEER_CONNECTIONS = 200;
+    private static final int MAX_PEER_CONNECTIONS_PER_TORRENT = 50;
+    private static final int MAX_ACTIVE_PEER_CONNECTIONS_PER_TORRENT = 20;
+    private static final int MAX_PENDING_CONNECTION_REQUESTS = 25;
+    private static final int MAX_IO_QUEUE_SIZE = 4096;
 
     private final DirectoryService directoryService;
     private final BitTorrentClientFactory clientFactory;
@@ -47,6 +54,7 @@ public class BitTorrentService {
 
     private volatile Path loadedRoot;
     private volatile boolean rootLoaded = false;
+    private volatile Config runtimeConfig;
 
     public BitTorrentService(DirectoryService directoryService, DownloadRecordStore recordStore) {
         this(directoryService, new DefaultBitTorrentClientFactory(), recordStore);
@@ -536,12 +544,30 @@ public class BitTorrentService {
     }
 
     private Config getConfig() {
-        Config config = new Config() {
-            @Override
-            public int getNumOfHashingThreads() {
-                return Runtime.getRuntime().availableProcessors() * 2;
+        Config currentConfig = runtimeConfig;
+        if (currentConfig != null) {
+            return currentConfig;
+        }
+        synchronized (this) {
+            if (runtimeConfig == null) {
+                runtimeConfig = createConfig();
             }
-        };
+            return runtimeConfig;
+        }
+    }
+
+    private Config createConfig() {
+        Config config = new Config();
+        config.setNumOfHashingThreads(Math.max(1,
+                Math.min(MAX_HASHING_THREADS, Runtime.getRuntime().availableProcessors())));
+        config.setMaxPeerConnections(MAX_PEER_CONNECTIONS);
+        config.setMaxPeerConnectionsPerTorrent(MAX_PEER_CONNECTIONS_PER_TORRENT);
+        config.setMaxConcurrentlyActivePeerConnectionsPerTorrent(MAX_ACTIVE_PEER_CONNECTIONS_PER_TORRENT);
+        config.setMaxPendingConnectionRequests(MAX_PENDING_CONNECTION_REQUESTS);
+        config.setMaxIOQueueSize(MAX_IO_QUEUE_SIZE);
+        config.setPeerConnectionTimeout(Duration.ofSeconds(15));
+        config.setPeerHandshakeTimeout(Duration.ofSeconds(10));
+        config.setMaxPieceReceivingTime(Duration.ofSeconds(30));
         RoutableAddressResolver.resolve().ifPresentOrElse(
                 address -> {
                     config.setAcceptorAddress(address);

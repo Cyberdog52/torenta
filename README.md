@@ -186,7 +186,8 @@ Torenta stores durable download records and partial payloads under
 `<download-directory>/.torenta/downloads/`. Running downloads are recovered as paused after an
 application restart and must be restarted manually. The Downloads page can pause or restart a
 download, stop it and delete only its torrent-owned files, or remove a finished tile while keeping
-the media files.
+the media files. Concurrent downloads share one bounded BitTorrent runtime and listen port instead
+of creating competing network runtimes for each torrent.
 
 Torrent payloads download into an isolated hidden staging directory. On completion Torenta copies
 them into the movie or season directory, overwriting files with the same paths, records the final
