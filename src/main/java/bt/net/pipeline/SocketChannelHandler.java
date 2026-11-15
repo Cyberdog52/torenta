@@ -113,6 +113,10 @@ public class SocketChannelHandler implements ChannelHandler {
     private boolean processInboundData() throws IOException {
         synchronized (inboundBufferLock) {
             ByteBuffer buffer = inboundBuffer.lockAndGet();
+            if (buffer == null) {
+                inboundBuffer.unlock();
+                return false;
+            }
             try {
                 do {
                     int readLast;
@@ -137,6 +141,11 @@ public class SocketChannelHandler implements ChannelHandler {
     public void flush() {
         synchronized (outboundBufferLock) {
             ByteBuffer buffer = outboundBuffer.lockAndGet();
+            if (buffer == null) {
+                // buffers were released (channel already shut down)
+                outboundBuffer.unlock();
+                return;
+            }
             buffer.flip();
             try {
                 while (buffer.hasRemaining()) {
