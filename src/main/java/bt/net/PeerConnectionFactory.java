@@ -169,23 +169,28 @@ public class PeerConnectionFactory implements IPeerConnectionFactory {
 
         ChannelPipeline pipeline = createPipeline(peer, channel, in, out, cipherOptional);
         ChannelHandler channelHandler = new SocketChannelHandler(channel, in, out, pipeline::bindHandler, dataReceiver);
-        channelHandler.register();
+        try {
+            channelHandler.register();
 
-        int remotePort = ((InetSocketAddress)channel.getRemoteAddress()).getPort();
-        PeerConnection connection = new SocketPeerConnection(peer, remotePort, channelHandler);
-        ConnectionHandler connectionHandler;
-        if (incoming) {
-            connectionHandler = connectionHandlerFactory.getIncomingHandler();
-        } else {
-            connectionHandler = connectionHandlerFactory.getOutgoingHandler(torrentId);
-        }
-        boolean inited = initConnection(connection, connectionHandler);
-        if (inited) {
-            subscribeHandler(connection.getTorrentId(), channelHandler);
-            return ConnectionResult.success(connection);
-        } else {
-            connection.closeQuietly();
-            return ConnectionResult.failure("Handshake failed");
+            int remotePort = ((InetSocketAddress)channel.getRemoteAddress()).getPort();
+            PeerConnection connection = new SocketPeerConnection(peer, remotePort, channelHandler);
+            ConnectionHandler connectionHandler;
+            if (incoming) {
+                connectionHandler = connectionHandlerFactory.getIncomingHandler();
+            } else {
+                connectionHandler = connectionHandlerFactory.getOutgoingHandler(torrentId);
+            }
+            boolean inited = initConnection(connection, connectionHandler);
+            if (inited) {
+                subscribeHandler(connection.getTorrentId(), channelHandler);
+                return ConnectionResult.success(connection);
+            } else {
+                connection.closeQuietly();
+                return ConnectionResult.failure("Handshake failed");
+            }
+        } catch (Exception e) {
+            channelHandler.close();
+            throw e;
         }
     }
 
